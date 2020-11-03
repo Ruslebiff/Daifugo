@@ -17,5 +17,8 @@ public class ClientMain {
             e.printStackTrace();
         }
 
+
+        GameLobby lobby = new GameLobby();
+
     }
 }
