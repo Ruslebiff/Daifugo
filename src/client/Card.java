@@ -11,13 +11,22 @@ import java.io.IOException;
 public class Card extends JPanel {
     private final int value;          // The value of the card
     private final char suit;        // The suit of the card, i.e. diamond, spades etc.
+    private final int number;
     private BufferedImage image;
     private final String filePath;
 
     // Constructor with parameters, sets values of card
-    public Card(int val, char srt){
-        this.value = val;
+    public Card(int number, char srt){
+        this.number = number;
         this.suit = srt;
+        if(this.number == 2) {
+            this.value = 15;
+        } else if (this.number == 3 && this.suit  == 'C') {
+            this.value = 16;
+        } else {
+            this.value = number;
+        }
+
         this.filePath = "./src/images/" + this.suit + Integer.toString(this.value); // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
