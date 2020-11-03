@@ -1,3 +1,5 @@
+package client;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -5,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-// Card class is a button representing a card on the players hand
+// client.Card class is a button representing a card on the players hand
 public class Card extends JPanel {
     private final int value;          // The value of the card
     private final char suit;        // The suit of the card, i.e. diamond, spades etc.
