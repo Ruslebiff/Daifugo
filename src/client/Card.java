@@ -27,7 +27,7 @@ public class Card extends JPanel {
             this.value = number;
         }
 
-        this.filePath = "./src/images/" + this.suit + Integer.toString(this.value); // Filepath
+        this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.value); // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
         } catch (IOException ex) {
