@@ -13,7 +13,7 @@ public class Table extends JPanel {
     private final String filePath;
 
     public Table() {
-        this.filePath = "./resources/"; // Filepath
+        this.filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
         } catch (IOException ex) {
