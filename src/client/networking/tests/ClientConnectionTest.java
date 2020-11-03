@@ -1,6 +1,6 @@
 package client.networking.tests;
 
-import client.networking.Client;
+import client.networking.ClientConnection;
 import common.Protocol;
 import org.junit.jupiter.api.Test;
 
@@ -10,18 +10,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ClientTest {
+class ClientConnectionTest {
 
     @Test
     public void clientHeartbeatShouldReturnReceiveTime() throws IOException {
-        Client client = new Client();
-        client.connect("localhost", Protocol.PORT);
+        ClientConnection clientConnection = new ClientConnection();
+        clientConnection.connect("localhost", Protocol.PORT);
 
         long timestamp = Instant.now().toEpochMilli();
-        client.sendMessage(Protocol.BEGIN_HEARTBEAT);
-        client.sendMessage(Long.toString(timestamp));
-        List<String> response = client.sendMessage(Protocol.EOF);
-        client.stopConnection();
+        clientConnection.sendMessage(Protocol.BEGIN_HEARTBEAT);
+        clientConnection.sendMessage(Long.toString(timestamp));
+        List<String> response = clientConnection.sendMessage(Protocol.EOF);
+        clientConnection.disconnect();
 
         assertEquals(response.get(0), Protocol.BEGIN_HEARTBEAT_RESPONSE);
         long now = Instant.now().toEpochMilli();

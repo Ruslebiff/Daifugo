@@ -6,14 +6,14 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class Client {
+public class ClientConnection {
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
 
     public void connect(String ip, int port) throws IOException {
         clientSocket = new Socket(ip, port);
-        clientSocket.setSoTimeout(Protocol.TIMEOUT*1000);
+        clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT *1000);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
@@ -29,16 +29,10 @@ public class Client {
         return response;
     }
 
-    public void stopConnection() throws IOException {
+    public void disconnect() throws IOException {
         sendMessage(Protocol.CLOSE_CONNECTION);
         in.close();
         out.close();
         clientSocket.close();
-    }
-
-    public static void main(String[] args) {
-        System.out.println("Hello, I'm the client!");
-
-
     }
 }

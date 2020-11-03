@@ -36,7 +36,7 @@ public class Server {
 
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
-            clientSocket.setSoTimeout(Protocol.TIMEOUT*1000);
+            clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT *1000);
         }
 
         private void sendInvalidRequest() {
