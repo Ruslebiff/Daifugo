@@ -1,3 +1,5 @@
+package client;
+
 public class QuickSort {
     static int partition(Card []arr, int low, int high)
     {
