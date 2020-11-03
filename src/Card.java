@@ -1,16 +1,14 @@
 import javax.swing.*;
-import java.io.File;
 
 // Card class is a button representing a card on the players hand
 public class Card extends JButton {
     private final int value;          // The value of the card
-    private final String sort;        // The sort of the card, i.e. diamond, spades etc.
-    private final Icon cardImage;     // The image of the card
+    private final char suit;        // The suit of the card, i.e. diamond, spades etc.
 
-    public Card(int val, String srt, String filePath){
+    // Constructor with parameters, sets values of card
+    public Card(int val, char srt, Icon cardImage){
         this.value = val;
-        this.sort = srt;
-        this.cardImage = new ImageIcon(String.valueOf(new File(filePath)));
+        this.suit = srt;
         setIcon(cardImage);
     }
 
@@ -18,7 +16,8 @@ public class Card extends JButton {
         return value;
     }
 
-    public String getSort() {
-        return sort;
+    public char getSuit() {
+        return suit;
     }
 }
+
