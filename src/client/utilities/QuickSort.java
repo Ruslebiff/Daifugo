@@ -1,7 +1,9 @@
-package client;
+package client.utilities;
+
+import client.Card;
 
 public class QuickSort {
-    static int partition(Card []arr, int low, int high)
+    static int partition(Card[]arr, int low, int high)
     {
         int pivot = arr[high].getValue();
         int i = (low-1); // index of smaller element

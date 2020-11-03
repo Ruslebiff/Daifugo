@@ -1,16 +1,18 @@
 package client;
 
+import java.util.Deque;
+
 public class Player {
     private final String name;
     private final int playerID;
     private String role;
-//    private final Card[] cards;
-//, Card[] cards
-    public Player(String name, int playerID, String role) {
+    private final Deque<Card> cards;
+
+    public Player(String name, int playerID, String role, Deque<Card> cards) {
         this.name = name;
         this.playerID = playerID;
         this.role = role;
-//        this.cards = cards;
+        this.cards = cards;
     }
 
     // Sorts the players hand by using a quicksort
