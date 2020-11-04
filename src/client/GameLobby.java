@@ -2,6 +2,8 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class GameLobby extends JFrame {
@@ -33,25 +35,33 @@ public class GameLobby extends JFrame {
 
         /* Lobby table */
         // TODO: get games from server
+        // TODO: Column with lock icon for password protected games?
         String[] columnNames = {
                 "Lobby name",
                 "Owner",
-                "Players"
+                "Players",
+                "Button"
         };
 
+        JButton enKnapp = new JButton();
+        enKnapp.setText("Kul knapp");
+        enKnapp.addActionListener(e -> System.out.println("heiheihei"));
+
         // TODO: Sample games, get from server instead
-        String[][] games = {
-                {"Game name 1", "Dr. Mundo", "2"},
-                {"Super Game For Cool Guyz", "Teemo", "6" },
-                {"Kosekroken", "Caitlyn", "4"}
+        Object[][] games = {
+                {"Game name 1", "Dr. Mundo", "2", enKnapp.getText()},
+                {"Super Game For Cool Guyz", "Teemo", "6", ""},
+                {"Kosekroken", "Caitlyn", "4", ""},
         };
 
         JTable gamesTable = new JTable(games, columnNames);
+        gamesTable.getColumn("Button").setCellRenderer(new ButtonRenderer());
+        gamesTable.getColumn("Button").setCellEditor(new ButtonEditor(enKnapp, new JCheckBox()));
         JScrollPane sp = new JScrollPane(gamesTable);
-
 
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
         setVisible(true);
     }
 }
+
