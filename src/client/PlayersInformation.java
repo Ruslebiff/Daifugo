@@ -2,9 +2,10 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
-public class PlayersInformation extends JPanel {
+public class PlayersInformation extends JPanel implements GameStateTracker {
     private final Player[] players;     // Array of the players in the game
     private JLabel[] playerInfo;        // Array of the labels representing the players
     private int previousTurn;           // ID of the player before you
@@ -25,6 +26,8 @@ public class PlayersInformation extends JPanel {
         infoString.setFont(new Font("sans serif", Font.BOLD, 20));
         add(infoString);
 
+
+        // For each player in the game, create a JLabel
         for (int i = 0; i < players.length; i++) {
             String playerInformationTxt = players[i].getName() + " - " + players[i].getRole();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
@@ -34,14 +37,28 @@ public class PlayersInformation extends JPanel {
             playerInfo[i].setOpaque(true);
             add(playerInfo[i]);
         }
+        indicateTurn();
     }
 
     // Change color to the current player and turn the others gray
-    public void indicateTurn(int pID) {
+    public void indicateTurn() {
+        int pID = Integer.parseInt(getActivePlayerID());    // Get the ID of the active player
+
         if(previousTurn != pID) {       // If the turn is supposed to go to the next player, else do nothing
             playerInfo[previousTurn].setBackground(neutralColor);
             playerInfo[pID].setBackground(turnColor);
             previousTurn = pID;
         }
     }
+
+    @Override
+    public String getActivePlayerID() {
+        return "0";
+    }
+
+    @Override
+    public ArrayList<Card> getPlayerHand(String token) {
+        return null;
+    }
+
 }

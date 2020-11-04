@@ -3,7 +3,7 @@ package client;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.List;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class Table extends JPanel {
     private final String filePath;
     private final int pInfoWidth = 200;
     private final int pInfoHeight = 100;
-    private Deque<Card> cards;
+    private ArrayList<Card> cards;
 
     public Table() {
         this.filePath = "./resources/green_fabric.jpg"; // Filepath
@@ -37,11 +37,11 @@ public class Table extends JPanel {
         }
 
         Collections.shuffle(cardList);          // Shuffle the cards
-        cards = new ArrayDeque<Card>(cardList); // The deck of cards that the players will use
+        cards = new ArrayList<Card>(cardList); // The deck of cards that the players will use
 
-//        Player[] players = new Player[2];
-//        players[0] = new Player("Mohammed Lee", 0, "President");
-//        players[1] = new Player("John Doe", 1, "Bum");
+        Player[] players = new Player[1];
+        players[0] = new Player("Mohammed Lee", 0, "President", cards);
+//        players[1] = new Player("John Doe", 2, "Bum", cards);
 
         PlayersInformation playersInformation = new PlayersInformation(players);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);

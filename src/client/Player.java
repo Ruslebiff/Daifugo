@@ -1,23 +1,25 @@
 package client;
 
-import java.util.Deque;
+import javax.swing.*;
+import java.util.ArrayList;
 
-public class Player {
+public class Player extends JPanel {
     private final String name;
     private final int playerID;
     private String role;
-    private final Deque<Card> cards;
+    private  ArrayList<Card> hand;
 
-    public Player(String name, int playerID, String role, Deque<Card> cards) {
+    public Player(String name, int playerID, String role, ArrayList<Card> cards) {
         this.name = name;
         this.playerID = playerID;
         this.role = role;
-        this.cards = cards;
+        this.hand = cards;
+        sortHand();
     }
 
     // Sorts the players hand by using a quicksort
     public void sortHand() {
-//        QuickSort.sort(cards, 0, cards.length - 1);
+        QuickSort.sort(this.hand, 0, this.hand.size() - 1);
     }
 
     public String getName(){
@@ -26,5 +28,9 @@ public class Player {
 
     public String getRole() {
         return role;
+    }
+
+    public String getPlayedID() {
+        return Integer.toString(this.playerID);
     }
 }
