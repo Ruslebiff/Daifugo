@@ -13,7 +13,7 @@ public class ClientConnection {
 
     public void connect(String ip, int port) throws IOException {
         clientSocket = new Socket(ip, port);
-        clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT *1000);
+        clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }

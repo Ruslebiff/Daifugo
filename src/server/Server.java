@@ -24,20 +24,23 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         Server server = new Server();
-        System.out.printf("Daifugo server starting on port %d...\n", Protocol.PORT);
         server.start(Protocol.PORT);
-
-
     }
 
     private static class ClientHandler extends Thread {
+        private static final Logger LOGGER = Logger.getLogger(
+                ClientHandler.class.getName()
+        );
         private final Socket clientSocket;
         private PrintWriter out;
         private BufferedReader in;
 
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
-            clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT *1000);
+            clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT);
+            LOGGER.addHandler(CONSOLE_HANDLER);
+            // TODO: add file logging:
+            //LOGGER.addHandler(FILE_HANDLER);
         }
 
         private void sendInvalidRequest() {
@@ -76,6 +79,7 @@ public class Server {
             }
 
             String line = "";
+            runloop:
             while (true) {
                 try {
                     if ((line = in.readLine()) == null) break;
@@ -84,14 +88,28 @@ public class Server {
                 }
 
                 ArrayList<String> request = new ArrayList<>();
+                long last = Instant.now().toEpochMilli();
+                long now;
                 try {
                     do {
+                        now = Instant.now().toEpochMilli();
+                        long age = now-last;
+                        if (age > Protocol.REQUEST_TIMEOUT) {
+                            // Break out of loop and close connection
+                            LOGGER.warning("Request timed out");
+                            break runloop;
+                        }
                         request.add(line);
                         out.println(Protocol.ACKNOWLEDGED);
-                        line = in.readLine();
-                    } while (!line.equals(Protocol.EOF));
+                        try {
+                            if ((line = in.readLine()) == null) break;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        last = now;
+                    } while (!Objects.equals(line, Protocol.EOF));
                     request.add(line);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     sendInvalidRequest();
                 }
 

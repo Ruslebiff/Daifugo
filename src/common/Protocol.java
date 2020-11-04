@@ -29,7 +29,7 @@ public class Protocol {
     public static final int PORT = 5555;
 
 
-    // Timeout in seconds
-    public static final int SOCKET_TIMEOUT = 10;
-    public static final int REQUEST_TIMEOUT = 30;   // timeout for between BEGIN_* and EOF
+    // Timeout in milliseconds
+    public static final int SOCKET_TIMEOUT = 10*1000;
+    public static final int REQUEST_TIMEOUT = 3*1000;   // timeout for between BEGIN_* and EOF
 }

@@ -79,4 +79,13 @@ class ClientConnectionTest {
         clientThree.disconnect();
     }
 
+    @Test
+    public void serverClosesConnectionOnSlowRequest() throws IOException, InterruptedException {
+        ClientConnection conn = new ClientConnection();
+        conn.connect("localhost", Protocol.PORT);
+        conn.sendMessage(Protocol.BEGIN_DIAGNOSTIC);
+        Thread.sleep(Protocol.REQUEST_TIMEOUT+300);
+        assertThrows(NullPointerException.class, () -> conn.sendMessage("test"));
+    }
+
 }
