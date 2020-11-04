@@ -26,7 +26,6 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
         infoString.setFont(new Font("sans serif", Font.BOLD, 20));
         add(infoString);
 
-
         // For each player in the game, create a JLabel
         for (int i = 0; i < players.length; i++) {
             String playerInformationTxt = players[i].getName() + " - " + players[i].getRole();
@@ -57,7 +56,7 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
     }
 
     @Override
-    public ArrayList<Card> getPlayerHand(String token) {
+    public ArrayList<Card> dealPlayerHand(String token) {
         return null;
     }
 

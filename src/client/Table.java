@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class Table extends JPanel {
+public class Table extends JPanel implements GameStateTracker {
 
     private BufferedImage image;
     private final String filePath;
@@ -26,22 +26,29 @@ public class Table extends JPanel {
         }
         setLayout(null);
 
-        // The deck of cards, H(earts), S(pades), C(lubs), D(iamond)
-        ArrayList<Card> cardList = new ArrayList<Card>(52);
-        char[] suits = {'H', 'S', 'C', 'D'};
+        cards = getDeck();  // Get the shuffled deck from the interface
 
-        for (int suit = 0; suit < 4; suit++) {      // For each suit, create 13 cards
-            for (int number = 2; number < 14; number++) {
-                cardList.add(new Card(number, suits[suit]));
-            }
+        /**
+         * REMOVE LATER
+         */
+        ArrayList<Card> p1 = new ArrayList<>();
+        ArrayList<Card> p2 = new ArrayList<>();
+
+        for (int i = 0; i < cards.size(); i++) {
+            if(i < 25)
+                p1.add(cards.get(i));
+            else
+                p2.add(cards.get(i));
         }
 
-        Collections.shuffle(cardList);          // Shuffle the cards
-        cards = new ArrayList<Card>(cardList); // The deck of cards that the players will use
-
+        /**
+         * REMOVE LATER
+         */
         Player[] players = new Player[1];
-        players[0] = new Player("Mohammed Lee", 0, "President", cards);
-//        players[1] = new Player("John Doe", 2, "Bum", cards);
+        players[0] = new Player("Mohammed Lee", 0, "President", p1);
+        players[0].setBounds(50,700,880,150);
+        add(players[0]);
+//        players[1] = new Player("John Doe", 1, "Bum", p2);
 
         PlayersInformation playersInformation = new PlayersInformation(players);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
@@ -52,5 +59,15 @@ public class Table extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.drawImage(image, 0, 0, this); // Draws the image of onto the JPanel
+    }
+
+    @Override
+    public String getActivePlayerID() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<Card> dealPlayerHand(String token) {
+        return null;
     }
 }
