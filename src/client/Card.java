@@ -19,8 +19,7 @@ public class Card extends JPanel {
 
     // Constructor with parameters, sets values of card
     public Card(int number, char s){
-        int WIDTH = 200;
-        int HEIGHT = 200;
+
 
         this.number = number;
         this.suit = s;
@@ -35,11 +34,11 @@ public class Card extends JPanel {
         this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.number) + ".png"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));  // Read the image
-            scaledImage = image.getScaledInstance(50,100,Image.SCALE_SMOOTH);
+            scaledImage = image.getScaledInstance(80,120,Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        setSize(new Dimension(WIDTH, HEIGHT));
+
     }
 
     public int getValue() {

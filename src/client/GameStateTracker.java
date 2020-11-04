@@ -20,7 +20,6 @@ public interface GameStateTracker {
                 cardList.add(new Card(number, suits[suit]));    // Add the card to the cardList
 
         Collections.shuffle(cardList);          // Shuffle the cards
-
         return cardList;
     }
 

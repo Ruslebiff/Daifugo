@@ -4,18 +4,18 @@ import javax.swing.*;
 
 // The window where the game is
 public class GameWindow extends JFrame {
-    private final int HEIGHT = 1000;
-    private final int WIDTH = 1000;
+    private final int FRAME_HEIGHT = 1000;
+    private final int FRAME_WIDTH = 1000;
 
 
 
     public GameWindow(String gameName) {
-        setSize(WIDTH,HEIGHT);
+        setSize(FRAME_WIDTH,FRAME_HEIGHT);
         setLayout(null);
         setTitle(gameName);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        Table table = new Table();
+        Table table = new Table(FRAME_WIDTH, FRAME_HEIGHT);
         table.setBounds(0,0, getWidth(), getHeight());
         add(table);
 

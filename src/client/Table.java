@@ -15,9 +15,13 @@ public class Table extends JPanel implements GameStateTracker {
     private final String filePath;
     private final int pInfoWidth = 200;
     private final int pInfoHeight = 100;
+    private int TABLE_HEIGHT;
+    private int TABLE_WIDTH;
     private ArrayList<Card> cards;
 
-    public Table() {
+    public Table(int f_width, int f_height) {
+        this.TABLE_WIDTH = f_width;
+        this.TABLE_HEIGHT = f_height;
         this.filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
@@ -32,13 +36,10 @@ public class Table extends JPanel implements GameStateTracker {
          * REMOVE LATER
          */
         ArrayList<Card> p1 = new ArrayList<>();
-        ArrayList<Card> p2 = new ArrayList<>();
 
-        for (int i = 0; i < cards.size(); i++) {
-            if(i < 25)
-                p1.add(cards.get(i));
-            else
-                p2.add(cards.get(i));
+//        int counter = 0;
+        for (int i = 0; i < 5; i++) {
+            p1.add(cards.get(i));
         }
 
         /**
@@ -46,9 +47,9 @@ public class Table extends JPanel implements GameStateTracker {
          */
         Player[] players = new Player[1];
         players[0] = new Player("Mohammed Lee", 0, "President", p1);
-        players[0].setBounds(50,700,880,150);
+        players[0].setBounds((TABLE_WIDTH/2) - 300,700,TABLE_WIDTH/2,TABLE_HEIGHT/8);
         add(players[0]);
-//        players[1] = new Player("John Doe", 1, "Bum", p2);
+
 
         PlayersInformation playersInformation = new PlayersInformation(players);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
