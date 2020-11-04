@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
 
@@ -58,6 +59,12 @@ public class Server {
             out.println(Protocol.EOF);
         }
 
+        private void diagnosticHandler(List<String> request) {
+            for (String msg : request) {
+                out.println(msg);
+            }
+        }
+
         public void run() {
             try {
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -83,12 +90,14 @@ public class Server {
                         out.println(Protocol.ACKNOWLEDGED);
                         line = in.readLine();
                     } while (!line.equals(Protocol.EOF));
+                    request.add(line);
                 } catch (IOException e) {
                     sendInvalidRequest();
                 }
 
                 switch (request.get(0)) {
                     case Protocol.BEGIN_HEARTBEAT -> sendHeartbeatResponse();
+                    case Protocol.BEGIN_DIAGNOSTIC -> diagnosticHandler(request);
                     default -> sendError("Unknown request type");
                 }
 

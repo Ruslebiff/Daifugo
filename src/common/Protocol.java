@@ -18,6 +18,7 @@ public class Protocol {
     public static final String BEGIN_HEARTBEAT_RESPONSE = "BGNHBR";
     public static final String BEGIN_ERROR = "BGNE";
     public static final String BEGIN_TOKEN = "BGNTKN";
+    public static final String BEGIN_DIAGNOSTIC = "BGNDIAG"; // return same data as sent
 
     // Single-line message codes
     public static final String ACKNOWLEDGED = "ACK";
