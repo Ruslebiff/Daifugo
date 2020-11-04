@@ -2,8 +2,6 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 
 public class GameLobby extends JFrame {
@@ -58,7 +56,8 @@ public class GameLobby extends JFrame {
 
         joinGameButton.addActionListener(e -> {
             int gameID = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
-            int playerCount = Integer.parseInt(games[gameID-1][3].toString());
+            int playerCount = Character.getNumericValue(games[gameID-1][3].toString().charAt(0));
+
             if (playerCount < 8){   // TODO: Actually join the game
                 System.out.println("joining game " + gameID);
             } else {
@@ -89,7 +88,7 @@ public class GameLobby extends JFrame {
             }
 
             /* Info - insert max players */
-//            gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
+            gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
         }
 
 
