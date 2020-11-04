@@ -7,12 +7,47 @@ import java.net.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.*;
 
 public class Server {
+    private static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
+    private static FileHandler FILE_HANDLER = null;
+
+    static {
+        try {
+            FILE_HANDLER = new FileHandler(
+                    "%h/daifugo-server.log",
+                    true
+            );
+            System.setProperty(
+                    "java.util.logging.SimpleFormatter.format",
+                    "[%1$ta %1$tF %1$tT %1$tZ] %4$s: %5$s %n"
+            );
+            FILE_HANDLER.setFormatter(new SimpleFormatter());
+            CONSOLE_HANDLER.setFormatter(new SimpleFormatter());
+
+            // Setting default log level to finest, overridden by local LOGGER object
+            FILE_HANDLER.setLevel(Level.ALL);
+            CONSOLE_HANDLER.setLevel(Level.ALL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private ServerSocket serverSocket;
+    private static final Logger SERVER_LOGGER = Logger.getLogger(
+            ClientHandler.class.getName()
+    );
+
+    public Server() {
+        SERVER_LOGGER.setLevel(Level.ALL);
+        SERVER_LOGGER.addHandler(CONSOLE_HANDLER);
+        SERVER_LOGGER.addHandler(FILE_HANDLER);
+    }
 
     public void start(int port) throws IOException {
+        SERVER_LOGGER.info("Daifugo server starting on port " + port + "...");
         serverSocket = new ServerSocket(port);
         while (true)
             new Server.ClientHandler(serverSocket.accept()).start();
@@ -123,6 +158,7 @@ public class Server {
             }
 
             try {
+                LOGGER.info("Closing server connection...");
                 in.close();
                 out.close();
                 clientSocket.close();
