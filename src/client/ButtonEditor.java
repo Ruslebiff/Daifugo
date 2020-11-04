@@ -12,6 +12,7 @@ class ButtonEditor extends DefaultCellEditor {
     private String label;
 
     private boolean isPushed;
+    private boolean isEnabled;
 
     public ButtonEditor(JButton button1, JCheckBox checkBox) {
         super(checkBox);
