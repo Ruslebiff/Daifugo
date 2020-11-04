@@ -37,26 +37,33 @@ public class GameLobby extends JFrame {
         // TODO: get games from server
         // TODO: Column with lock icon for password protected games?
         String[] columnNames = {
-                "Lobby name",
+                "ID",
+                "Table name",
                 "Owner",
                 "Players",
-                "Button"
+                "",
+                "!"
         };
 
         JButton enKnapp = new JButton();
-        enKnapp.setText("Kul knapp");
-        enKnapp.addActionListener(e -> System.out.println("heiheihei"));
+        enKnapp.setText("Join");
 
         // TODO: Sample games, get from server instead
         Object[][] games = {
-                {"Game name 1", "Dr. Mundo", "2", enKnapp.getText()},
-                {"Super Game For Cool Guyz", "Teemo", "6", ""},
-                {"Kosekroken", "Caitlyn", "4", ""},
+                {"1", "Game name 1", "Dr. Mundo", "2", enKnapp.getText(), true},
+                {"2", "Super Game For Cool Guyz", "Teemo", "6", enKnapp.getText(), false},
+                {"3", "Kosekroken", "Caitlyn", "4", enKnapp.getText(), false},
         };
 
         JTable gamesTable = new JTable(games, columnNames);
-        gamesTable.getColumn("Button").setCellRenderer(new ButtonRenderer());
-        gamesTable.getColumn("Button").setCellEditor(new ButtonEditor(enKnapp, new JCheckBox()));
+
+        enKnapp.addActionListener(e ->
+                System.out.println("joining game " + (gamesTable.getValueAt(gamesTable.getSelectedRow(), 0)))
+                // TODO: Actually join the game
+        );
+
+        gamesTable.getColumn("").setCellRenderer(new ButtonRenderer());
+        gamesTable.getColumn("").setCellEditor(new ButtonEditor(enKnapp, new JCheckBox()));
         JScrollPane sp = new JScrollPane(gamesTable);
 
         add(controlPanel, BorderLayout.PAGE_START);
