@@ -50,22 +50,17 @@ public class GameLobby extends JFrame {
         };
 
 
-
+        JTable gamesTable = new JTable(games, columnNames);
         DefaultTableModel tableModel = new DefaultTableModel(games, columnNames) {
-
             @Override
             public boolean isCellEditable(int row, int column) {
-                //all cells false
                 return column == 5; // only last column, needed for button to work
             }
         };
 
-        JTable gamesTable = new JTable(games, columnNames);
         gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
-
-        // TODO: Cells should not be editable
 
         joinGameButton.addActionListener(e -> {
             int gameID = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
@@ -91,7 +86,6 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(4).setMaxWidth(100);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(100);
 
-
         /* Loops through all games */
         for (int i = 0; i < games.length; i++){
             /* Info - game password protected or not */
@@ -104,15 +98,7 @@ public class GameLobby extends JFrame {
 
             /* Info - insert max players */
             gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
-
-            /* Red if full */
-//            int playerCount = Character.getNumericValue(games[i][3].toString().charAt(0));
-//            if (playerCount == MAX_PLAYERS){
-////                cellToChange = gamesTable.rende
-//
-//            }
         }
-
 
         JScrollPane sp = new JScrollPane(gamesTable);
         add(controlPanel, BorderLayout.PAGE_START);
