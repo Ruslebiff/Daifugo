@@ -4,10 +4,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-// TODO: BUTTON - New game
-// TODO: BUTTON - Edit nickname
-// TODO: SHOW TEXT - Show nickname
-// TODO: BUTTON - Settings
+// TODO: BUTTON - New game - Functionality
+// TODO: BUTTON - Settings - Functionality
 
 
 public class GameLobby extends JFrame {
@@ -34,7 +32,7 @@ public class GameLobby extends JFrame {
         newGameButton.setText("New Game");
 
         JLabel editNickButton = new JLabel();
-        editNickButton.setText("Your Name");
+        editNickButton.setText("Your Name"); // TODO: Get player's name instead
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
