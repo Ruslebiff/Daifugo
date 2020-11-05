@@ -1,6 +1,7 @@
 package client;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 
@@ -50,9 +51,17 @@ public class GameLobby extends JFrame {
 
 
 
+        DefaultTableModel tableModel = new DefaultTableModel(games, columnNames) {
 
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                //all cells false
+                return column == 5; // only last column, needed for button to work
+            }
+        };
 
         JTable gamesTable = new JTable(games, columnNames);
+        gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
 
