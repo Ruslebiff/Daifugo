@@ -4,6 +4,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+// TODO: BUTTON - New game
+// TODO: BUTTON - Edit nickname
+// TODO: SHOW TEXT - Show nickname
+// TODO: BUTTON - Settings
+
 
 public class GameLobby extends JFrame {
     public GameLobby() {
@@ -19,13 +24,42 @@ public class GameLobby extends JFrame {
 
         /* Control bar */
         JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+
         controlPanel.setBounds(0, 0, window_width, window_height/20);
         controlPanel.setBackground(Color.lightGray);
-        // TODO: buttons for new game etc
-        JButton testButton = new JButton();
-        testButton.setBounds(50, 50, 150, 40);
-        testButton.setText("Test Button");
-        controlPanel.add(testButton);
+
+        JButton newGameButton = new JButton();
+        newGameButton.setText("New Game");
+
+        JLabel editNickButton = new JLabel();
+        editNickButton.setText("Your Name");
+
+        JButton settingsButton = new JButton();
+        settingsButton.setText("Settings");
+
+
+        c.fill = GridBagConstraints.LINE_START;
+        c.weightx = 0.0;
+        c.gridx = 0;
+        c.gridy = 0;
+        controlPanel.add(newGameButton, c);
+
+        c.fill = GridBagConstraints.CENTER;
+        c.weightx = 1;
+        c.gridx = 1;
+        c.gridy = 0;
+        controlPanel.add(editNickButton, c);
+
+        c.fill = GridBagConstraints.LINE_END;
+        c.weightx = 0.0;
+        c.gridx = 2;
+        c.gridy = 0;
+        controlPanel.add(settingsButton, c);
+
+
+
 
         /* Lobby table */
         // TODO: get games from server
@@ -80,11 +114,17 @@ public class GameLobby extends JFrame {
 
         /* Resize columns in table */
         gamesTable.getColumnModel().getColumn(0).setMaxWidth(15);
+        gamesTable.getColumnModel().getColumn(0).setMinWidth(15);
         gamesTable.getColumnModel().getColumn(1).setPreferredWidth(300);
+        gamesTable.getColumnModel().getColumn(1).setMinWidth(100);
         gamesTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+        gamesTable.getColumnModel().getColumn(2).setMinWidth(50);
         gamesTable.getColumnModel().getColumn(3).setMaxWidth(100);
+        gamesTable.getColumnModel().getColumn(3).setMinWidth(50);
         gamesTable.getColumnModel().getColumn(4).setMaxWidth(100);
-        gamesTable.getColumnModel().getColumn(5).setMaxWidth(100);
+        gamesTable.getColumnModel().getColumn(4).setMinWidth(50);
+        gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
+        gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
         /* Loops through all games */
         for (int i = 0; i < games.length; i++){
