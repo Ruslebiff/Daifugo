@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,5 +57,11 @@ class ServerTest {
         conn.sendMessage(Protocol.BEGIN_DIAGNOSTIC);
         Thread.sleep(Protocol.REQUEST_TIMEOUT+300);
         assertThrows(NullPointerException.class, () -> conn.sendMessage("test"));
+    }
+
+    @Test
+    public void uuidTest() {
+        String uniqueID = UUID.randomUUID().toString();
+        System.out.println(uniqueID);
     }
 }
