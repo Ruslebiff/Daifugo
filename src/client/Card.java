@@ -13,12 +13,16 @@ public class Card extends JPanel {
     private final char suit;        // The suit of the card, i.e. diamond, spades etc.
     private final int number;
     private BufferedImage image;
+    private Image scaledImage;
     private final String filePath;
 
+
     // Constructor with parameters, sets values of card
-    public Card(int number, char srt){
+    public Card(int number, char s){
+
+
         this.number = number;
-        this.suit = srt;
+        this.suit = s;
         if(this.number == 2) {
             this.value = 15;
         } else if (this.number == 3 && this.suit  == 'C') {
@@ -27,16 +31,22 @@ public class Card extends JPanel {
             this.value = number;
         }
 
-        this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.value); // Filepath
+        this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.number) + ".png"; // Filepath
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(new File(filePath));  // Read the image
+            scaledImage = image.getScaledInstance(80,120,Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
     }
 
     public int getValue() {
         return value;
+    }
+
+    public int getNumber() {
+        return this.number;
     }
 
     public char getSuit() {
@@ -46,7 +56,7 @@ public class Card extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(image, 0, 0, this); // Draws the image of onto the Jpanel
+        g.drawImage(scaledImage, 0, 0, this); // Draws the image of onto the Jpanel
     }
 }
 
