@@ -105,7 +105,10 @@ public class Server {
 
         public void run() {
             try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                out = new PrintWriter(
+                        clientSocket.getOutputStream(),
+                        true
+                );
                 in = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream())
                 );
