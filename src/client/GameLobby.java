@@ -8,7 +8,6 @@ import java.awt.*;
 // TODO: BUTTON - New game - Functionality
 // TODO: BUTTON - Settings - Functionality
 // TODO: BUTTON - Refresh list
-// TODO: Status bar at bottom - ping etc
 
 
 public class GameLobby extends JFrame {
@@ -17,6 +16,9 @@ public class GameLobby extends JFrame {
         int window_width = 1000;
         int MAX_PLAYERS = 8;
         String playerName = "Player 1";
+        
+        /* Get Games List */
+        Object[][] games = getGamesList();
 
         /* Create window */
         setSize(window_width,window_height);
@@ -33,8 +35,11 @@ public class GameLobby extends JFrame {
         JButton newGameButton = new JButton();
         newGameButton.setText("New Game");
 
-        JLabel editNickButton = new JLabel();
-        editNickButton.setText(playerName);
+        JButton refreshGamesButton = new JButton();
+        refreshGamesButton.setText("Refresh");
+
+        JLabel nickText = new JLabel();
+        nickText.setText(playerName);
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
@@ -45,32 +50,39 @@ public class GameLobby extends JFrame {
         c.gridy = 0;
         controlPanel.add(newGameButton, c);
 
-        c.fill = GridBagConstraints.CENTER;
-        c.weightx = 1;
+        c.fill = GridBagConstraints.LINE_START;
+        c.weightx = 0.0;
         c.gridx = 1;
         c.gridy = 0;
-        controlPanel.add(editNickButton, c);
+        controlPanel.add(refreshGamesButton, c);
+
+        c.fill = GridBagConstraints.CENTER;
+        c.weightx = 0.1;
+        c.gridx = 2;
+        c.gridy = 0;
+        c.ipadx = 100;
+        controlPanel.add(nickText, c);
 
         c.fill = GridBagConstraints.LINE_END;
         c.weightx = 0.0;
-        c.gridx = 2;
+        c.gridx = 3;
         c.gridy = 0;
+        c.ipadx = 0;
         controlPanel.add(settingsButton, c);
 
         /* Status bar */
         JPanel statusBar = new JPanel();
         statusBar.setBackground(Color.lightGray);
         statusBar.setLayout(new BorderLayout());
-        
+
         JLabel latencyLabel = new JLabel();
-        int latency = 123;         // TODO: get network latency
+        int latency = 123;         // TODO: get network latency to server
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
 
         /* Lobby table */
         // TODO: get games from server
-        // TODO: Column with lock icon for password protected games?
         String[] columnNames = {
                 "ID",
                 "Game name",
@@ -81,15 +93,6 @@ public class GameLobby extends JFrame {
         };
 
         JButton joinGameButton = new JButton();
-        joinGameButton.setText("Join");
-
-        // TODO: Sample games, get from server instead
-        Object[][] games = {
-                {"1", "Game name 1", "Dr. Mundo", 2, true, joinGameButton.getText()},
-                {"2", "Super Game For Cool Guyz", "Teemo", 6, false, joinGameButton.getText()},
-                {"3", "Kosekroken", "Caitlyn", 8, false, joinGameButton.getText()},
-        };
-
 
         JTable gamesTable = new JTable(games, columnNames);
         DefaultTableModel tableModel = new DefaultTableModel(games, columnNames) {
@@ -152,6 +155,17 @@ public class GameLobby extends JFrame {
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.PAGE_END);
         setVisible(true);
+    }
+
+    public Object[][] getGamesList(){
+        // TODO: Sample games, get from server instead
+        Object[][] gamesList = {
+                {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
+                {"2", "Super Game For Cool Guyz", "Teemo", 6, false, "Join"},
+                {"3", "Kosekroken", "Caitlyn", 8, false, "Join"},
+        };
+
+        return gamesList;
     }
 }
 
