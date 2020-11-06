@@ -11,10 +11,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserSessionTest {
 
     @Test
-    public void creatingNewSessionWithUsedTokenShouldFail() {
-        String token = UUID.randomUUID().toString();
-        UserSession s1 = new UserSession(token);
-        assertThrows(UserSessionError.class, () -> new UserSession(token));
+    public void creatingNewSessionWithUsedTokenShouldFail() throws UserSessionError {
+        UserSession s1 = new UserSession();
+        assertThrows(UserSessionError.class, () -> new UserSession(s1.getToken()));
     }
 
+    @Test
+    public void gettingSessionByTokenResultsInSameInstance() throws UserSessionError {
+        UserSession s1 = new UserSession();
+        String token = s1.getToken();
+
+        UserSession s2 = UserSession.retrieveSessionFromToken(token);
+
+        assertSame(s1, s2);
+    }
+
+    @Test
+    public void retrievingNonexistingSessionShouldThrow() {
+        String token = UUID.randomUUID().toString();
+        assertThrows(
+                UserSessionError.class,
+                () -> UserSession.retrieveSessionFromToken(token)
+        );
+    }
 }
