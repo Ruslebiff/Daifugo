@@ -54,7 +54,12 @@ public class Server {
     }
 
     public void stop() throws IOException {
+        SERVER_LOGGER.info("Stopping server...");
         serverSocket.close();
+
+        // ensures that subsequent server restarts during testing
+        // doesn't continue counting from last user number
+        UserSession._reset();
     }
 
     public static void main(String[] args) throws IOException {
@@ -74,6 +79,7 @@ public class Server {
             clientSocket = socket;
             clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT);
             LOGGER.addHandler(CONSOLE_HANDLER);
+            LOGGER.setLevel(Level.INFO);
             // TODO: add file logging:
             //LOGGER.addHandler(FILE_HANDLER);
         }
@@ -103,6 +109,14 @@ public class Server {
             }
         }
 
+        private void createNewSession() {
+            UserSession session = new UserSession();
+            out.println(Protocol.BEGIN_TOKEN);
+            out.println(session.getToken());
+            out.println(session.getNick());
+            out.println(Protocol.EOF);
+        }
+
         public void run() {
             try {
                 out = new PrintWriter(
@@ -116,6 +130,8 @@ public class Server {
                 e.printStackTrace();
             }
 
+            boolean connectionIsNew = true;
+
             String line = "";
             runloop:
             while (true) {
@@ -125,11 +141,24 @@ public class Server {
                     e.printStackTrace();
                 }
 
+                assert line != null;
+                if (connectionIsNew) {
+                    if (!line.equals(Protocol.BEGIN_TOKEN)
+                            && !line.equals(Protocol.REQUEST_TOKEN)
+                    ) {
+                        sendError("You need to identify as first request. Closing connection.");
+                        break;
+                    }
+                    LOGGER.fine("First request of connection");
+                    connectionIsNew = false;
+                }
+
                 ArrayList<String> request = new ArrayList<>();
                 long last = Instant.now().toEpochMilli();
                 long now;
                 try {
                     do {
+                        LOGGER.fine("Start of loop: " + line);
                         now = Instant.now().toEpochMilli();
                         long age = now-last;
                         if (age > Protocol.REQUEST_TIMEOUT) {
@@ -137,8 +166,15 @@ public class Server {
                             LOGGER.warning("Request timed out");
                             break runloop;
                         }
-                        request.add(line);
+
+                        if (Protocol.isMessageSingleInstruction(line)) {
+                            LOGGER.fine("Detected single-instruction initiator: " + line);
+                            break; // don't look for EOF
+                        }
+
                         out.println(Protocol.ACKNOWLEDGED);
+                        request.add(line);
+
                         try {
                             if ((line = in.readLine()) == null) break;
                         } catch (IOException e) {
@@ -146,12 +182,18 @@ public class Server {
                         }
                         last = now;
                     } while (!Objects.equals(line, Protocol.EOF));
+
                     request.add(line);
                 } catch (Exception e) {
                     sendInvalidRequest();
                 }
 
+                LOGGER.fine("Passing to handler:");
+                for (String s : request) {
+                    LOGGER.fine("\t" + s);
+                }
                 switch (request.get(0)) {
+                    case Protocol.REQUEST_TOKEN -> createNewSession();
                     case Protocol.BEGIN_HEARTBEAT -> sendHeartbeatResponse();
                     case Protocol.BEGIN_DIAGNOSTIC -> diagnosticHandler(request);
                     default -> sendError("Unknown request type");

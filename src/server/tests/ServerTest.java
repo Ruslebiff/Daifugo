@@ -2,15 +2,69 @@ package server.tests;
 
 import client.networking.ClientConnection;
 import common.Protocol;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import server.Server;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServerTest {
+
+    private static Server server;
+
+    @BeforeEach
+    void startLocalServer() throws InterruptedException {
+        server = new Server();
+        new Thread(() -> {
+            try {
+                server.start(Protocol.PORT);
+            } catch (Exception e) {
+            }
+        }).start();
+
+        Thread.sleep(1000);
+    }
+
+    @AfterEach
+    void stopLocalServer() throws IOException {
+        System.out.println("Stopping local test server...");
+        server.stop();
+    }
+
+    @Test
+    public void clientHeartbeatShouldReturnReceiveTime() throws IOException {
+        ClientConnection clientConnection = new ClientConnection();
+        clientConnection.connect("localhost", Protocol.PORT);
+
+        // starting session
+        clientConnection.sendMessage(Protocol.REQUEST_TOKEN);
+
+        long timestamp = Instant.now().toEpochMilli();
+        clientConnection.sendMessage(Protocol.BEGIN_HEARTBEAT);
+        clientConnection.sendMessage(Long.toString(timestamp));
+        List<String> response = clientConnection.sendMessage(Protocol.EOF);
+        clientConnection.disconnect();
+
+        assertEquals(response.get(0), Protocol.BEGIN_HEARTBEAT_RESPONSE);
+        long now = Instant.now().toEpochMilli();
+        long receivedTime = Long.parseLong(response.get(1));
+        assertTrue(
+                timestamp <= receivedTime
+                        && receivedTime <= now
+        );
+
+        assertEquals(response.get(2), Protocol.EOF);
+    }
+
+    @Test
+    public void connectAndDisconnectShouldntThrowException() throws IOException {
+        ClientConnection conn = new ClientConnection();
+        conn.connect("localhost", Protocol.PORT);
+        assertDoesNotThrow(conn::disconnect);
+    }
 
     @Test
     public void parallellRequestsShouldNotInterfereEachother() throws IOException {
@@ -21,6 +75,11 @@ class ServerTest {
         clientTwo.connect("localhost", Protocol.PORT);
         ClientConnection clientThree = new ClientConnection();
         clientThree.connect("localhost", Protocol.PORT);
+
+        // starts sessions for all the connections
+        clientOne.sendMessage(Protocol.REQUEST_TOKEN);
+        clientTwo.sendMessage(Protocol.REQUEST_TOKEN);
+        clientThree.sendMessage(Protocol.REQUEST_TOKEN);
 
         clientOne.sendMessage(Protocol.BEGIN_DIAGNOSTIC);
         clientTwo.sendMessage(Protocol.BEGIN_DIAGNOSTIC);
@@ -54,14 +113,25 @@ class ServerTest {
     public void serverClosesConnectionOnSlowRequest() throws IOException, InterruptedException {
         ClientConnection conn = new ClientConnection();
         conn.connect("localhost", Protocol.PORT);
+
+        // starting a session
+        conn.sendMessage(Protocol.REQUEST_TOKEN);
+
         conn.sendMessage(Protocol.BEGIN_DIAGNOSTIC);
         Thread.sleep(Protocol.REQUEST_TIMEOUT+300);
         assertThrows(NullPointerException.class, () -> conn.sendMessage("test"));
     }
 
     @Test
-    public void uuidTest() {
-        String uniqueID = UUID.randomUUID().toString();
-        System.out.println(uniqueID);
+    public void newConnectionSuppliesTokenAndUserName() throws IOException {
+        ClientConnection conn = new ClientConnection();
+        conn.connect("localhost", Protocol.PORT);
+
+        List<String> response = conn.sendMessage(Protocol.REQUEST_TOKEN);
+        assertEquals(4, response.size());
+        assertEquals(Protocol.BEGIN_TOKEN, response.get(0));
+        assertEquals("User1", response.get(2));
     }
+
+
 }

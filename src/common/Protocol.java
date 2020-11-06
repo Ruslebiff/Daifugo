@@ -25,6 +25,12 @@ public class Protocol {
     public static final String REQUEST_TOKEN = "RQTKN";
     public static final String CLOSE_CONNECTION = "DONE";
 
+    public static boolean isMessageSingleInstruction(String msg) {
+        return msg.equals(ACKNOWLEDGED)
+                || msg.equals(REQUEST_TOKEN)
+                || msg.equals(CLOSE_CONNECTION);
+    }
+
     // Port number
     public static final int PORT = 5555;
 
@@ -32,4 +38,6 @@ public class Protocol {
     // Timeout in milliseconds
     public static final int SOCKET_TIMEOUT = 10*1000;
     public static final int REQUEST_TIMEOUT = 3*1000;   // timeout for between BEGIN_* and EOF
+
+
 }

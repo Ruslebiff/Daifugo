@@ -2,44 +2,54 @@ package client.networking.tests;
 
 import client.networking.ClientConnection;
 import common.Protocol;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import server.Server;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClientConnectionTest {
 
-    @Test
-    public void connectAndDisconnectShouldntThrowException() throws IOException {
-        ClientConnection conn = new ClientConnection();
-        conn.connect("localhost", Protocol.PORT);
-        assertDoesNotThrow(conn::disconnect);
+    private static Server server;
+
+    @BeforeAll
+    static void startLocalServer() throws InterruptedException {
+        server = new Server();
+        new Thread(() -> {
+            try {
+                server.start(Protocol.PORT);
+            } catch (Exception ignored) {
+            }
+        }).start();
+
+        Thread.sleep(1000);
     }
 
-    @Test
-    public void clientHeartbeatShouldReturnReceiveTime() throws IOException {
-        ClientConnection clientConnection = new ClientConnection();
-        clientConnection.connect("localhost", Protocol.PORT);
-
-        long timestamp = Instant.now().toEpochMilli();
-        clientConnection.sendMessage(Protocol.BEGIN_HEARTBEAT);
-        clientConnection.sendMessage(Long.toString(timestamp));
-        List<String> response = clientConnection.sendMessage(Protocol.EOF);
-        clientConnection.disconnect();
-
-        assertEquals(response.get(0), Protocol.BEGIN_HEARTBEAT_RESPONSE);
-        long now = Instant.now().toEpochMilli();
-        long receivedTime = Long.parseLong(response.get(1));
-        assertTrue(
-                timestamp <= receivedTime
-                && receivedTime <= now
-        );
-
-        assertEquals(response.get(2), Protocol.EOF);
+    @AfterAll
+    static void stopLocalServer() throws IOException {
+        server.stop();
     }
 
+    /**
+     * Users of ClientConnection HAVE to check for ACK on each message
+     * to discover errors, since the error message may be wanted.
+     *
+     * I have opted out of using an exception, since that may expose
+     * server information down the line if users of ClientConnection
+     * were to make errors in sending exception text unfiltered to users
+     */
+    @Test
+    public void sendMessageShouldReturnCompleteError() throws IOException {
+
+        ClientConnection connection = new ClientConnection();
+        connection.connect("localhost", Protocol.PORT);
+        List<String> response = connection.sendMessage("BOBBYCOCK");
+
+        assertEquals(Protocol.BEGIN_ERROR, response.get(0));
+    }
 
 }
