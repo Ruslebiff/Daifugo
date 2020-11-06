@@ -64,21 +64,21 @@ public class Player extends JPanel {
     }
 
     public void removeCardFromDisplay() {
-        Card temp = hand.get(cardNumb++);
-//        cardsOnDisplay--;
+        cardsOnDisplay--;
+        System.out.println(cardsOnDisplay);
+        Card temp = hand.get(++cardNumb);
         this.remove(temp);
-        repaint();
+        rearrangeCardsOnDisplay();
     }
 
     public void rearrangeCardsOnDisplay() {
         boundsX = 250 - (cardWidth/4);
         for (int i = 0; i < cardsOnDisplay; i++) {  // Fjerne alle eksisterende fra bordet
-            removeCardFromDisplay();
+            Card temp = hand.get(cardNumb++);
+            this.remove(temp);
             placementNumber += 10;
         }
         boundsX += placementNumber;
-
-
 
         for (int i = 0; i < cardsOnDisplay; i++) {
             if(i == 0) {
@@ -87,8 +87,9 @@ public class Player extends JPanel {
             Card temp = hand.get(cardNumb--);
             temp.setBounds(boundsX -= (2*placementNumber),0, cardWidth,cardHeight);
             this.add(temp);
-            repaint();
         }
+
+        repaint();
     }
 
     // Sorts the players hand by using a quicksort

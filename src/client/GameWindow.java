@@ -12,6 +12,7 @@ public class GameWindow extends JFrame {
     public GameWindow(String gameName) {
         setSize(FRAME_WIDTH,FRAME_HEIGHT);
         setLayout(null);
+        setLocationRelativeTo(null);
         setTitle(gameName);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
