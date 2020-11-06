@@ -2,11 +2,11 @@ package client;
 
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-public class TableRowColorRenderer implements TableCellRenderer {
+public class TableRowColorRenderer extends DefaultTableCellRenderer {
 
     public static final DefaultTableCellRenderer DEFAULT_RENDERER = new DefaultTableCellRenderer();
 
@@ -34,6 +34,14 @@ public class TableRowColorRenderer implements TableCellRenderer {
         } else {
             c.setBackground(Color.white);
         }
+
+        // Center text in columns
+        if (column == 3 || column == 4) {          // These will be centered
+            DEFAULT_RENDERER.setHorizontalAlignment(JLabel.CENTER);
+        } else {
+            DEFAULT_RENDERER.setHorizontalAlignment(JLabel.LEFT);
+        }
+
 
 
 

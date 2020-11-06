@@ -8,7 +8,6 @@ public class ClientMain {
     public static void main(String[] args) {
         System.out.println("Hello, I'm the client!");
 
-        GameWindow gameWindow = new GameWindow("HEI");
         // eksempel på loading av bilde fra resources:
         try {
             BufferedImage imageExample = ImageIO.read(
@@ -17,7 +16,6 @@ public class ClientMain {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         GameLobby lobby = new GameLobby();
 

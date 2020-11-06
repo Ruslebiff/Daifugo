@@ -1,11 +1,14 @@
 package client;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 // TODO: BUTTON - New game - Functionality
 // TODO: BUTTON - Settings - Functionality
+// TODO: BUTTON - Refresh list
+// TODO: Status bar at bottom - ping etc
 
 
 public class GameLobby extends JFrame {
@@ -13,6 +16,7 @@ public class GameLobby extends JFrame {
         int window_height = 1000;
         int window_width = 1000;
         int MAX_PLAYERS = 8;
+        String playerName = "Player 1";
 
         /* Create window */
         setSize(window_width,window_height);
@@ -32,7 +36,7 @@ public class GameLobby extends JFrame {
         newGameButton.setText("New Game");
 
         JLabel editNickButton = new JLabel();
-        editNickButton.setText("Your Name"); // TODO: Get player's name instead
+        editNickButton.setText(playerName);
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
