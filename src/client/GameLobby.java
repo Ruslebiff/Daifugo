@@ -4,21 +4,20 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 // TODO: BUTTON - New game - Functionality
 // TODO: BUTTON - Settings - Functionality
-// TODO: BUTTON - Refresh list
-
 
 public class GameLobby extends JFrame {
+    private Object[][] games;
+
     public GameLobby() {
         int window_height = 1000;
         int window_width = 1000;
         int MAX_PLAYERS = 8;
         String playerName = "Player 1";
-        
-        /* Get Games List */
-        Object[][] games = getGamesList();
 
         /* Create window */
         setSize(window_width,window_height);
@@ -37,6 +36,9 @@ public class GameLobby extends JFrame {
 
         JButton refreshGamesButton = new JButton();
         refreshGamesButton.setText("Refresh");
+        refreshGamesButton.addActionListener(e -> {
+            this.games = getGamesList();
+        });
 
         JLabel nickText = new JLabel();
         nickText.setText(playerName);
@@ -82,7 +84,6 @@ public class GameLobby extends JFrame {
 
 
         /* Lobby table */
-        // TODO: get games from server
         String[] columnNames = {
                 "ID",
                 "Game name",
@@ -91,6 +92,9 @@ public class GameLobby extends JFrame {
                 "Private",
                 ""
         };
+
+        /* Get Games List */
+        games = getGamesList();
 
         JButton joinGameButton = new JButton();
 
@@ -159,7 +163,9 @@ public class GameLobby extends JFrame {
 
     public Object[][] getGamesList(){
         // TODO: Sample games, get from server instead
-        Object[][] gamesList = {
+        System.out.println("Updating games list ...");
+        
+        Object[][] gamesList = { // TEMPORARY
                 {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
                 {"2", "Super Game For Cool Guyz", "Teemo", 6, false, "Join"},
                 {"3", "Kosekroken", "Caitlyn", 8, false, "Join"},
