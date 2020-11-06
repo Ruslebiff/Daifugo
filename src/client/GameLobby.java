@@ -25,6 +25,14 @@ public class GameLobby extends JFrame {
         setTitle("Daifugo - Lobby");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        /* New game view */
+        JPanel newGamePanel = new JPanel();
+        newGamePanel.setVisible(false);
+
+        /* Settings view */
+
+
+        /** Normal view: */
         /* Control bar */
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
@@ -33,6 +41,10 @@ public class GameLobby extends JFrame {
 
         JButton newGameButton = new JButton();
         newGameButton.setText("New Game");
+        newGameButton.addActionListener(e -> {
+            createNewGame();
+            
+        });
 
         JButton refreshGamesButton = new JButton();
         refreshGamesButton.setText("Refresh");
@@ -45,6 +57,9 @@ public class GameLobby extends JFrame {
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
+        settingsButton.addActionListener(e -> {
+            editSettings();
+        });
 
         c.fill = GridBagConstraints.LINE_START;
         c.weightx = 0.0;
@@ -154,6 +169,7 @@ public class GameLobby extends JFrame {
             gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
         }
 
+        add(newGamePanel);
         JScrollPane sp = new JScrollPane(gamesTable);
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
@@ -164,7 +180,7 @@ public class GameLobby extends JFrame {
     public Object[][] getGamesList(){
         // TODO: Sample games, get from server instead
         System.out.println("Updating games list ...");
-        
+
         Object[][] gamesList = { // TEMPORARY
                 {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
                 {"2", "Super Game For Cool Guyz", "Teemo", 6, false, "Join"},
@@ -172,6 +188,14 @@ public class GameLobby extends JFrame {
         };
 
         return gamesList;
+    }
+
+    public void createNewGame() {
+        System.out.println("Creating new game ...");
+    }
+
+    public void editSettings() {
+        System.out.println("Editing settings ...");
     }
 }
 
