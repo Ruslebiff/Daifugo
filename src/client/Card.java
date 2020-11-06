@@ -8,13 +8,15 @@ import java.io.File;
 import java.io.IOException;
 
 // client.Card class is a button representing a card on the players hand
-public class Card extends JPanel {
-    private final int value;          // The value of the card
+public class Card extends JLayeredPane {
+    private final int value;        // The value of the card in terms of the game rules
     private final char suit;        // The suit of the card, i.e. diamond, spades etc.
-    private final int number;
+    private final int number;       // The actual value on the card
     private BufferedImage image;
     private Image scaledImage;
     private final String filePath;
+    private int cardWith = 80;
+    private int cardHeight = 120;
 
 
     // Constructor with parameters, sets values of card
@@ -30,11 +32,12 @@ public class Card extends JPanel {
         } else {
             this.value = number;
         }
+//        setOpaque(true);
 
         this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.number) + ".png"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));  // Read the image
-            scaledImage = image.getScaledInstance(80,120,Image.SCALE_SMOOTH);
+            scaledImage = image.getScaledInstance(cardWith,cardHeight,Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
