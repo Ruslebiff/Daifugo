@@ -28,8 +28,6 @@ public class GameLobby extends JFrame {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-
-        controlPanel.setBounds(0, 0, window_width, window_height/20);
         controlPanel.setBackground(Color.lightGray);
 
         JButton newGameButton = new JButton();
@@ -40,7 +38,6 @@ public class GameLobby extends JFrame {
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
-
 
         c.fill = GridBagConstraints.LINE_START;
         c.weightx = 0.0;
@@ -60,7 +57,15 @@ public class GameLobby extends JFrame {
         c.gridy = 0;
         controlPanel.add(settingsButton, c);
 
-
+        /* Status bar */
+        JPanel statusBar = new JPanel();
+        statusBar.setBackground(Color.lightGray);
+        statusBar.setLayout(new BorderLayout());
+        
+        JLabel latencyLabel = new JLabel();
+        int latency = 123;         // TODO: get network latency
+        latencyLabel.setText("Latency: " + latency + "  ");
+        statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
 
         /* Lobby table */
@@ -145,6 +150,7 @@ public class GameLobby extends JFrame {
         JScrollPane sp = new JScrollPane(gamesTable);
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
+        add(statusBar, BorderLayout.PAGE_END);
         setVisible(true);
     }
 }
