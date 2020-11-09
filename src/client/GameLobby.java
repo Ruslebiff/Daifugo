@@ -7,8 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// TODO: BUTTON - New game - Functionality
-// TODO: BUTTON - Settings - Functionality
+
 
 public class GameLobby extends JFrame {
     private Object[][] games;
@@ -41,10 +40,7 @@ public class GameLobby extends JFrame {
 
         JButton newGameButton = new JButton();
         newGameButton.setText("New Game");
-        newGameButton.addActionListener(e -> {
-            createNewGame();
-            
-        });
+
 
         JButton refreshGamesButton = new JButton();
         refreshGamesButton.setText("Refresh");
@@ -169,8 +165,26 @@ public class GameLobby extends JFrame {
             gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
         }
 
-        add(newGamePanel);
+
         JScrollPane sp = new JScrollPane(gamesTable);
+
+        /** Button action listeners*/
+        newGameButton.addActionListener(e -> {
+            controlPanel.setVisible(false);
+            sp.setVisible(false);
+
+            newGamePanel.setVisible(true);
+
+
+
+
+//            Object[] tempNewGameData = {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"};
+//            createNewGame(tempNewGameData);
+
+        });
+
+        add(newGamePanel);
+
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.PAGE_END);
@@ -190,10 +204,13 @@ public class GameLobby extends JFrame {
         return gamesList;
     }
 
-    public void createNewGame() {
+    // TODO: BUTTON - New game - Functionality
+    public void createNewGame(Object[] newGameData) {
         System.out.println("Creating new game ...");
+        // use newGameData to add the new game on server
     }
 
+    // TODO: BUTTON - Settings - Functionality
     public void editSettings() {
         System.out.println("Editing settings ...");
     }
