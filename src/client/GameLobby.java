@@ -37,7 +37,44 @@ public class GameLobby extends JFrame {
 
         /* New game view */
         JPanel newGamePanel = new JPanel();
+        newGamePanel.setSize(window_width,window_height);
         newGamePanel.setVisible(false);
+        newGamePanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+
+        JLabel newGameNameLabel = new JLabel("Name: ");
+        JTextField newGameName = new JTextField("my new game");
+        JPasswordField newGamePassword = new JPasswordField("");
+        newGamePassword.setEnabled(false);
+        JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
+        JButton newGameConfirmButton = new JButton("Confirm");
+
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        newGamePanel.add(newGameNameLabel, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1;
+        newGamePanel.add(newGameName, gbc);
+
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        newGamePanel.add(newGamePrivateCheckbox, gbc);
+        gbc.gridx = 1;
+        newGamePanel.add(newGamePassword, gbc);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.PAGE_END; //bottom of space
+        gbc.gridwidth = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        newGamePanel.add(newGameConfirmButton, gbc);
+
 
         /* Settings view */
 
@@ -104,7 +141,6 @@ public class GameLobby extends JFrame {
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
-
         /* Get Games List */
         getGamesList();
 
@@ -138,18 +174,27 @@ public class GameLobby extends JFrame {
         JScrollPane sp = new JScrollPane(gamesTable);
 
         /** Button action listeners*/
+        newGamePrivateCheckbox.addActionListener(e -> {
+            if (newGamePrivateCheckbox.isSelected()){
+                newGamePassword.setEnabled(true);
+            } else {
+                newGamePassword.setEnabled(false);
+            }
+
+        });
+
+        newGameConfirmButton.addActionListener(e -> {
+            Object[] newGameData = {"9", newGameName.getText(), playerName, 0, newGamePrivateCheckbox.isSelected(), "Join"};
+            createNewGame(newGameData);
+            controlPanel.setVisible(true);
+            sp.setVisible(true);
+            newGamePanel.setVisible(false);
+        });
+
         newGameButton.addActionListener(e -> {
             controlPanel.setVisible(false);
             sp.setVisible(false);
-
             newGamePanel.setVisible(true);
-
-
-
-
-            Object[] tempNewGameData = {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"};
-            createNewGame(tempNewGameData);
-
         });
 
         joinGameButton.addActionListener(e -> {
@@ -216,10 +261,9 @@ public class GameLobby extends JFrame {
     // TODO: BUTTON - New game - Functionality
     public void createNewGame(Object[] newGameData) {
         System.out.println("Creating new game ...");
-        // use newGameData to add the new game on server
 
-
-//        tableModel.addRow(row);
+        tableModel.addRow(newGameData); // should be added to server, not directly in table. This will make it crash until that is done.
+        refreshGamesList(); // refresh table
     }
 
     // TODO: BUTTON - Settings - Functionality
