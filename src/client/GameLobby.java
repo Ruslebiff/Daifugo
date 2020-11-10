@@ -1,21 +1,32 @@
 package client;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 
 
 public class GameLobby extends JFrame {
-    private Object[][] games;
+    private String[] columnNames = {
+            "ID",
+            "Game name",
+            "Owner",
+            "Players",
+            "Private",
+            ""
+    };
+    private DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return column == 5; // only last column, needed for button to work
+        }
+    };
+    private JTable gamesTable = new JTable(tableModel);
+    private int window_height = 1000;
+    private int window_width = 1000;
+    private int MAX_PLAYERS = 8;
 
     public GameLobby() {
-        int window_height = 1000;
-        int window_width = 1000;
-        int MAX_PLAYERS = 8;
+
         String playerName = "Player 1";
 
         /* Create window */
@@ -45,7 +56,7 @@ public class GameLobby extends JFrame {
         JButton refreshGamesButton = new JButton();
         refreshGamesButton.setText("Refresh");
         refreshGamesButton.addActionListener(e -> {
-            this.games = getGamesList();
+            refreshGamesList();
         });
 
         JLabel nickText = new JLabel();
@@ -94,44 +105,14 @@ public class GameLobby extends JFrame {
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
 
-        /* Lobby table */
-        String[] columnNames = {
-                "ID",
-                "Game name",
-                "Owner",
-                "Players",
-                "Private",
-                ""
-        };
-
         /* Get Games List */
-        games = getGamesList();
-
-        JButton joinGameButton = new JButton();
-
-        JTable gamesTable = new JTable(games, columnNames);
-        DefaultTableModel tableModel = new DefaultTableModel(games, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 5; // only last column, needed for button to work
-            }
-        };
+        getGamesList();
 
         gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
 
-        joinGameButton.addActionListener(e -> {
-            int gameID = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
-            int playerCount = Character.getNumericValue(games[gameID-1][3].toString().charAt(0));
-
-            if (playerCount < 8){   // TODO: Actually join the game
-                System.out.println("joining game " + gameID);
-            } else {
-                System.out.println("game full!");
-                JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
-            }
-        });
+        JButton joinGameButton = new JButton();
 
         /* add join buttons to table rows */
         gamesTable.getColumn("").setCellRenderer(new ButtonRenderer());
@@ -151,19 +132,7 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
-        /* Loops through all games */
-        for (int i = 0; i < games.length; i++){
-            /* Info - game password protected or not */
-            boolean p = ((Boolean)(games[i][games[i].length - 2]));
-            if (p){
-                gamesTable.setValueAt("Yes", i, 4);
-            } else {
-                gamesTable.setValueAt("No", i, 4);
-            }
 
-            /* Info - insert max players */
-            gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
-        }
 
 
         JScrollPane sp = new JScrollPane(gamesTable);
@@ -178,22 +147,45 @@ public class GameLobby extends JFrame {
 
 
 
-//            Object[] tempNewGameData = {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"};
-//            createNewGame(tempNewGameData);
+            Object[] tempNewGameData = {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"};
+            createNewGame(tempNewGameData);
 
         });
 
-        add(newGamePanel);
+        joinGameButton.addActionListener(e -> {
+            int gameID = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
+            int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
+            if (playerCount < 8){   // TODO: Actually join the game
+                System.out.println("joining game " + gameID);
+            } else {
+                System.out.println("game full!");
+                JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
+            }
+        });
+
+        add(newGamePanel);
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.PAGE_END);
         setVisible(true);
     }
 
-    public Object[][] getGamesList(){
+    public void refreshGamesList(){
+        // Remove all rows, to prevent duplicates and old games from displaying
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            tableModel.removeRow(row);
+        }
+        tableModel.removeRow(0); // jalla bugfix, removes the row that is left after the loop
+
+        // Fill table again
+        getGamesList();
+    }
+
+    public void getGamesList(){
         // TODO: Sample games, get from server instead
         System.out.println("Updating games list ...");
+
 
         Object[][] gamesList = { // TEMPORARY
                 {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
@@ -201,13 +193,33 @@ public class GameLobby extends JFrame {
                 {"3", "Kosekroken", "Caitlyn", 8, false, "Join"},
         };
 
-        return gamesList;
+        // Add all rows
+        for (int row = 0; row < gamesList.length; row++) {
+            tableModel.addRow(gamesList[row]);
+        }
+
+        /* Loops through all games */
+        for (int i = 0; i < tableModel.getRowCount(); i++){
+            /* Info - game password protected or not */
+            boolean p = ((Boolean)(gamesTable.getValueAt(i, 4)));
+            if (p){
+                gamesTable.setValueAt("Yes", i, 4);
+            } else {
+                gamesTable.setValueAt("No", i, 4);
+            }
+
+            /* Info - insert max players */
+            gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
+        }
     }
 
     // TODO: BUTTON - New game - Functionality
     public void createNewGame(Object[] newGameData) {
         System.out.println("Creating new game ...");
         // use newGameData to add the new game on server
+
+
+//        tableModel.addRow(row);
     }
 
     // TODO: BUTTON - Settings - Functionality
