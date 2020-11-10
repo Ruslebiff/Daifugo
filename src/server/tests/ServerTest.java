@@ -67,9 +67,23 @@ class ServerTest {
         ClientConnection conn = new ClientConnection();
         conn.connect("localhost", Protocol.PORT);
 
-        IdentityResponse response = (IdentityResponse) conn.sendMessage(new Message(MessageType.CONNECT));
+        IdentityResponse response = (IdentityResponse) conn.sendMessage(
+                new Message(MessageType.CONNECT)
+        );
         assertEquals(MessageType.IDENTITY_RESPONSE, response.getMessageType());
         assertEquals("User1", response.getNick());
+    }
+
+    @Test
+    public void mustConnectBeforeRequesting() throws IOException, ClassNotFoundException {
+        ClientConnection conn = new ClientConnection();
+        conn.connect("localhost", Protocol.PORT);
+
+        Message response = conn.sendMessage(new HeartbeatMessage(
+                Instant.now().toEpochMilli())
+        );
+        assertTrue(response.isError());
+        assertEquals("Invalid request", response.getErrorMessage());
     }
 
 }

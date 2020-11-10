@@ -53,8 +53,7 @@ class ClientConnectionTest {
         Message response = connection.sendMessage(new ErrorMessage("test"));
 
         assertEquals(MessageType.ERROR, response.getMessageType());
-        ErrorMessage tmp = (ErrorMessage) response;
-        assertEquals("Non-implemented request type", tmp.getErrorString());
+        assertEquals("Non-implemented request type", response.getErrorMessage());
     }
 
 }

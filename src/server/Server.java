@@ -7,8 +7,7 @@ import java.net.*;
 import java.time.Instant;
 import java.util.logging.*;
 
-import static protocol.MessageType.CONNECT;
-import static protocol.MessageType.HEARTBEAT;
+import static protocol.MessageType.*;
 
 
 public class Server {
@@ -75,6 +74,7 @@ public class Server {
         private final Socket clientSocket;
         private ObjectOutputStream out;
         private ObjectInputStream in;
+        private UserSession currentSession = null;
 
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
@@ -104,8 +104,13 @@ public class Server {
 
 
         private void createNewSession() throws IOException {
-            UserSession session = new UserSession();
-            out.writeObject(new IdentityResponse(session));
+            currentSession = new UserSession();
+            out.writeObject(
+                    new IdentityResponse(
+                        currentSession.getToken(),
+                        currentSession.getNick()
+                    )
+            );
         }
 
         public void run() {
@@ -127,6 +132,13 @@ public class Server {
                     Message request = (Message) in.readObject();
                     if (request == null)
                         throw new IOException("request was null");
+
+                    if (currentSession == null
+                            && request.getMessageType() != CONNECT
+                            && request.getMessageType() != DISCONNECT
+                    ) {
+                        sendInvalidRequest();
+                    }
 
                     switch (request.getMessageType()) {
                         case CONNECT -> createNewSession();
