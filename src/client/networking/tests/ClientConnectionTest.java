@@ -38,9 +38,6 @@ class ClientConnectionTest {
     }
 
     /**
-     * Users of ClientConnection HAVE to check for ACK on each message
-     * to discover errors, since the error message may be wanted.
-     *
      * I have opted out of using an exception, since that may expose
      * server information down the line if users of ClientConnection
      * were to make errors in sending exception text unfiltered to users
