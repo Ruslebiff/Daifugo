@@ -45,8 +45,8 @@ class ClientConnectionTest {
     @Test
     public void sendingErrorMessageToServerShouldNotBeAccepted() throws ClassNotFoundException, IOException {
 
-        ClientConnection connection = new ClientConnection();
-        connection.connect("localhost", Protocol.PORT);
+        ClientConnection connection = new ClientConnection("localhost");
+        connection.sendMessage(new Message(MessageType.CONNECT));
         Message response = connection.sendMessage(new ErrorMessage("test"));
 
         assertEquals(MessageType.ERROR, response.getMessageType());

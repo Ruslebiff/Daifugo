@@ -12,8 +12,8 @@ public class ClientConnection {
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public void connect(String ip, int port) throws IOException {
-        clientSocket = new Socket(ip, port);
+    public ClientConnection(String address) throws IOException {
+        clientSocket = new Socket(address, Protocol.PORT);
         clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT);
         out = new ObjectOutputStream(clientSocket.getOutputStream());
         in = new ObjectInputStream(clientSocket.getInputStream());

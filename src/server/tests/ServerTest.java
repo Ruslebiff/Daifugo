@@ -34,8 +34,7 @@ class ServerTest {
 
     @Test
     public void clientHeartbeatShouldReturnReceiveTime() throws IOException, ClassNotFoundException {
-        ClientConnection clientConnection = new ClientConnection();
-        clientConnection.connect("localhost", Protocol.PORT);
+        ClientConnection clientConnection = new ClientConnection("localhost");
 
         // starting session
         clientConnection.sendMessage(new Message(MessageType.CONNECT));
@@ -57,15 +56,13 @@ class ServerTest {
 
     @Test
     public void connectAndDisconnectShouldNotThrowException() throws IOException {
-        ClientConnection conn = new ClientConnection();
-        conn.connect("localhost", Protocol.PORT);
+        ClientConnection conn = new ClientConnection("localhost");
         assertDoesNotThrow(conn::disconnect);
     }
 
     @Test
     public void newConnectionSuppliesTokenAndUserName() throws IOException, ClassNotFoundException {
-        ClientConnection conn = new ClientConnection();
-        conn.connect("localhost", Protocol.PORT);
+        ClientConnection conn = new ClientConnection("localhost");
 
         IdentityResponse response = (IdentityResponse) conn.sendMessage(
                 new Message(MessageType.CONNECT)
@@ -76,8 +73,7 @@ class ServerTest {
 
     @Test
     public void mustConnectBeforeRequesting() throws IOException, ClassNotFoundException {
-        ClientConnection conn = new ClientConnection();
-        conn.connect("localhost", Protocol.PORT);
+        ClientConnection conn = new ClientConnection("localhost");
 
         Message response = conn.sendMessage(new HeartbeatMessage(
                 Instant.now().toEpochMilli())
