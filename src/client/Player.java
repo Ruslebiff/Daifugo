@@ -24,7 +24,9 @@ public class Player extends JPanel {
     int boundsX = 0;
     int cardsOnDisplay = 0;
     int internalMargin = 5;
-    private final int space = 24; // Space between cards when a player has maximum cards
+    private int space = 24; // Space between cards when a player has maximum cards
+    private final int maxCards = 18;
+
 
     public Player(String name, int playerID, String role, ArrayList<Card> cards, int width) {
         this.name = name;
@@ -107,7 +109,7 @@ public class Player extends JPanel {
 //        }
 
 
-
+        space = space + ((maxCards - cardsOnDisplay)/2);
         boundsX = (widthOfComponent/2)  - (cardWidth/2) + (((cardsOnDisplay-1)/2) * space);
         for (int i = 0; i < cardsOnDisplay; i++) {
             Card temp = hand.get(cardNumb--);
@@ -117,7 +119,7 @@ public class Player extends JPanel {
         repaint();
     }
 
-
+    
     // Sorts the players hand by using a quicksort
     public void sortHand() {
         QuickSort.sort(this.hand, 0, this.hand.size() - 1);
