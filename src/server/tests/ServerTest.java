@@ -82,4 +82,33 @@ class ServerTest {
         assertEquals("Invalid request", response.getErrorMessage());
     }
 
+    // TODO: find out why this results in timeouts
+/*    @Test
+    public void reconnectSucceedsWhenReestablishingConnection() throws IOException, ClassNotFoundException {
+        ClientConnection conn = new ClientConnection("localhost");
+
+
+        Message response = conn.sendMessage(
+            new Message(MessageType.CONNECT)
+        );
+        IdentityResponse identityResponse = (IdentityResponse) response;
+
+        String token = identityResponse.getToken();
+        String nick = identityResponse.getNick();
+
+        response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+        assertEquals(MessageType.OK, response.getMessageType());
+
+        //conn.disconnect();
+
+        conn = new ClientConnection("localhost");
+
+        identityResponse = (IdentityResponse) conn.sendMessage(
+                new ReconnectMessage(token)
+        );
+
+        assertEquals(token, identityResponse.getToken());
+        assertEquals(nick, identityResponse.getNick());
+    }*/
+
 }

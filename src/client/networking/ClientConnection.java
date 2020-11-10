@@ -8,9 +8,9 @@ import java.net.*;
 import java.io.*;
 
 public class ClientConnection {
-    private Socket clientSocket;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
+    private final Socket clientSocket;
+    private final ObjectOutputStream out;
+    private final ObjectInputStream in;
 
     public ClientConnection(String address) throws IOException {
         clientSocket = new Socket(address, Protocol.PORT);

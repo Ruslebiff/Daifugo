@@ -1,6 +1,7 @@
 package server;
 
 import protocol.*;
+import server.exceptions.UserSessionError;
 
 import java.io.*;
 import java.net.*;
@@ -102,12 +103,29 @@ public class Server {
             );
         }
 
+        private boolean handleReconnection(Message request) throws IOException {
+            if (currentSession != null) {
+                sendInvalidRequest();
+                return false;
+            }
+
+            LOGGER.info("handling reconnect");
+            try {
+                ReconnectMessage tmp = (ReconnectMessage) request;
+                currentSession = UserSession.retrieveSessionFromToken(
+                        tmp.getToken()
+                );
+            } catch (UserSessionError e) {
+                sendError(e.toString());
+            }
+            return true;
+        }
 
         private void createNewSession() throws IOException {
             currentSession = new UserSession();
             out.writeObject(
                     new IdentityResponse(
-                        currentSession.getToken(),
+                            currentSession.getToken(),
                         currentSession.getNick()
                     )
             );
@@ -129,25 +147,38 @@ public class Server {
             while (true) {
                 try {
 
-                    Message request = (Message) in.readObject();
-                    if (request == null)
-                        throw new IOException("request was null");
+                    Message request;
+                    try {
+                        request = (Message) in.readObject();
+                    } catch (SocketTimeoutException e) {
+                        LOGGER.info("socket exception, breaking runloop");
+                        break;
+                    }
+
+                    LOGGER.info("past first try-catch");
 
                     if (currentSession == null
                             && request.getMessageType() != CONNECT
+                            && request.getMessageType() != RECONNECT
                             && request.getMessageType() != DISCONNECT
                     ) {
                         sendInvalidRequest();
-                    }
 
-                    switch (request.getMessageType()) {
-                        case CONNECT -> createNewSession();
-                        case HEARTBEAT -> sendHeartbeatResponse();
-                        case DISCONNECT -> {
-                            out.writeObject(new Message(MessageType.OK));
-                            break runLoop;
+                    } else {
+                        switch (request.getMessageType()) {
+                            case CONNECT -> createNewSession();
+                            case RECONNECT -> {
+                                boolean ok = handleReconnection(request);
+                                if (!ok)
+                                    break runLoop;
+                            }
+                            case HEARTBEAT -> sendHeartbeatResponse();
+                            case DISCONNECT -> {
+                                out.writeObject(new Message(MessageType.OK));
+                                break runLoop;
+                            }
+                            default -> sendError("Non-implemented request type");
                         }
-                        default -> sendError("Non-implemented request type");
                     }
 
 
