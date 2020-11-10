@@ -1,14 +1,15 @@
 package server;
 
-import protocol.Protocol;
+import protocol.*;
 
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.logging.*;
+
+import static protocol.MessageType.CONNECT;
+import static protocol.MessageType.HEARTBEAT;
+
 
 public class Server {
     private static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
@@ -72,8 +73,8 @@ public class Server {
                 ClientHandler.class.getName()
         );
         private final Socket clientSocket;
-        private PrintWriter out;
-        private BufferedReader in;
+        private ObjectOutputStream out;
+        private ObjectInputStream in;
 
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
@@ -84,124 +85,76 @@ public class Server {
             //LOGGER.addHandler(FILE_HANDLER);
         }
 
-        private void sendInvalidRequest() {
-            out.println(Protocol.BEGIN_ERROR);
-            out.println("Invalid request");
-            out.println(Protocol.EOF);
+        private void sendInvalidRequest() throws IOException {
+            sendError("Invalid request");
         }
 
-        private void sendError(String msg) {
-            out.println(Protocol.BEGIN_ERROR);
-            out.println(msg);
-            out.println(Protocol.EOF);
+        private void sendError(String msg) throws IOException {
+            out.writeObject(
+                    new ErrorMessage(msg)
+            );
         }
 
-        private void sendHeartbeatResponse() {
+        private void sendHeartbeatResponse() throws IOException {
             long receiveTime = Instant.now().toEpochMilli();
-            out.println(Protocol.BEGIN_HEARTBEAT_RESPONSE);
-            out.println(Long.toString(receiveTime));
-            out.println(Protocol.EOF);
+            out.writeObject(
+                    new HeartbeatMessage(receiveTime)
+            );
         }
 
+        // TODO: find out if such a thing is needed now
+/*
         private void diagnosticHandler(List<String> request) {
             for (String msg : request) {
                 out.println(msg);
             }
         }
+*/
 
-        private void createNewSession() {
+        private void createNewSession() throws IOException {
             UserSession session = new UserSession();
-            out.println(Protocol.BEGIN_TOKEN);
-            out.println(session.getToken());
-            out.println(session.getNick());
-            out.println(Protocol.EOF);
+            out.writeObject(new IdentityResponse(session));
         }
 
         public void run() {
+
+            // setting up object channels
             try {
-                out = new PrintWriter(
-                        clientSocket.getOutputStream(),
-                        true
-                );
-                in = new BufferedReader(
-                        new InputStreamReader(clientSocket.getInputStream())
-                );
+                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(clientSocket.getInputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            boolean connectionIsNew = true;
 
-            String line = "";
+            // Starting communication loop
             runloop:
             while (true) {
                 try {
-                    if ((line = in.readLine()) == null) break;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
-                assert line != null;
-                if (connectionIsNew) {
-                    if (!line.equals(Protocol.BEGIN_TOKEN)
-                            && !line.equals(Protocol.REQUEST_TOKEN)
-                    ) {
-                        sendError("You need to identify as first request. Closing connection.");
-                        break;
-                    }
-                    LOGGER.fine("First request of connection");
-                    connectionIsNew = false;
-                }
+                    Message request = (Message) in.readObject();
+                    if (request == null)
+                        throw new IOException("request was null");
 
-                ArrayList<String> request = new ArrayList<>();
-                long last = Instant.now().toEpochMilli();
-                long now;
-                try {
-                    do {
-                        LOGGER.fine("Start of loop: " + line);
-                        now = Instant.now().toEpochMilli();
-                        long age = now-last;
-                        if (age > Protocol.REQUEST_TIMEOUT) {
-                            // Break out of loop and close connection
-                            LOGGER.warning("Request timed out");
+                    switch (request.getMessageType()) {
+                        case CONNECT -> createNewSession();
+                        case HEARTBEAT -> sendHeartbeatResponse();
+                        case DISCONNECT -> {
+                            out.writeObject(new Message(MessageType.OK));
                             break runloop;
                         }
+                        default -> sendError("Non-implemented request type");
+                    }
 
-                        if (Protocol.isMessageSingleInstruction(line)) {
-                            LOGGER.fine("Detected single-instruction initiator: " + line);
-                            break; // don't look for EOF
-                        }
 
-                        out.println(Protocol.ACKNOWLEDGED);
-                        request.add(line);
-
-                        try {
-                            if ((line = in.readLine()) == null) break;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        last = now;
-                    } while (!Objects.equals(line, Protocol.EOF));
-
-                    request.add(line);
-                } catch (Exception e) {
-                    sendInvalidRequest();
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                    break;
                 }
-
-                LOGGER.fine("Passing to handler:");
-                for (String s : request) {
-                    LOGGER.fine("\t" + s);
-                }
-                switch (request.get(0)) {
-                    case Protocol.REQUEST_TOKEN -> createNewSession();
-                    case Protocol.BEGIN_HEARTBEAT -> sendHeartbeatResponse();
-                    case Protocol.BEGIN_DIAGNOSTIC -> diagnosticHandler(request);
-                    default -> sendError("Unknown request type");
-                }
-
-
             }
 
+
+            // Done with run loop, closing connection.
             try {
                 LOGGER.info("Closing server connection...");
                 in.close();

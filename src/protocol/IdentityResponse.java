@@ -1,16 +1,20 @@
 package protocol;
 
-public class IdentityResponse extends Message {
+import server.UserSession;
 
-    public IdentityResponse() {
+public class IdentityResponse extends Message {
+    private UserSession session;
+
+    public IdentityResponse(UserSession session) {
         super(MessageType.IDENTITY_RESPONSE);
+        this.session = session;
     }
 
     public String getToken() {
-        return "";
+        return session.getToken();
     }
 
     public String getNick() {
-        return "";
+        return session.getNick();
     }
 }

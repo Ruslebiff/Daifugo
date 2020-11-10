@@ -46,13 +46,15 @@ class ClientConnectionTest {
      * were to make errors in sending exception text unfiltered to users
      */
     @Test
-    public void sendMessageShouldReturnCompleteError() throws ClassNotFoundException, IOException {
+    public void sendingErrorMessageToServerShouldNotBeAccepted() throws ClassNotFoundException, IOException {
 
         ClientConnection connection = new ClientConnection();
         connection.connect("localhost", Protocol.PORT);
-        Message response = connection.sendMessage(new ErrorMessage("invalid request"));
+        Message response = connection.sendMessage(new ErrorMessage("test"));
 
         assertEquals(MessageType.ERROR, response.getMessageType());
+        ErrorMessage tmp = (ErrorMessage) response;
+        assertEquals("Non-implemented request type", tmp.getErrorString());
     }
 
 }

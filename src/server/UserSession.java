@@ -1,9 +1,11 @@
 package server;
 
 import server.exceptions.UserSessionError;
+
+import java.io.Serializable;
 import java.util.*;
 
-public class UserSession {
+public class UserSession implements Serializable {
     private static Map<UUID, UserSession> sessions = new HashMap<>();
     private static Set<String> nickList = new HashSet<>();
     private static long userCount = 0L;

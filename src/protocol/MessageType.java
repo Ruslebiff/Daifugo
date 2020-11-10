@@ -2,6 +2,7 @@ package protocol;
 
 public enum MessageType {
     ERROR,
+    OK,
     HEARTBEAT,
     CONNECT,
     RECONNECT,

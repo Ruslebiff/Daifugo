@@ -7,7 +7,6 @@ import server.Server;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +29,6 @@ class ServerTest {
 
     @AfterEach
     void stopLocalServer() throws IOException {
-        System.out.println("Stopping local test server...");
         server.stop();
     }
 
@@ -70,8 +68,8 @@ class ServerTest {
         conn.connect("localhost", Protocol.PORT);
 
         IdentityResponse response = (IdentityResponse) conn.sendMessage(new Message(MessageType.CONNECT));
+        assertEquals(MessageType.IDENTITY_RESPONSE, response.getMessageType());
         assertEquals("User1", response.getNick());
     }
 
-    //TODO: check that subsequent requests in the form BEGIN_* ... EOF doesn't loose connection
 }
