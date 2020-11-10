@@ -32,7 +32,6 @@ public class Card extends JLayeredPane {
         } else {
             this.value = number;
         }
-//        setOpaque(true);
 
         this.filePath = "./resources/cardimages/" + this.suit + Integer.toString(this.number) + ".png"; // Filepath
         try {

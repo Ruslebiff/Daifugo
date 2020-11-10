@@ -19,17 +19,19 @@ public class Player extends JPanel {
     private JButton addCard;
     private final int cardWidth = 80;
     private final int cardHeight = 120;
-    int cardNumb = 19;
-    int boundsX = 500 - cardWidth + 15;
-    int placementNumber = 20;
+    private int widthOfComponent = 500;
+    int cardNumb = 18;
+    int boundsX = 0;
     int cardsOnDisplay = 0;
+    int internalMargin = 5;
+    private final int space = 24; // Space between cards when a player has maximum cards
 
-
-    public Player(String name, int playerID, String role, ArrayList<Card> cards) {
+    public Player(String name, int playerID, String role, ArrayList<Card> cards, int width) {
         this.name = name;
         this.playerID = playerID;
         this.role = role;
         this.hand = cards;
+        this.widthOfComponent = width;
         sortHand(); // Sorts the players hand with respect to the game rules
 
         setLayout(null);
@@ -59,38 +61,62 @@ public class Player extends JPanel {
     }
 
     public void addCardToDisplay() {
-        cardsOnDisplay++;
-        rearrangeCardsOnDisplay();
+//        cardsOnDisplay++;
+//        rearrangeCardsOnDisplay();
+        addAll18();
     }
 
     public void removeCardFromDisplay() {
         cardsOnDisplay--;
-        System.out.println(cardsOnDisplay);
+        System.out.println(cardNumb);
         Card temp = hand.get(++cardNumb);
         this.remove(temp);
         rearrangeCardsOnDisplay();
     }
 
+    public void addAll18() {
+        boundsX = (widthOfComponent) - (cardWidth) - internalMargin;
+        int bort = 0;
+        for (int i = 0; i < 18; i++) {
+            Card temp = hand.get(cardNumb--);
+            bort = i*space;
+            temp.setBounds(boundsX - bort, 0, cardWidth, cardHeight);
+            add(temp);
+        }
+        repaint();
+        cardsOnDisplay = 18;
+    }
+
     public void rearrangeCardsOnDisplay() {
-        boundsX = 250 - (cardWidth/4);
+        int maxWidthOfCards = (int) (widthOfComponent*1.5);
         for (int i = 0; i < cardsOnDisplay; i++) {  // Fjerne alle eksisterende fra bordet
             Card temp = hand.get(cardNumb++);
+            System.out.println(cardNumb);
             this.remove(temp);
-            placementNumber += 10;
         }
-        boundsX += placementNumber;
 
+//        int spread = (maxWidthOfCards/(cardsOnDisplay+1))*(1+(1/(cardsOnDisplay + 10)));
+//        boundsX = (widthOfComponent/2) - ((spread * cardsOnDisplay)/2) + (widthOfComponent/2) - (cardWidth/2);
+////        boundsX = widthOfComponent - cardWidth/2;
+//        System.out.println("Bounds x "  + boundsX);
+//        for (int i = 0; i < cardsOnDisplay; i++) {
+//            Card temp = hand.get(cardNumb--);
+//            temp.setBounds(boundsX -= spread, 0, cardWidth, cardHeight);
+//            this.add(temp);
+////            System.out.println("Added " + temp.getSuit() + Integer.toString(temp.getNumber()));
+//        }
+
+
+
+        boundsX = (widthOfComponent/2)  - (cardWidth/2) + (((cardsOnDisplay-1)/2) * space);
         for (int i = 0; i < cardsOnDisplay; i++) {
-            if(i == 0) {
-                placementNumber = 20;
-            } else placementNumber = 10;
             Card temp = hand.get(cardNumb--);
-            temp.setBounds(boundsX -= (2*placementNumber),0, cardWidth,cardHeight);
+            temp.setBounds(boundsX - (i*space), 0, cardWidth, cardHeight);
             this.add(temp);
         }
-
         repaint();
     }
+
 
     // Sorts the players hand by using a quicksort
     public void sortHand() {

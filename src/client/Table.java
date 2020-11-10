@@ -44,7 +44,7 @@ public class Table extends JPanel implements GameStateTracker {
          * REMOVE LATER
          */
         Player[] players = new Player[1];
-        players[0] = new Player("Mohammed Lee", 0, "President", p1);
+        players[0] = new Player("Mohammed Lee", 0, "President", p1, TABLE_WIDTH/2);
         players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,700,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 50);
         add(players[0]);
 
