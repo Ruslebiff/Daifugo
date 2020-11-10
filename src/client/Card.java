@@ -46,8 +46,6 @@ public class Card extends JPanel {
             ex.printStackTrace();
         }
 
-
-//        addListener();
     }
 
     public int getValue() {
@@ -87,6 +85,10 @@ public class Card extends JPanel {
 
     public void setSelected(){
         isSelected = !isSelected;
+    }
+
+    public void setSelectedFalse() {
+        isSelected = false;
     }
 }
 

@@ -23,19 +23,19 @@ public class Player extends JPanel {
     private final ArrayList<Card> hand;
     private JButton removeCard;
     private JButton addCard;
-    private PlayerButton playCards;
-    private PlayerButton cancelPlay;
-    private JButton passTurn;
+    private final PlayerButton playCards;
+    private final PlayerButton cancelPlay;
+    private final PlayerButton passTurn;
     private final int cardWidth = 80;
     private final int cardHeight = 120;
     private final int widthOfComponent;
-    private int buttonWidth = 100;
-    private int buttonHeight = 50;
+    private final int buttonWidth = 100;
+    private final int buttonHeight = 50;
     private int cardIndex;
     private int boundsX = 0;
     private int cardsOnDisplay = 0;
     private int space = 24; // Space between cards when a player has maximum cards
-    private int maxCards = 18;
+    private final int maxCards = 18;
 
 
     public Player(String name, int playerID, String role, ArrayList<Card> cards, int width) {
@@ -61,16 +61,17 @@ public class Player extends JPanel {
 
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
-        passTurn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0,
+        passTurn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0, // TODO: Give up turn
                                         buttonWidth, buttonHeight, "Pass Turn");
         add(passTurn);
-
+                                // TODO: Check if selected cards are "legal" to play, if yes -> play on table, else put back in hand/display
         playCards = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurn.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Play Cards");
         add(playCards);
 
         cancelPlay = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCards.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Cancel");
+        cancelPlay.addActionListener(e -> { cancel();});
         add(cancelPlay);
 
 
@@ -193,5 +194,16 @@ public class Player extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.drawImage(image, 0, 0, this); // Draws the image of onto the JPanel
+    }
+
+    public Card[] playCards(Card[] selectedCards) {
+        return null;
+    }
+
+    public void cancel() {
+        hand.forEach(c -> {
+            c.setSelectedFalse();
+            c.repaint();
+        });
     }
 }
