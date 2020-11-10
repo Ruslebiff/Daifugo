@@ -36,7 +36,7 @@ public class Table extends JPanel implements GameStateTracker {
          * REMOVE LATER
          */
         ArrayList<Card> p1 = new ArrayList<>();;
-        for (int i = 0; i < cards.size(); i++) {
+        for (int i = 0; i < cards.size()-46; i++) {
             p1.add(cards.get(i));
         }
 
@@ -45,7 +45,7 @@ public class Table extends JPanel implements GameStateTracker {
          */
         Player[] players = new Player[1];
         players[0] = new Player("Mohammed Lee", 0, "President", p1, TABLE_WIDTH/2);
-        players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,700,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 50);
+        players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,(TABLE_HEIGHT/2) + 100,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 100);
         add(players[0]);
 
 

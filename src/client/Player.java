@@ -19,15 +19,19 @@ public class Player extends JPanel {
     private final ArrayList<Card> hand;
     private JButton removeCard;
     private JButton addCard;
+    private PlayerButton playCards;
+    private PlayerButton cancelPlay;
+    private JButton passTurn;
     private final int cardWidth = 80;
     private final int cardHeight = 120;
-    private int widthOfComponent = 500;
-    int cardNumb = 18;
-    int boundsX = 0;
-    int cardsOnDisplay = 0;
-    int internalMargin = 5;
+    private final int widthOfComponent;
+    private int buttonWidth = 100;
+    private int buttonHeight = 50;
+    private int cardIndex;
+    private int boundsX = 0;
+    private int cardsOnDisplay = 0;
     private int space = 24; // Space between cards when a player has maximum cards
-    private final int maxCards = 18;
+    private int maxCards = 18;
 
 
     public Player(String name, int playerID, String role, ArrayList<Card> cards, int width) {
@@ -35,11 +39,15 @@ public class Player extends JPanel {
         this.playerID = playerID;
         this.role = role;
         this.hand = cards;
+        this.cardIndex = hand.size() - 1;
         this.widthOfComponent = width;
-        sortHand(); // Sorts the players hand with respect to the game rules
-
+        sortHand(); // Sorts the players hand with respect to the card values
+        System.out.println("Hand size " + hand.size());
         setLayout(null);
         setOpaque(true);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
+
+        // Renders the green filt unto the player-section
         this.filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
@@ -47,67 +55,84 @@ public class Player extends JPanel {
             ex.printStackTrace();
         }
 
+
+        passTurn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0,
+                                        buttonWidth, buttonHeight, "Pass Turn");
+        add(passTurn);
+
+        playCards = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurn.getBounds().x, 0,
+                                        buttonWidth, buttonHeight, "Play Cards");
+        add(playCards);
+
+        cancelPlay = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCards.getBounds().x, 0,
+                                        buttonWidth, buttonHeight, "Cancel");
+        add(cancelPlay);
+
+
+        // TODO: REMOVE ADD AND REMOVE BUTTONS
         addCard = new JButton("Add");
-        addCard.setBounds(0,125,100,50);
+        addCard.setBounds(0,175,buttonWidth,buttonHeight);
         add(addCard);
         addCard.addActionListener( e -> {
             addCardToDisplay();
         });
 
         removeCard = new JButton("Remove");
-        removeCard.setBounds(100,125,100,50);
+        removeCard.setBounds(100,175,100,50);
         add(removeCard);
         removeCard.addActionListener(e -> {
             removeCardFromDisplay();
         });
-
-        setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
     }
 
     public void addCardToDisplay() {
-        addAll18();
+        viewDealtHand();
     }
 
     public void removeCardFromDisplay() {
         cardsOnDisplay--;
-        Card temp = hand.get(++cardNumb);
+        Card temp = hand.get(++cardIndex);
         this.remove(temp);
         rearrangeCardsOnDisplay();
     }
 
-    public void addAll18() {
-        boundsX = (widthOfComponent) - (cardWidth) - internalMargin;
-        int bort = 0;
-        for (int i = 0; i < 18; i++) {
-            Card temp = hand.get(cardNumb--);
-            bort = i*space;
-            temp.setBounds(boundsX - bort, 0, cardWidth, cardHeight);
+    // TODO: Y-coordinate must be further down
+
+    public void viewDealtHand() {
+        space = space + ((maxCards - hand.size())/2);
+        boundsX = (widthOfComponent/2) - (cardWidth/2) + (((hand.size()-1)/2) * space);
+        for (int i = 0; i < hand.size(); i++) {
+            Card temp = hand.get(cardIndex--);
+            temp.setBounds(boundsX - (i*space), 50, cardWidth, cardHeight);
             add(temp);
         }
         repaint();
-        cardsOnDisplay = 18;
+        cardsOnDisplay =  hand.size();
     }
 
     public void rearrangeCardsOnDisplay() {
         for (int i = 0; i < cardsOnDisplay; i++) {  // Removes all current cards
-            Card temp = hand.get(cardNumb++);       // So that they can be redrawn centered and relatively spaced
+            Card temp = hand.get(cardIndex++);       // So that they can be redrawn centered and relatively spaced
             this.remove(temp);
         }
 
         // The spacing between cards
         space = space + ((maxCards - cardsOnDisplay)/2);
         if(cardsOnDisplay < 4)  // If the cards on the hand is less than four, don't have any space
-            space = cardWidth ;
+            space = cardWidth;
 
+
+        // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
         boundsX = round(((float)widthOfComponent/2)  - ((float)cardWidth/2) + (((float)cardsOnDisplay-1)/2) * (float)space);
         for (int i = 0; i < cardsOnDisplay; i++) {  // For each card on hand, place them from right to left
-            Card temp = hand.get(cardNumb--);       // to see the highest card first
-            temp.setBounds(boundsX - (i*space) , 0, cardWidth, cardHeight);
+            Card temp = hand.get(cardIndex--);       // to see the highest card first
+            temp.setBounds(boundsX - (i*space) , 50, cardWidth, cardHeight);
             this.add(temp);
         }
         repaint();
     }
+
 
 
     // Sorts the players hand by using a quicksort
