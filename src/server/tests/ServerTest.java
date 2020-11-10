@@ -21,7 +21,7 @@ class ServerTest {
         new Thread(() -> {
             try {
                 server.start(Protocol.PORT);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }).start();
 
@@ -133,5 +133,5 @@ class ServerTest {
         assertEquals("User1", response.get(2));
     }
 
-
+    //TODO: check that subsequent requests in the form BEGIN_* ... EOF doesn't loose connection
 }
