@@ -1,4 +1,4 @@
-package common;
+package protocol;
 
 /**
  * Protocol supplies a common set of protocol 'constants' for

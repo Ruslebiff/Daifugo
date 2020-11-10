@@ -1,7 +1,10 @@
 package client.networking.tests;
 
 import client.networking.ClientConnection;
-import common.Protocol;
+import protocol.ErrorMessage;
+import protocol.Message;
+import protocol.MessageType;
+import protocol.Protocol;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -43,13 +46,13 @@ class ClientConnectionTest {
      * were to make errors in sending exception text unfiltered to users
      */
     @Test
-    public void sendMessageShouldReturnCompleteError() throws IOException {
+    public void sendMessageShouldReturnCompleteError() throws ClassNotFoundException, IOException {
 
         ClientConnection connection = new ClientConnection();
         connection.connect("localhost", Protocol.PORT);
-        List<String> response = connection.sendMessage("BOBBYCOCK");
+        Message response = connection.sendMessage(new ErrorMessage("invalid request"));
 
-        assertEquals(Protocol.BEGIN_ERROR, response.get(0));
+        assertEquals(MessageType.ERROR, response.getMessageType());
     }
 
 }

@@ -1,6 +1,6 @@
 package server;
 
-import common.Protocol;
+import protocol.Protocol;
 
 import java.io.*;
 import java.net.*;
