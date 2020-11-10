@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -19,6 +20,7 @@ public class Card extends JPanel {
     private final String filePath;
     private int cardWidth = 80;
     private int cardHeight = 120;
+    private boolean isSelected = false;
 
 
 
@@ -44,6 +46,8 @@ public class Card extends JPanel {
             ex.printStackTrace();
         }
 
+
+//        addListener();
     }
 
     public int getValue() {
@@ -58,16 +62,31 @@ public class Card extends JPanel {
         return suit;
     }
 
-    @Override
+    @Override       // If the card is not selected -> paint normally, else paint with overlay
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);       // Rounds the corner of the cards
-        RoundRectangle2D r = new RoundRectangle2D.Float(0, 0, cardWidth, cardHeight, 10, 10);
-        g.setClip(r);
-        g.drawImage(scaledImage, 0, 0, this); // Draws the image of onto the Jpanel
+        if(!isSelected) {
+            super.paintComponent(g);       // Rounds the corner of the cards
+            RoundRectangle2D r = new RoundRectangle2D.Float(0, 0, cardWidth, cardHeight, 10, 10);
+            g.setClip(r);
+            g.drawImage(scaledImage, 0, 0, this); // Draws the image of onto the Jpanel
+        }
+        else
+            paintOverlay(g);
     }
 
-    public void mousePressed(MouseEvent e) {
-        System.out.println(getSuit() + Integer.toString(getNumber()));
+    // Paints the component with a transparent overlay
+    protected void paintOverlay(Graphics g){
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.drawImage(scaledImage, 0, 0, this);
+        g2d.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+        g2d.setColor(new Color(135,206,250));
+        g2d.fillRect(0, 0, cardWidth, cardHeight);
+        g2d.dispose();
+    }
+
+    public void setSelected(){
+        isSelected = !isSelected;
     }
 }
 

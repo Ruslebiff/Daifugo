@@ -93,12 +93,10 @@ public class Player extends JPanel {
     public void addListener(Card c) {
         c.addMouseListener(new MouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                // If the component does not have border, add border, else remove border
-                if(c.getBorder() == null)
-                    c.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-                else
-                    c.setBorder(null);
+            public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
+                c.setSelected();
+                c.paintComponent(c.getGraphics());
+                hand.forEach(c -> repaint());
             }
 
             @Override
