@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static java.lang.Math.round;
+
 public class Player extends JPanel {
     private BufferedImage image;
     private final String filePath;
@@ -63,14 +65,11 @@ public class Player extends JPanel {
     }
 
     public void addCardToDisplay() {
-//        cardsOnDisplay++;
-//        rearrangeCardsOnDisplay();
         addAll18();
     }
 
     public void removeCardFromDisplay() {
         cardsOnDisplay--;
-        System.out.println(cardNumb);
         Card temp = hand.get(++cardNumb);
         this.remove(temp);
         rearrangeCardsOnDisplay();
@@ -90,36 +89,27 @@ public class Player extends JPanel {
     }
 
     public void rearrangeCardsOnDisplay() {
-        int maxWidthOfCards = (int) (widthOfComponent*1.5);
-        for (int i = 0; i < cardsOnDisplay; i++) {  // Fjerne alle eksisterende fra bordet
-            Card temp = hand.get(cardNumb++);
-            System.out.println(cardNumb);
+        for (int i = 0; i < cardsOnDisplay; i++) {  // Removes all current cards
+            Card temp = hand.get(cardNumb++);       // So that they can be redrawn centered and relatively spaced
             this.remove(temp);
         }
 
-//        int spread = (maxWidthOfCards/(cardsOnDisplay+1))*(1+(1/(cardsOnDisplay + 10)));
-//        boundsX = (widthOfComponent/2) - ((spread * cardsOnDisplay)/2) + (widthOfComponent/2) - (cardWidth/2);
-////        boundsX = widthOfComponent - cardWidth/2;
-//        System.out.println("Bounds x "  + boundsX);
-//        for (int i = 0; i < cardsOnDisplay; i++) {
-//            Card temp = hand.get(cardNumb--);
-//            temp.setBounds(boundsX -= spread, 0, cardWidth, cardHeight);
-//            this.add(temp);
-////            System.out.println("Added " + temp.getSuit() + Integer.toString(temp.getNumber()));
-//        }
-
-
+        // The spacing between cards
         space = space + ((maxCards - cardsOnDisplay)/2);
-        boundsX = (widthOfComponent/2)  - (cardWidth/2) + (((cardsOnDisplay-1)/2) * space);
-        for (int i = 0; i < cardsOnDisplay; i++) {
-            Card temp = hand.get(cardNumb--);
-            temp.setBounds(boundsX - (i*space), 0, cardWidth, cardHeight);
+        if(cardsOnDisplay < 4)  // If the cards on the hand is less than four, don't have any space
+            space = cardWidth ;
+
+        // The x-coordinate of the first card from right to left
+        boundsX = round(((float)widthOfComponent/2)  - ((float)cardWidth/2) + (((float)cardsOnDisplay-1)/2) * (float)space);
+        for (int i = 0; i < cardsOnDisplay; i++) {  // For each card on hand, place them from right to left
+            Card temp = hand.get(cardNumb--);       // to see the highest card first
+            temp.setBounds(boundsX - (i*space) , 0, cardWidth, cardHeight);
             this.add(temp);
         }
         repaint();
     }
 
-    
+
     // Sorts the players hand by using a quicksort
     public void sortHand() {
         QuickSort.sort(this.hand, 0, this.hand.size() - 1);
@@ -143,31 +133,3 @@ public class Player extends JPanel {
         g.drawImage(image, 0, 0, this); // Draws the image of onto the JPanel
     }
 }
-
-//    setLayout(new GridBagLayout()); // The row where the cards will show
-//        GridBagConstraints gbc = new GridBagConstraints();  // Constraints of the grid
-//        gbc.gridwidth = 1;   // Set the width of the cell of the cards
-//        gbc.fill = GridBagConstraints.BOTH;  // Make the component fill out the cell
-//        gbc.gridx = 0;  // Where the first component will be placed
-//        gbc.gridy = 0;
-//        gbc.weightx = 1;
-//        gbc.weighty = 1;
-//        gbc.anchor = GridBagConstraints.CENTER;
-
-
-//        sortHand();     // HER SKAL DET EGT VÆRE hand.size()
-//        for (int i = 0; i < 1; i++) {
-////            if(i == (hand.size() - 1)) {
-////                gbc.weightx = 5;
-////            }
-//            this.add(hand.get(i), gbc);     // Add each card to the hand
-//            gbc.gridx += i;                 // Set where the card should be set
-//            System.out.println("BREDDE PÅ ETT KORT " + hand.get(i).getBounds().width);
-//        }
-//
-//        gbc.gridx = 0;
-//        gbc.gridy = 2;
-//        gbc.weightx = 2;
-//        add(addCard);
-//        gbc.gridx += 1;
-//        add(removeCard);
