@@ -2,7 +2,11 @@ package client;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +59,7 @@ public class Player extends JPanel {
             ex.printStackTrace();
         }
 
+        hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
         passTurn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0,
                                         buttonWidth, buttonHeight, "Pass Turn");
@@ -84,6 +89,40 @@ public class Player extends JPanel {
             removeCardFromDisplay();
         });
     }
+
+    public void addListener(Card c) {
+        c.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // If the component does not have border, add border, else remove border
+                if(c.getBorder() == null)
+                    c.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+                else
+                    c.setBorder(null);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+    }
+
 
     public void addCardToDisplay() {
         viewDealtHand();
