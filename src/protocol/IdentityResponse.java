@@ -3,8 +3,8 @@ package protocol;
 import server.UserSession;
 
 public class IdentityResponse extends Message {
-    private String token;
-    private String nick;
+    private final String token;
+    private final String nick;
 
     public IdentityResponse(String token, String nick) {
         super(MessageType.IDENTITY_RESPONSE);
