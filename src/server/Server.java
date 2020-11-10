@@ -102,14 +102,6 @@ public class Server {
             );
         }
 
-        // TODO: find out if such a thing is needed now
-/*
-        private void diagnosticHandler(List<String> request) {
-            for (String msg : request) {
-                out.println(msg);
-            }
-        }
-*/
 
         private void createNewSession() throws IOException {
             UserSession session = new UserSession();
@@ -128,7 +120,7 @@ public class Server {
 
 
             // Starting communication loop
-            runloop:
+            runLoop:
             while (true) {
                 try {
 
@@ -141,7 +133,7 @@ public class Server {
                         case HEARTBEAT -> sendHeartbeatResponse();
                         case DISCONNECT -> {
                             out.writeObject(new Message(MessageType.OK));
-                            break runloop;
+                            break runLoop;
                         }
                         default -> sendError("Non-implemented request type");
                     }
