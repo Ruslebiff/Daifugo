@@ -24,11 +24,9 @@ public class GameLobby extends JFrame {
     private int window_height = 1000;
     private int window_width = 1000;
     private int MAX_PLAYERS = 8;
+    private String playerName = "Player 1";
 
     public GameLobby() {
-
-        String playerName = "Player 1";
-
         /* Create window */
         setSize(window_width,window_height);
         setLayout(new BorderLayout());
@@ -42,14 +40,12 @@ public class GameLobby extends JFrame {
         newGamePanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-
         JLabel newGameNameLabel = new JLabel("Name: ");
         JTextField newGameName = new JTextField("my new game");
         JPasswordField newGamePassword = new JPasswordField("");
         newGamePassword.setEnabled(false);
         JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
         JButton newGameConfirmButton = new JButton("Confirm");
-
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 0.0;
@@ -60,7 +56,6 @@ public class GameLobby extends JFrame {
         gbc.gridx = 1;
         newGamePanel.add(newGameName, gbc);
 
-
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -69,7 +64,6 @@ public class GameLobby extends JFrame {
         newGamePanel.add(newGamePassword, gbc);
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.PAGE_END; //bottom of space
         gbc.gridwidth = 3;
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -77,7 +71,30 @@ public class GameLobby extends JFrame {
 
 
         /* Settings view */
+        JPanel settingsPanel = new JPanel();
+        settingsPanel.setSize(window_width,window_height);
+        settingsPanel.setVisible(false);
+        settingsPanel.setLayout(new GridBagLayout());
 
+
+        JLabel newNickNameLabel = new JLabel("Nickname: ");
+        JTextField newNickName = new JTextField(playerName);
+        JButton settingsConfirmButton = new JButton("Confirm");
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        settingsPanel.add(newNickNameLabel, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1;
+        settingsPanel.add(newNickName, gbc);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        settingsPanel.add(settingsConfirmButton, gbc);
 
         /** Normal view: */
         /* Control bar */
@@ -101,9 +118,6 @@ public class GameLobby extends JFrame {
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
-        settingsButton.addActionListener(e -> {
-            editSettings();
-        });
 
         c.fill = GridBagConstraints.LINE_START;
         c.weightx = 0.0;
@@ -191,10 +205,24 @@ public class GameLobby extends JFrame {
             newGamePanel.setVisible(false);
         });
 
+        settingsConfirmButton.addActionListener(e -> {
+            playerName = newNickName.getText();
+            controlPanel.setVisible(true);
+            sp.setVisible(true);
+            settingsPanel.setVisible(false);
+            nickText.setText(playerName);
+        });
+
         newGameButton.addActionListener(e -> {
             controlPanel.setVisible(false);
             sp.setVisible(false);
             newGamePanel.setVisible(true);
+        });
+
+        settingsButton.addActionListener(e -> {
+            controlPanel.setVisible(false);
+            sp.setVisible(false);
+            settingsPanel.setVisible(true);
         });
 
         joinGameButton.addActionListener(e -> {
@@ -210,6 +238,7 @@ public class GameLobby extends JFrame {
         });
 
         add(newGamePanel);
+        add(settingsPanel);
         add(controlPanel, BorderLayout.PAGE_START);
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.PAGE_END);
@@ -264,11 +293,6 @@ public class GameLobby extends JFrame {
 
         tableModel.addRow(newGameData); // should be added to server, not directly in table. This will make it crash until that is done.
         refreshGamesList(); // refresh table
-    }
-
-    // TODO: BUTTON - Settings - Functionality
-    public void editSettings() {
-        System.out.println("Editing settings ...");
     }
 }
 
