@@ -1,12 +1,14 @@
 package server.tests;
 
 import client.networking.ClientConnection;
+import common.GameListing;
 import protocol.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,6 +107,31 @@ class ServerTest {
         String got = updatedNickResponse.getNick();
 
         assertEquals(newNick, got);
+    }
+
+    @Test
+    public void testingDummyGameList() throws IOException, ClassNotFoundException {
+        ClientConnection conn = new ClientConnection("localhost");
+        Message response = conn.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError(), "Connecting should not result in error");
+
+        response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError(), "Getting game list should not return error");
+
+        GameListResponse listResponse = (GameListResponse) response;
+
+        List<GameListing> gameList = listResponse.getGameList();
+        for (GameListing listing : gameList) {
+            System.out.printf(
+                    "%s, %s, %s, %d, %b\n",
+                    listing.getID(),
+                    listing.getTitle(),
+                    listing.getOwner(),
+                    listing.getNumberOfPlayers(),
+                    listing.hasPassword()
+            );
+        }
+
     }
 
     // TODO: find out why this results in timeouts

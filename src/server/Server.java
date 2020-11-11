@@ -1,11 +1,13 @@
 package server;
 
+import common.GameListing;
 import protocol.*;
 import server.exceptions.UserSessionError;
 
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.logging.*;
 
 import static protocol.MessageType.*;
@@ -148,6 +150,43 @@ public class Server {
             }
         }
 
+        private void sendGameList() throws IOException {
+            //TODO: replace with actual list
+            ArrayList<GameListing> dummyList = new ArrayList<>();
+            dummyList.add(new GameListing(
+                    "asdf1",
+                    "A game",
+                    "Mr John",
+                    4,
+                    false
+            ));
+            dummyList.add(new GameListing(
+                    "oijad933da",
+                    "Another game",
+                    "Mr Fred",
+                    4,
+                    false
+            ));
+            dummyList.add(new GameListing(
+                    "98432ihdsa",
+                    "Games are fun",
+                    "Mr Janice",
+                    4,
+                    false
+            ));
+            dummyList.add(new GameListing(
+                    "+sa0dsapojdsa",
+                    "Bobbycock",
+                    "Mr Cock",
+                    4,
+                    false
+            ));
+
+            out.writeObject(
+                    new GameListResponse(dummyList)
+            );
+        }
+
         public void run() {
 
             // setting up object channels
@@ -190,6 +229,7 @@ public class Server {
                             }
                             case HEARTBEAT -> sendHeartbeatResponse();
                             case UPDATE_NICK -> updateNick((UpdateNickMessage) request);
+                            case GET_GAME_LIST -> sendGameList();
                             case DISCONNECT -> {
                                 if (currentSession != null) {
                                     currentSession.endSession();

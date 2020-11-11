@@ -10,10 +10,11 @@ public enum MessageType {
     HEARTBEAT,
     UPDATE_NICK,
     GET_GAME_LIST,
-    JOIN_GAME,
+    GAME_LIST_RESPONSE,
     NEW_GAME,
+    JOIN_GAME,
     GAME_STATE,
+    START_GAME,
     PLAY_CARDS,
     PASS_TURN,
-    START_GAME,
 }
