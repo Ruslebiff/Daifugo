@@ -1,8 +1,17 @@
 package client;
 
+import client.networking.ClientConnection;
+import common.GameListing;
+import protocol.GameListResponse;
+import protocol.Message;
+import protocol.MessageType;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameLobby extends JFrame {
     private String[] columnNames = {
@@ -24,6 +33,7 @@ public class GameLobby extends JFrame {
     private int window_width = 1000;
     private int MAX_PLAYERS = 8;
     private String playerName = "Player 1";
+    private ArrayList<Object> gameList = new ArrayList<>();
 
     public GameLobby() {
         /* Create window */
@@ -282,11 +292,9 @@ public class GameLobby extends JFrame {
      */
     public void refreshGamesList(){
         // Remove all rows, to prevent duplicates and old games from displaying
-        for (int row = 0; row < tableModel.getRowCount(); row++) {
+        for (int row = tableModel.getRowCount()-1; row >= 0; row--) {
             tableModel.removeRow(row);
         }
-        tableModel.removeRow(0); // jalla bugfix, removes the row that is left after the loop
-
         // Fill table again
         getGamesList();
     }
@@ -296,32 +304,36 @@ public class GameLobby extends JFrame {
      */
     public void getGamesList(){
         System.out.println("Updating games list ...");
+        ClientConnection conn;
+        try {
+            conn = new ClientConnection("localhost");
+            conn.sendMessage(new Message(MessageType.CONNECT));
+            Message response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
+            GameListResponse listResponse = (GameListResponse) response;
+            List<GameListing> gamesFromServer = listResponse.getGameList();
+            int i = 1;
+            for (GameListing listing : gamesFromServer) {
+                System.out.printf(
+                        "%s, %s, %s, %d, %b\n",
+                        listing.getID(),
+                        listing.getTitle(),
+                        listing.getOwner(),
+                        listing.getNumberOfPlayers(),
+                        listing.hasPassword()
+                );
+                Object[] game = {listing.getID(),listing.getTitle(),listing.getOwner(),listing.getNumberOfPlayers(),listing.hasPassword()};
+                gameList.add(game);
 
-        // Sample games - should be removed in production
-        // TODO: get games list from server
-        Object[][] gamesList = { // TEMPORARY
-                {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
-                {"2", "Super Game For Cool Guyz", "Teemo", 6, false, "Join"},
-                {"3", "Kosekroken", "Caitlyn", 8, false, "Join"},
-        };
-
-        // Add all rows
-        for (int row = 0; row < gamesList.length; row++) {
-            tableModel.addRow(gamesList[row]);
-        }
-
-        /* Loops through all games */
-        for (int i = 0; i < tableModel.getRowCount(); i++){
-            /* Info - game password protected or not */
-            boolean p = ((Boolean)(gamesTable.getValueAt(i, 4)));
-            if (p){
-                gamesTable.setValueAt("Yes", i, 4);
-            } else {
-                gamesTable.setValueAt("No", i, 4);
+                String p = "No";
+                if (listing.hasPassword()){
+                    p = "Yes";
+                }
+                Object[] gameToTable = {i,listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers() + " / " + MAX_PLAYERS, p, "Join"};
+                tableModel.addRow(gameToTable);
+                i++;
             }
-
-            /* Info - insert max players */
-            gamesTable.setValueAt(gamesTable.getValueAt(i, 3) + " / " + MAX_PLAYERS, i, 3);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
