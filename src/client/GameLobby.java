@@ -295,8 +295,11 @@ public class GameLobby extends JFrame {
         for (int row = tableModel.getRowCount()-1; row >= 0; row--) {
             tableModel.removeRow(row);
         }
+
+        gameList.removeAll(gameList); // Clear gameList
         // Fill table again
         getGamesList();
+        System.out.println(gameList.size());
     }
 
     /**
