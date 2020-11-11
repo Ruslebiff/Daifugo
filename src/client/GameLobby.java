@@ -3,6 +3,8 @@ package client;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class GameLobby extends JFrame {
@@ -230,7 +232,39 @@ public class GameLobby extends JFrame {
             int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
             if (playerCount < 8){   // TODO: Actually join the game
-                System.out.println("joining game " + gameID);
+                if (gameIsPrivate(gameID)) { // game is private
+                    // show window for entering password
+                    JFrame pwFrame = new JFrame("Join game");
+                    pwFrame.setLayout(null);
+                    pwFrame.setSize(300,150);
+                    pwFrame.setVisible(true);
+                    pwFrame.setLocationRelativeTo(null);
+                    JLabel pwToJoinLabel = new JLabel("Enter password");
+                    JPasswordField pwToJoinField = new JPasswordField();
+                    JButton pwEnterGameButton = new JButton("Join game");
+
+                    pwToJoinLabel.setBounds(100,10, 200, 20);
+                    pwToJoinField.setBounds(50,30, 200, 20);
+                    pwEnterGameButton.setBounds(100, 75, 95, 20);
+
+                    pwEnterGameButton.addActionListener(e1 -> {
+                        if (verifyPassword(gameID, pwToJoinField.getPassword())){
+                            // join game
+                            System.out.println("pw accepted, joining game " + gameID);
+                            pwFrame.setVisible(false);
+                        } else {
+                            System.out.println("wrong password");
+                            JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+                        }
+                    });
+
+                    pwFrame.add(pwToJoinLabel);
+                    pwFrame.add(pwToJoinField);
+                    pwFrame.add(pwEnterGameButton);
+                } else { // game is not private
+                    System.out.println("joining game " + gameID);
+                }
+
             } else {
                 System.out.println("game full!");
                 JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
@@ -257,10 +291,10 @@ public class GameLobby extends JFrame {
     }
 
     public void getGamesList(){
-        // TODO: Sample games, get from server instead
         System.out.println("Updating games list ...");
 
-
+        // Sample games - should be removed in production
+        // TODO: get games list from server
         Object[][] gamesList = { // TEMPORARY
                 {"1", "Game name 1", "Dr. Mundo", 2, true, "Join"},
                 {"2", "Super Game For Cool Guyz", "Teemo", 6, false, "Join"},
@@ -287,12 +321,48 @@ public class GameLobby extends JFrame {
         }
     }
 
-    // TODO: BUTTON - New game - Functionality
+    /**
+     * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when refreshed.
+     * @param newGameData - Data for the new game that is being created.
+     */
     public void createNewGame(Object[] newGameData) {
         System.out.println("Creating new game ...");
 
+        // TODO: create new game on server
+
         tableModel.addRow(newGameData); // should be added to server, not directly in table. This will make it crash until that is done.
         refreshGamesList(); // refresh table
+    }
+
+    /**
+     * Verify if the entered password is correct.
+     * @param gameID - ID for the game the password should be checked for
+     * @param enteredPassword - The entered password
+     * @return - True if the entered password is correct for given game id, false if not.
+     */
+    public boolean verifyPassword(int gameID, char[] enteredPassword){
+        // TODO: verify password at server end, return true if correct password
+
+        if (enteredPassword.length == 0){   // just for testing
+            return false;
+        } else {
+            return true; // temp, should return false by default if pw is not correct
+        }
+    }
+
+    /**
+     * Checks if the game is password protected. Returns true if it is protected.
+     * @param gameID - ID for the game that should be checked
+     * @return - returns true if the game is password protected. False if not.
+     */
+    public boolean gameIsPrivate(int gameID){
+        // TODO: check server if the game is protected or not
+        // temp
+        if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString() == "Yes") {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
