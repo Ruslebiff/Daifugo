@@ -90,5 +90,9 @@ public class Card extends JPanel {
     public void setSelectedFalse() {
         isSelected = false;
     }
+
+    public boolean isSelected() {
+        return  isSelected;
+    }
 }
 
