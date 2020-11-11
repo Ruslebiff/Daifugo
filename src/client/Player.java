@@ -30,9 +30,7 @@ public class Player extends JPanel {
     private final int widthOfComponent;
     private final int buttonWidth = 100;
     private final int buttonHeight = 50;
-    private int cardIndex;
     private int boundsX = 0;
-    private int cardsOnDisplay = 0;
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
     private boolean myTurn = true;
@@ -43,7 +41,6 @@ public class Player extends JPanel {
         this.playerID = playerID;
         this.role = role;
         this.hand = cards;
-        this.cardIndex = hand.size() - 1;
         this.widthOfComponent = width;
 
         sortHand(); // Sorts the players hand with respect to the card values
@@ -148,16 +145,17 @@ public class Player extends JPanel {
             add(card);
         }
         repaint();
-        cardsOnDisplay =  hand.size();  // TODO: REMOVE
     }
 
     public void rearrangeCardsOnDisplay() {
         hand.forEach(this::remove);
 
         // The spacing between cards
-        space = space + ((maxCards - hand.size())/2);    // TODO: Change to hand.size()
-        if(hand.size() < 4)  // If the cards on the hand is less than four, don't have any space
+        space = space + ((maxCards - hand.size())/2);
+        System.out.println("SPACE " + space);
+        if(hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
             space = cardWidth;
+        System.out.println("SPACE AFTER HAND.SIZE CHECK " + space);
 
         // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
@@ -185,9 +183,6 @@ public class Player extends JPanel {
         return role;
     }
 
-    public String getPlayedID() {
-        return Integer.toString(this.playerID);
-    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -213,6 +208,8 @@ public class Player extends JPanel {
                 cardsToPlay.add(c);
             }
         });
+
+        // If cards to play is allowed, to this
         cardsToPlay.forEach(c -> {
             hand.remove(c);
             this.remove(c); 
@@ -221,10 +218,6 @@ public class Player extends JPanel {
         sortHand();
         rearrangeCardsOnDisplay();
 
-//        System.out.println("Adding the cards back");
-//        hand.addAll(cardsToPlay);
-//        sortHand();
-//        rearrangeCardsOnDisplay();
     }
 
 

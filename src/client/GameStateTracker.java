@@ -1,5 +1,6 @@
 package client;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -8,6 +9,7 @@ public interface GameStateTracker {
 
     String getActivePlayerID(); // returns nick or unique identifier of current player
     ArrayList<Card> dealPlayerHand(String token);   // Returns an arraylist to the player with the respective token
+    Boolean playCards(ArrayList<Card> cards);
 
     /**
      * Function populates the deck of cards 'cardList' and shuffles it
@@ -22,5 +24,4 @@ public interface GameStateTracker {
         Collections.shuffle(cardList);          // Shuffle the cards
         return cardList;
     }
-
 }

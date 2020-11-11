@@ -60,4 +60,9 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
         return null;
     }
 
+    @Override
+    public Boolean playCards(ArrayList<Card> cards) {
+        return null;
+    }
+
 }

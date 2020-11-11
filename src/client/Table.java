@@ -69,4 +69,9 @@ public class Table extends JPanel implements GameStateTracker {
     public ArrayList<Card> dealPlayerHand(String token) {
         return null;
     }
+
+    @Override
+    public Boolean playCards(ArrayList<Card> cards) {
+        return null;
+    }
 }
