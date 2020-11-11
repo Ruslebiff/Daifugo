@@ -61,8 +61,13 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
     }
 
     @Override
-    public Boolean playCards(ArrayList<Card> cards) {
+    public Boolean checkIfPlayable() {
         return null;
+    }
+
+    @Override
+    public int getLastPlayedType() {
+        return 0;
     }
 
 }

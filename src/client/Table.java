@@ -36,7 +36,7 @@ public class Table extends JPanel implements GameStateTracker {
          * REMOVE LATER
          */
         ArrayList<Card> p1 = new ArrayList<>();;
-        for (int i = 0; i < cards.size()-46; i++) {
+        for (int i = 0; i < cards.size()/3; i++) {
             p1.add(cards.get(i));
         }
 
@@ -71,7 +71,13 @@ public class Table extends JPanel implements GameStateTracker {
     }
 
     @Override
-    public Boolean playCards(ArrayList<Card> cards) {
+    public Boolean checkIfPlayable() {
         return null;
     }
+
+    @Override
+    public int getLastPlayedType() {
+        return 0;
+    }
+
 }

@@ -9,20 +9,20 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.round;
 
-public class Player extends JPanel {
+public class Player extends JPanel implements GameStateTracker{
     private BufferedImage image;    // Image of green felt
     private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
     private final int playerID;     // Id
     private final String role;      // Role, i.e. president, vice president etc.
     private final ArrayList<Card> hand; // The cards dealt to the player
+    private final ArrayList<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
     private JButton addCard;
-    private final PlayerButton playCards;   // Button plays the selected cards
+    private final PlayerButton playCardsBtn;   // Button plays the selected cards
     private final PlayerButton cancelPlay;
     private final PlayerButton passTurn;
     private final int cardWidth = 80;
@@ -44,7 +44,6 @@ public class Player extends JPanel {
         this.widthOfComponent = width;
 
         sortHand(); // Sorts the players hand with respect to the card values
-        System.out.println("Hand size " + hand.size());
         setLayout(null);
         setOpaque(true);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
@@ -63,12 +62,13 @@ public class Player extends JPanel {
                                         buttonWidth, buttonHeight, "Pass Turn");
         add(passTurn);
                                 // TODO: Check if selected cards are "legal" to play, if yes -> play on table, else put back in hand/display
-        playCards = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurn.getBounds().x, 0,
+        playCardsBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurn.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Play Cards");
-        playCards.addActionListener(e -> playSelectedCards());
-        add(playCards);
+        playCardsBtn.setEnabled(false);
+        playCardsBtn.addActionListener(e -> playCards());
+        add(playCardsBtn);
 
-        cancelPlay = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCards.getBounds().x, 0,
+        cancelPlay = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCardsBtn.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Cancel");
         cancelPlay.addActionListener(e -> cancel());
         add(cancelPlay);
@@ -95,9 +95,14 @@ public class Player extends JPanel {
             c.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
-                    c.setSelected();
-                    c.paintComponent(c.getGraphics());
-                    hand.forEach(c -> repaint());
+                    c.setSelected();    // Set the object to either selected or not, based upon what it previously was
+                    c.paintComponent(c.getGraphics());  // Paint it accordingly
+                    hand.forEach(c -> repaint());       // Repaint all the rest of the cards
+                    if(c.isSelected())      // If the card is selected, add it to the arrayList
+                        cardsToPlay.add(c);
+                    else
+                        cardsToPlay.remove(c);
+                    playCardsBtn.setEnabled(checkIfPlayable());
                 }
 
                 @Override
@@ -152,10 +157,9 @@ public class Player extends JPanel {
 
         // The spacing between cards
         space = space + ((maxCards - hand.size())/2);
-        System.out.println("SPACE " + space);
+
         if(hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
             space = cardWidth;
-        System.out.println("SPACE AFTER HAND.SIZE CHECK " + space);
 
         // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
@@ -167,8 +171,6 @@ public class Player extends JPanel {
         }
         repaint();
     }
-
-
 
     // Sorts the players hand by using a quicksort
     public void sortHand() {
@@ -183,7 +185,6 @@ public class Player extends JPanel {
         return role;
     }
 
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -194,32 +195,72 @@ public class Player extends JPanel {
         hand.forEach(c -> {
             c.setSelectedFalse();   // Deselects all the cards
             c.repaint();
-
         });
     }
 
-    public void playSelectedCards() {
-        // Server.playCards()
-        // if selected cards are ok to play
-        // if server-response was gucci, remove the cards from the hand, sort the hand again
-        ArrayList<Card> cardsToPlay = new ArrayList<>();
-        hand.forEach(c -> {
-            if(c.isSelected()) {
-                cardsToPlay.add(c);
+    // Function checks if all the cards selected to play are the same value
+    public Boolean allTheSameCards() {
+        boolean equal = true;
+        int val = cardsToPlay.get(0).getValue();    // Get the value from one of the cards
+        for(Card c: cardsToPlay)                    // Go through each card
+            if (val != c.getValue()) {              // If the value is not the same, one of the cards is different
+                equal = false;
+                break;
             }
-        });
-
-        // If cards to play is allowed, to this
-        cardsToPlay.forEach(c -> {
-            hand.remove(c);
-            this.remove(c); 
-        });
-        
-        sortHand();
-        rearrangeCardsOnDisplay();
-
+        return equal;
     }
 
+    // Function removes cards from hand and GUI and sorts the remaining cards
+    public void playCards() {
+        cardsToPlay.forEach(c -> {
+            hand.remove(c);     // Remove them from hand
+            this.remove(c);     // Remove them from GUI
+        });
+        if(hand.size() != 0){   // If player has more cards left
+            sortHand();             // Sort hand accordingly
+            rearrangeCardsOnDisplay(); // Display properly
+        } // else Server.endGameForPlayer, assign role accordingly
+        cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
+    }
 
+    @Override
+    public String getActivePlayerID() {
+        return null;
+    }
 
+    @Override
+    public ArrayList<Card> dealPlayerHand(String token) {
+        return null;
+    }
+
+    @Override
+    public Boolean checkIfPlayable() {
+        int nCards = cardsToPlay.size();  // Amount of cards played
+        int [] lastThreeCards = new int[3];
+        lastThreeCards[0] = 8;
+        lastThreeCards[1] = 9;
+        lastThreeCards[2] = 4;
+
+        // Check if player has selected cards to play, and if they match the types on the table, i.e. singles, doubles
+        // or triples, alternatively that the card played is clover 3
+        if(nCards != 0 && ((nCards == getLastPlayedType()) || (cardsToPlay.get(nCards - 1).getValue() == 16))) {
+            // Check if the card on top of the deck is higher or equal to the player's card
+            boolean valid = true;
+            for (Card c: cardsToPlay)     // Check that all selected cards are playable
+                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lasstThreeCards
+                    valid = false;  // If a card is not playable, set valid to false
+                    break;
+                }
+            if(!allTheSameCards())  // If the selected cards vary in value, validity is false
+                valid = false;
+
+            return valid;
+        }
+        return false;
+    }
+
+    @Override
+    public int getLastPlayedType() {
+        return 2;
+    }
 }
