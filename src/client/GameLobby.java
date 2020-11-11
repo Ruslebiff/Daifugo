@@ -3,9 +3,6 @@ package client;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 
 public class GameLobby extends JFrame {
     private String[] columnNames = {
@@ -279,6 +276,10 @@ public class GameLobby extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Refreshes gamesList.
+     * Clears the gamesTable, then fills it with updated games from server via getGamesList()
+     */
     public void refreshGamesList(){
         // Remove all rows, to prevent duplicates and old games from displaying
         for (int row = 0; row < tableModel.getRowCount(); row++) {
@@ -290,6 +291,9 @@ public class GameLobby extends JFrame {
         getGamesList();
     }
 
+    /**
+     * Fills the gamesList with the games from the server, adds them to the gamesTable
+     */
     public void getGamesList(){
         System.out.println("Updating games list ...");
 
