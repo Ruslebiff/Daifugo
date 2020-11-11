@@ -6,7 +6,7 @@ public enum MessageType {
     CONNECT,
     IDENTITY_RESPONSE,
     DISCONNECT,
-    RECONNECT,      // TODO: not currently working -- is it necessary? though?
+    RECONNECT,      // TODO: not currently working -- is it necessary, though?
     HEARTBEAT,
     UPDATE_NICK,
     GET_GAME_LIST,

@@ -82,8 +82,34 @@ class ServerTest {
         assertEquals("Invalid request", response.getErrorMessage());
     }
 
+    @Test
+    public void getNewNickUpdatesSession() throws IOException, ClassNotFoundException {
+        ClientConnection conn = new ClientConnection("localhost");
+        Message response = conn.sendMessage(
+                new Message(MessageType.CONNECT)
+        );
+        assertFalse(response.isError());
+
+        IdentityResponse identityResponse = (IdentityResponse) response;
+        String oldNick = identityResponse.getNick();
+        String newNick = "John";
+
+        response = conn.sendMessage(
+                new UpdateNickMessage(identityResponse.getToken(), newNick)
+        );
+        assertFalse(
+                response.isError(),
+                "Updating nick shall not result in error"
+        );
+        IdentityResponse updatedNickResponse = (IdentityResponse) response;
+        String got = updatedNickResponse.getNick();
+
+        assertEquals(newNick, got);
+    }
+
     // TODO: find out why this results in timeouts
-/*    @Test
+/*
+    @Test
     public void reconnectSucceedsWhenReestablishingConnection() throws IOException, ClassNotFoundException {
         ClientConnection conn = new ClientConnection("localhost");
 
@@ -91,6 +117,13 @@ class ServerTest {
         Message response = conn.sendMessage(
             new Message(MessageType.CONNECT)
         );
+        if (response.isError()) {}
+
+
+
+
+
+
         IdentityResponse identityResponse = (IdentityResponse) response;
 
         String token = identityResponse.getToken();
@@ -109,6 +142,7 @@ class ServerTest {
 
         assertEquals(token, identityResponse.getToken());
         assertEquals(nick, identityResponse.getNick());
-    }*/
+    }
+*/
 
 }

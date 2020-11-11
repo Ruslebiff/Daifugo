@@ -69,6 +69,13 @@ public class UserSession implements Serializable {
         this.nick = nick;
     }
 
+    public void endSession() {
+        synchronized (UserSession.class) {
+            sessions.remove(token);
+            nickList.remove(nick);
+        }
+    }
+
 
     public void joinGame(UUID gameID) {
         // TODO

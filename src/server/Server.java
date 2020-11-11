@@ -131,6 +131,23 @@ public class Server {
             );
         }
 
+        private void updateNick(UpdateNickMessage request) throws IOException {
+            try {
+                currentSession.setNick(request.getNick());
+                out.writeObject(
+                        new IdentityResponse(
+                                request.getToken(),
+                                currentSession.getNick()
+                        )
+                );
+            }
+            catch (UserSessionError e) {
+                out.writeObject(
+                        new ErrorMessage(e.toString())
+                );
+            }
+        }
+
         public void run() {
 
             // setting up object channels
@@ -168,12 +185,15 @@ public class Server {
                         switch (request.getMessageType()) {
                             case CONNECT -> createNewSession();
                             case RECONNECT -> {
-                                boolean ok = handleReconnection(request);
-                                if (!ok)
+                                if (!handleReconnection(request))
                                     break runLoop;
                             }
                             case HEARTBEAT -> sendHeartbeatResponse();
+                            case UPDATE_NICK -> updateNick((UpdateNickMessage) request);
                             case DISCONNECT -> {
+                                if (currentSession != null) {
+                                    currentSession.endSession();
+                                }
                                 out.writeObject(new Message(MessageType.OK));
                                 break runLoop;
                             }
