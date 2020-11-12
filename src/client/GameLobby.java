@@ -3,15 +3,12 @@ package client;
 import client.networking.ClientConnection;
 import common.GameListing;
 import protocol.*;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class GameLobby extends JFrame {
     private String[] columnNames = {
@@ -33,7 +30,7 @@ public class GameLobby extends JFrame {
     private int window_width = 1000;
     private int MAX_PLAYERS = 8;
     private String playerName;
-    private ArrayList<Object> gameList = new ArrayList<>();
+    private List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
 
     public GameLobby() {
@@ -232,7 +229,7 @@ public class GameLobby extends JFrame {
 
         JScrollPane sp = new JScrollPane(gamesTable);
 
-        /** Button action listeners*/
+        /* Button action listeners*/
         newGamePrivateCheckbox.addActionListener(e -> {
             if (newGamePrivateCheckbox.isSelected()){
                 newGamePassword.setEnabled(true);
@@ -243,7 +240,13 @@ public class GameLobby extends JFrame {
         });
 
         newGameConfirmButton.addActionListener(e -> {
-            createNewGame(newGameName.getText(), newGamePassword.getPassword());
+            char[] pw;
+            if (newGamePrivateCheckbox.isSelected()){
+                pw = newGamePassword.getPassword();
+            } else {
+                pw = new char[0];
+            }
+            createNewGame(newGameName.getText(), pw);
             controlPanel.setVisible(true);
             sp.setVisible(true);
             newGamePanel.setVisible(false);
@@ -287,11 +290,11 @@ public class GameLobby extends JFrame {
         });
 
         joinGameButton.addActionListener(e -> {
-            int gameID = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
+            int gameNumber = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
             int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
             if (playerCount < 8){   // TODO: Actually join the game
-                if (gameIsPrivate(gameID)) { // game is private
+                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString() == "Yes") { // game is private // TODO: can we use the hasPassword() instead?
                     // show window for entering password
                     JFrame pwFrame = new JFrame("Join game");
                     pwFrame.setLayout(null);
@@ -307,21 +310,42 @@ public class GameLobby extends JFrame {
                     pwEnterGameButton.setBounds(100, 75, 95, 20);
 
                     pwEnterGameButton.addActionListener(e1 -> {
-                        if (verifyPassword(gameID, pwToJoinField.getPassword())){
-                            // join game
-                            System.out.println("pw accepted, joining game " + gameID);
-                            pwFrame.setVisible(false);
-                        } else {
-                            System.out.println("wrong password");
-                            JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+
+                        try {
+                            Message response = conn.sendMessage(
+                                    new Message(MessageType.CONNECT)
+                            );
+                            if (response.isError()){
+                                System.out.println(response.getErrorMessage());
+                                return;
+                            }
+
+                            String gameID;
+                            gameID = gameList.get(gameNumber-1).getID();
+                            System.out.println("GAME ID " + gameID);
+
+                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));  // TODO: This throws EOFException now
+                            if (response.isError()){
+                                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
+                                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+                                }
+                                System.out.println(response.getErrorMessage());
+                                return;
+                            }
+
+                        } catch (IOException | ClassNotFoundException ioException) {
+                            System.out.println("EOFEOFEOF");
+                            ioException.printStackTrace();
                         }
+
+
                     });
 
                     pwFrame.add(pwToJoinLabel);
                     pwFrame.add(pwToJoinField);
                     pwFrame.add(pwEnterGameButton);
                 } else { // game is not private
-                    System.out.println("joining game " + gameID);
+                    System.out.println("joining game " + gameNumber);
                 }
 
             } else {
@@ -381,9 +405,9 @@ public class GameLobby extends JFrame {
                         listing.getTitle(),
                         listing.getOwner(),
                         listing.getNumberOfPlayers(),
-                        listing.hasPassword()
+                        listing.hasPassword() // TODO: this is always true :(
                 );
-                Object[] game = {listing.getID(),listing.getTitle(),listing.getOwner(),listing.getNumberOfPlayers(),listing.hasPassword()}; // TODO: get hasStarted() from server as well
+                GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
                 String p = "No";
@@ -405,7 +429,6 @@ public class GameLobby extends JFrame {
      * @param gamePassword
      */
     public void createNewGame(String gameName, char[] gamePassword) {
-        // TODO: create new game on server
         try {
             Message response = null;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
@@ -428,40 +451,6 @@ public class GameLobby extends JFrame {
         }
 
         refreshGamesList(); // refresh table
-    }
-
-    /**
-     * Verify if the entered password is correct.
-     * @param gameID - ID for the game the password should be checked for
-     * @param enteredPassword - The entered password
-     * @return - True if the entered password is correct for given game id, false if not.
-     */
-    public boolean verifyPassword(int gameID, char[] enteredPassword){
-        /* TODO: verify password at server end, return true if correct password.
-            This function will be replaced by checking responses from server instead when joining game
-            (in the join button action listener)
-         */
-
-        if (enteredPassword.length == 0){   // just for testing
-            return false;
-        } else {
-            return true; // temp, should return false by default if pw is not correct
-        }
-    }
-
-    /**
-     * Checks if the game is password protected. Returns true if it is protected.
-     * @param gameID - ID for the game that should be checked
-     * @return - returns true if the game is password protected. False if not.
-     */
-    public boolean gameIsPrivate(int gameID){
-        // TODO: Remove. Games now have stored a value for protected or not
-        // temp
-        if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString() == "Yes") {
-            return true;
-        } else {
-            return false;
-        }
     }
 }
 
