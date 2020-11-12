@@ -38,10 +38,25 @@ public class GameLobby extends JFrame {
         try {
             conn = new ClientConnection("localhost");
         } catch (IOException e) {
+            System.out.println("ERROR: Failed to connect!");
             e.printStackTrace();
         }
+        
+        try {
+            Message response = conn.sendMessage(
+                    new Message(MessageType.CONNECT)
+            );
+            IdentityResponse identityResponse = (IdentityResponse) response;
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return;
+            }
+            playerName = identityResponse.getNick();
+        } catch (IOException | ClassNotFoundException ioException) {
+            ioException.printStackTrace();
+        }
 
-        // TODO: playerName getnick()
+
         /* Create window */
         setSize(window_width,window_height);
         setLayout(new BorderLayout());
@@ -334,6 +349,10 @@ public class GameLobby extends JFrame {
         try {
             conn.sendMessage(new Message(MessageType.CONNECT));
             Message response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return;
+            }
             GameListResponse listResponse = (GameListResponse) response;
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
