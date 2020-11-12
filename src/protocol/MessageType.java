@@ -2,6 +2,7 @@ package protocol;
 
 public enum MessageType {
     ERROR,
+    PASSWORD_ERROR,
     OK,
     CONNECT,
     IDENTITY_RESPONSE,
