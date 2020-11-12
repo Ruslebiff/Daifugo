@@ -2,12 +2,15 @@ package server;
 
 import common.GameListing;
 import protocol.*;
+import server.exceptions.GameException;
 import server.exceptions.UserSessionError;
+import server.exceptions.WrongPassword;
 
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.*;
 
 import static protocol.MessageType.*;
@@ -25,7 +28,7 @@ public class Server {
             );
             System.setProperty(
                     "java.util.logging.SimpleFormatter.format",
-                    "[%1$ta %1$tF %1$tT %1$tZ] %4$s: %5$s %n"
+                    "[%4$s] (%1$ta %1$tF %1$tT %1$tZ) - %3$s:  %5$s %n"
             );
             FILE_HANDLER.setFormatter(new SimpleFormatter());
             CONSOLE_HANDLER.setFormatter(new SimpleFormatter());
@@ -63,6 +66,7 @@ public class Server {
         // ensures that subsequent server restarts during testing
         // doesn't continue counting from last user number
         UserSession._reset();
+        Game._reset();
     }
 
     public static void main(String[] args) throws IOException {
@@ -105,7 +109,8 @@ public class Server {
             );
         }
 
-        private boolean handleReconnection(Message request) throws IOException {
+        //TODO: timeout problem
+/*        private boolean handleReconnection(Message request) throws IOException {
             if (currentSession != null) {
                 sendInvalidRequest();
                 return false;
@@ -121,7 +126,7 @@ public class Server {
                 sendError(e.toString());
             }
             return true;
-        }
+        }*/
 
         private void createNewSession() throws IOException {
             currentSession = new UserSession();
@@ -151,40 +156,66 @@ public class Server {
         }
 
         private void sendGameList() throws IOException {
-            //TODO: replace with actual list
-            ArrayList<GameListing> dummyList = new ArrayList<>();
-            dummyList.add(new GameListing(
-                    "asdf1",
-                    "A game",
-                    "Mr John",
-                    4,
-                    false
-            ));
-            dummyList.add(new GameListing(
-                    "oijad933da",
-                    "Another game",
-                    "Mr Fred",
-                    4,
-                    false
-            ));
-            dummyList.add(new GameListing(
-                    "98432ihdsa",
-                    "Games are fun",
-                    "Mr Janice",
-                    4,
-                    false
-            ));
-            dummyList.add(new GameListing(
-                    "+sa0dsapojdsa",
-                    "Bobbycock",
-                    "Mr Cock",
-                    4,
-                    false
-            ));
+            List<GameListing> list;
+
+            try {
+                list = Game.getGameList();
+            } catch (UserSessionError | GameException e) {
+                out.writeObject(new ErrorMessage(e.toString()));
+                return;
+            }
 
             out.writeObject(
-                    new GameListResponse(dummyList)
+                    new GameListResponse(list)
             );
+        }
+
+        private void createNewGame(NewGameMessage request) throws IOException {
+            LOGGER.info("Creating new game");
+            Game game;
+            try {
+                game = new Game(
+                        currentSession.getID(),
+                        request.getTitle(),
+                        request.getPassword()
+                );
+                LOGGER.info("Game created: " + game.getID().toString());
+            } catch (UserSessionError | GameException e) {
+                out.writeObject(new ErrorMessage(e.toString()));
+                return;
+            }
+            runGameMode();
+        }
+
+        private void joinExistingGame(JoinGameRequest request) throws IOException {
+            Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
+            try {
+                game.joinGame(currentSession, request.getPassword());
+
+            } catch (GameException e) {
+                out.writeObject(new ErrorMessage(e.getMessage()));
+                return;
+            } catch (WrongPassword ignored) {
+                out.writeObject(new PasswordError());
+                return;
+            }
+
+            runGameMode();
+        }
+
+        /**
+         * Runs a separate game loop, thus entering a new mode of responding
+         * to client messages
+         */
+        private void runGameMode() throws IOException {
+            LOGGER.info("Entered game mode");
+            try {
+                out.writeObject(new GameStateResponse(
+                        currentSession.getGame(), currentSession
+                ));
+            } catch (UserSessionError userSessionError) {
+                out.writeObject(new ErrorMessage(userSessionError.toString()));
+            }
         }
 
         public void run() {
@@ -211,7 +242,7 @@ public class Server {
                         break;
                     }
 
-                    LOGGER.info("past first try-catch");
+                    LOGGER.fine("past first try-catch");
 
                     if (currentSession == null
                             && request.getMessageType() != CONNECT
@@ -223,13 +254,15 @@ public class Server {
                     } else {
                         switch (request.getMessageType()) {
                             case CONNECT -> createNewSession();
-                            case RECONNECT -> {
+/*                            case RECONNECT -> { //TODO: timeout problem
                                 if (!handleReconnection(request))
                                     break runLoop;
-                            }
+                            }*/
                             case HEARTBEAT -> sendHeartbeatResponse();
                             case UPDATE_NICK -> updateNick((UpdateNickMessage) request);
                             case GET_GAME_LIST -> sendGameList();
+                            case NEW_GAME -> createNewGame((NewGameMessage) request);
+                            case JOIN_GAME -> joinExistingGame((JoinGameRequest) request);
                             case DISCONNECT -> {
                                 if (currentSession != null) {
                                     currentSession.endSession();

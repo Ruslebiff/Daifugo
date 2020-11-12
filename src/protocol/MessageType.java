@@ -2,6 +2,7 @@ package protocol;
 
 public enum MessageType {
     ERROR,
+    PASSWORD_ERROR,
     OK,
     CONNECT,
     IDENTITY_RESPONSE,
@@ -13,6 +14,7 @@ public enum MessageType {
     GAME_LIST_RESPONSE,
     NEW_GAME,
     JOIN_GAME,
+    JOIN_GAME_RESPONSE,
     GAME_STATE,
     START_GAME,
     PLAY_CARDS,

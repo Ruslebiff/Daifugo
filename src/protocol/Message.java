@@ -16,10 +16,13 @@ public class Message implements Serializable {
     }
 
     public boolean isError() {
-       return msgType == MessageType.ERROR;
+       return msgType == MessageType.ERROR || msgType == MessageType.PASSWORD_ERROR;
     }
 
     public String getErrorMessage() {
         return errorMessage;
     }
 }
+
+
+// TODO: refactor all uses of message constructors into separate classes

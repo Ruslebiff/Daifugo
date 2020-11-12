@@ -93,7 +93,6 @@ class ServerTest {
         assertFalse(response.isError());
 
         IdentityResponse identityResponse = (IdentityResponse) response;
-        String oldNick = identityResponse.getNick();
         String newNick = "John";
 
         response = conn.sendMessage(
@@ -110,28 +109,109 @@ class ServerTest {
     }
 
     @Test
-    public void testingDummyGameList() throws IOException, ClassNotFoundException {
+    public void creatingNewGameReturnsGameState() throws IOException, ClassNotFoundException {
         ClientConnection conn = new ClientConnection("localhost");
         Message response = conn.sendMessage(new Message(MessageType.CONNECT));
-        assertFalse(response.isError(), "Connecting should not result in error");
+        assertFalse(response.isError());
 
-        response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
-        assertFalse(response.isError(), "Getting game list should not return error");
+        response = conn.sendMessage(new NewGameMessage(
+                "A game title",
+                "secret"
+        ));
+        assertFalse(response.isError(), response.getErrorMessage());
+
+        assertEquals(MessageType.GAME_STATE, response.getMessageType());
+
+
+    }
+
+    @Test
+    public void retrievingGameListReturnsCorrectly() throws IOException, ClassNotFoundException {
+        ClientConnection conn1 = new ClientConnection("localhost");
+        Message response = conn1.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+        ClientConnection conn2 = new ClientConnection("localhost");
+        response = conn2.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+        ClientConnection conn3 = new ClientConnection("localhost");
+        response = conn3.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+
+        response = conn1.sendMessage(new NewGameMessage("first game", ""));
+        assertFalse(response.isError(), response.getErrorMessage());
+
+        response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError());
+        GameListResponse listResponse = (GameListResponse) response;
+        assertEquals( 1, listResponse.getGameList().size());
+        assertEquals("first game",
+                listResponse.getGameList().get(0).getTitle()
+        );
+
+        response = conn2.sendMessage(new NewGameMessage("second game", "secret"));
+        assertFalse(response.isError());
+
+        response = conn3.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError());
+        listResponse = (GameListResponse) response;
+        List<GameListing> gameList = listResponse.getGameList();
+        assertEquals( 2, gameList.size());
+        assertEquals("second game", gameList.get(1).getTitle());
+        assertTrue(gameList.get(1).hasPassword());
+        assertFalse(gameList.get(0).hasStarted());
+
+    }
+
+    @Test
+    public void joinGameReturnsGameState() throws IOException, ClassNotFoundException {
+        Message response;
+
+        ClientConnection host = new ClientConnection("localhost");
+        host.sendMessage(MessageType.CONNECT);
+        response = host.sendMessage(new NewGameMessage("title", "1234"));
+        assertFalse(response.isError(), response.getErrorMessage());
+
+        ClientConnection conn = new ClientConnection("localhost");
+        conn.sendMessage(MessageType.CONNECT);
+        response = conn.sendMessage(MessageType.GET_GAME_LIST);
+        assertFalse(response.isError());
+        GameListResponse listResponse = (GameListResponse) response;
+        List<GameListing> list = listResponse.getGameList();
+        response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), "1234"));
+        assertFalse(response.isError());
+        assertEquals(MessageType.GAME_STATE, response.getMessageType());
+    }
+
+    @Test
+    public void supplyingWrongPasswordResultsInPasswordError() throws IOException, ClassNotFoundException {
+        Message response;
+
+        ClientConnection host = new ClientConnection("localhost");
+        host.sendMessage(MessageType.CONNECT);
+
+        ClientConnection client = new ClientConnection("localhost");
+        client.sendMessage(MessageType.CONNECT);
+
+        response = host.sendMessage(
+                new NewGameMessage("title", "1234")
+        );
+        assertFalse(response.isError());
+
+        response = client.sendMessage(MessageType.GET_GAME_LIST);
+        assertFalse(response.isError());
 
         GameListResponse listResponse = (GameListResponse) response;
+        String gameID = listResponse.getGameList().get(0).getID();
 
-        List<GameListing> gameList = listResponse.getGameList();
-        for (GameListing listing : gameList) {
-            System.out.printf(
-                    "%s, %s, %s, %d, %b\n",
-                    listing.getID(),
-                    listing.getTitle(),
-                    listing.getOwner(),
-                    listing.getNumberOfPlayers(),
-                    listing.hasPassword()
-            );
-        }
+        response = client.sendMessage(
+                new JoinGameRequest(gameID, "wrong password")
+        );
 
+        assertTrue(response.isError());
+        assertEquals(MessageType.PASSWORD_ERROR, response.getMessageType());
     }
 
     // TODO: find out why this results in timeouts

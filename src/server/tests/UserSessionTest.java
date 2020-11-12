@@ -37,7 +37,7 @@ class UserSessionTest {
         String token = UUID.randomUUID().toString();
         assertThrows(
                 UserSessionError.class,
-                () -> UserSession.retrieveSessionFromToken(token)
+                () -> UserSession.retrieveSessionFromID(UUID.fromString(token))
         );
     }
 

@@ -8,19 +8,22 @@ public class GameListing implements Serializable {
     private final String owner;
     private final int numberOfPlayers;
     private final boolean passwordProtected;
+    private final boolean inProgress;
 
 
     public GameListing(
             String id,
-            String title, String owner,
+            String title,
+            String owner,
             int numberOfPlayers,
-            boolean passwordProtected
-    ) {
+            boolean passwordProtected,
+            boolean hasStarted) {
         ID = id;
         this.title = title;
         this.owner = owner;
         this.numberOfPlayers = numberOfPlayers;
         this.passwordProtected = passwordProtected;
+        this.inProgress = hasStarted;
     }
 
     public String getID() {
@@ -33,6 +36,10 @@ public class GameListing implements Serializable {
 
     public String getTitle() {
         return title;
+    }
+
+    public boolean hasStarted() {
+        return inProgress;
     }
 
     public int getNumberOfPlayers() {
