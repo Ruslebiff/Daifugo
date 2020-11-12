@@ -241,6 +241,7 @@ public class Server {
                             case UPDATE_NICK -> updateNick((UpdateNickMessage) request);
                             case GET_GAME_LIST -> sendGameList();
                             case NEW_GAME -> createNewGame((NewGameMessage) request);
+                            case JOIN_GAME -> joinExistingGame((JoinGameRequest) request);
                             case DISCONNECT -> {
                                 if (currentSession != null) {
                                     currentSession.endSession();

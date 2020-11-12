@@ -10,7 +10,7 @@ import server.exceptions.UserSessionError;
 import java.util.*;
 
 public class Game {
-    private static final Map<UUID, Game> games = new HashMap<>();
+    private static final Map<UUID, Game> games = new LinkedHashMap<>();
 
     public static List<GameListing> getGameList() throws UserSessionError {
         List<GameListing> list = new ArrayList<>();
@@ -23,7 +23,8 @@ public class Game {
                             game.title,
                             game.getOwnerNick(),
                             game.players.size(),
-                            !game.password.equals("")
+                            !game.password.equals(""),
+                            game.started
                     )
             );
         }
@@ -37,8 +38,8 @@ public class Game {
 
     private final UUID ID;
     private final UUID owner;
-    private String title;
-    private String password;
+    private final String title;
+    private final String password;
     private final Map<UUID, UserSession> players;
     private int currentPlayer;
     private boolean started;
@@ -68,6 +69,10 @@ public class Game {
 
     public String getTitle() {
         return title;
+    }
+
+    public boolean hasStarted() {
+        return started;
     }
 
     public String getOwnerNick() throws UserSessionError {

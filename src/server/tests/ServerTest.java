@@ -158,7 +158,11 @@ class ServerTest {
         response = conn3.sendMessage(new Message(MessageType.GET_GAME_LIST));
         assertFalse(response.isError());
         listResponse = (GameListResponse) response;
-        assertEquals( 2, listResponse.getGameList().size());
+        List<GameListing> gameList = listResponse.getGameList();
+        assertEquals( 2, gameList.size());
+        assertEquals("second game", gameList.get(1).getTitle());
+        assertTrue(gameList.get(1).hasPassword());
+        assertFalse(gameList.get(0).hasStarted());
 
     }
 
