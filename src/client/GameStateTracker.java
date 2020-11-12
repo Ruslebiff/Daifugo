@@ -1,14 +1,17 @@
 package client;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 
 public interface GameStateTracker {
     String getActivePlayerID(); // returns nick or unique identifier of current player
     ArrayList<Card> dealPlayerHand(String token);   // Returns an arraylist to the player with the respective token
+
     Boolean checkIfPlayable();
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
     void relinquishTurn();
+    void playCards(ArrayList<Card> playedCards);
 
     /**
      * Function populates the deck of cards 'cardList' and shuffles it
@@ -24,5 +27,4 @@ public interface GameStateTracker {
         Collections.shuffle(cardList);          // Shuffle the cards
         return cardList;
     }
-
 }

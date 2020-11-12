@@ -89,7 +89,7 @@ public class Player extends JPanel implements GameStateTracker{
         addCard.setBounds(0,175,buttonWidth,buttonHeight);
         add(addCard);
         addCard.addActionListener( e -> {
-            addCardToDisplay();
+            viewDealtHand();
         });
 
         removeCard = new JButton("Remove");
@@ -145,11 +145,6 @@ public class Player extends JPanel implements GameStateTracker{
             }
         });
 
-    }
-
-
-    public void addCardToDisplay() {
-        viewDealtHand();
     }
 
     public void removeCardFromDisplay() {
@@ -296,6 +291,11 @@ public class Player extends JPanel implements GameStateTracker{
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
     }
 
+    @Override
+    public void playCards(ArrayList<Card> playedCards) {
+
+    }
+
 
     // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
     // TODO: Kjør også giveUpCards() neste runde uavhengig
@@ -329,11 +329,20 @@ public class Player extends JPanel implements GameStateTracker{
     }
 
     /**
-
-     *
-     *
-     * Server sier fra at man skal gi bort kort, hvor mange og hvilken rolle man har (hvor mange kort som skal gis bort)
-     * Til hvem man skal gi det bort til
+     * TODO: Server
+     * *Når en spiller er tom for kort, si i fra til server -> server legger til
+     *  spillerID/uid i en List, sjekker størrelsen på den listen, hvis den
+     *  lista er antallSpillere-1 så er spillet over, og roller deles ut
+     * 	- Må ta rede for at det kan være 3-8 spillere
+     * 	- Dersom det er 3 spillere, bare sett rollene på dem manuelt
+     * 	- Hvis det er flere:
+     * 		* fori-loop
+     * 			if(i == 0): player.assignRole(2)
+     * 			elif(i == 1): player.assignRole(1)
+     * 			elif(i == (antall.size() - 2): player.assignRole(-1)
+     * 			elif(i == (antall.size() - 1): player.assignRole(-2)
+     * 	- Etter at roller deles ut, start et nytt spill
+     * 	- Del ut kort
      *
      */
 

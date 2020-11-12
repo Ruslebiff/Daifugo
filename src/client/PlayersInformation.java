@@ -83,4 +83,9 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
     public void relinquishTurn() {
 
     }
+
+    @Override
+    public void playCards(ArrayList<Card> playedCards) {
+
+    }
 }

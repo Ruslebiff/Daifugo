@@ -52,6 +52,13 @@ public class Table extends JPanel implements GameStateTracker {
         PlayersInformation playersInformation = new PlayersInformation(players);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
+
+
+        int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
+        CardsOnTable cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight);
+        cardsOnTable.setBounds((TABLE_WIDTH/2) - (cardsOnTableWidth/2), (TABLE_HEIGHT/3) - (cardsOnTableHeight/2),
+                                cardsOnTableWidth, cardsOnTableHeight);
+        add(cardsOnTable);
     }
 
     @Override
@@ -82,6 +89,11 @@ public class Table extends JPanel implements GameStateTracker {
 
     @Override
     public void relinquishTurn() {
+
+    }
+
+    @Override
+    public void playCards(ArrayList<Card> playedCards) {
 
     }
 
