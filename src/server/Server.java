@@ -28,7 +28,7 @@ public class Server {
             );
             System.setProperty(
                     "java.util.logging.SimpleFormatter.format",
-                    "[%1$ta %1$tF %1$tT %1$tZ] %4$s: %5$s %n"
+                    "[%4$s] (%1$ta %1$tF %1$tT %1$tZ) - %3$s:  %5$s %n"
             );
             FILE_HANDLER.setFormatter(new SimpleFormatter());
             CONSOLE_HANDLER.setFormatter(new SimpleFormatter());
