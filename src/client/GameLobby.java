@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 public class GameLobby extends JFrame {
     private String[] columnNames = {
             "ID",
@@ -33,10 +30,18 @@ public class GameLobby extends JFrame {
     private int window_height = 1000;
     private int window_width = 1000;
     private int MAX_PLAYERS = 8;
-    private String playerName = "Player 1";
+    private String playerName;
     private ArrayList<Object> gameList = new ArrayList<>();
+    private ClientConnection conn = null;
 
     public GameLobby() {
+        try {
+            conn = new ClientConnection("localhost");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // TODO: playerName getnick()
         /* Create window */
         setSize(window_width,window_height);
         setLayout(new BorderLayout());
@@ -87,12 +92,13 @@ public class GameLobby extends JFrame {
         settingsPanel.setLayout(new GridBagLayout());
 
 
+        // TODO: newNickNameLabel is placed on top of newNickName text field
         JLabel newNickNameLabel = new JLabel("Nickname: ");
         JTextField newNickName = new JTextField(playerName);
         JButton settingsConfirmButton = new JButton("Confirm");
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0.0;
+        gbc.weightx = 0.1;
         gbc.gridx = 0;
         gbc.gridy = 0;
         settingsPanel.add(newNickNameLabel, gbc);
@@ -192,7 +198,7 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
-
+        // TODO: handle kryss - disconnect message til server
 
 
         JScrollPane sp = new JScrollPane(gamesTable);
@@ -216,27 +222,21 @@ public class GameLobby extends JFrame {
         });
 
         settingsConfirmButton.addActionListener(e -> {
-            ClientConnection conn = null;
             try {
-                conn = new ClientConnection("localhost");
                 Message response = conn.sendMessage(
                         new Message(MessageType.CONNECT)
                 );
                 IdentityResponse identityResponse = (IdentityResponse) response;
-
                 response = conn.sendMessage(
                         new UpdateNickMessage(identityResponse.getToken(), newNickName.getText())
                 );
-
                 if (response.isError()){
                     JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
                     return;
                 }
-
                 IdentityResponse updatedNickResponse = (IdentityResponse) response;
                 playerName = updatedNickResponse.getNick();
                 nickText.setText(playerName);
-
             } catch (IOException | ClassNotFoundException ioException) {
                 ioException.printStackTrace();
             }
@@ -244,7 +244,6 @@ public class GameLobby extends JFrame {
             controlPanel.setVisible(true);
             sp.setVisible(true);
             settingsPanel.setVisible(false);
-
         });
 
         newGameButton.addActionListener(e -> {
@@ -332,9 +331,7 @@ public class GameLobby extends JFrame {
      */
     public void getGamesList(){
         System.out.println("Updating games list ...");
-        ClientConnection conn;
         try {
-            conn = new ClientConnection("localhost");
             conn.sendMessage(new Message(MessageType.CONNECT));
             Message response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
             GameListResponse listResponse = (GameListResponse) response;
@@ -385,7 +382,10 @@ public class GameLobby extends JFrame {
      * @return - True if the entered password is correct for given game id, false if not.
      */
     public boolean verifyPassword(int gameID, char[] enteredPassword){
-        // TODO: verify password at server end, return true if correct password
+        /* TODO: verify password at server end, return true if correct password.
+            This function will be replaced by checking responses from server instead when joining game
+            (in the join button action listener)
+         */
 
         if (enteredPassword.length == 0){   // just for testing
             return false;
@@ -400,7 +400,7 @@ public class GameLobby extends JFrame {
      * @return - returns true if the game is password protected. False if not.
      */
     public boolean gameIsPrivate(int gameID){
-        // TODO: check server if the game is protected or not
+        // TODO: Remove. Games now have stored a value for protected or not
         // temp
         if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString() == "Yes") {
             return true;
