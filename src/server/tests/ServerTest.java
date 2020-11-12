@@ -93,7 +93,6 @@ class ServerTest {
         assertFalse(response.isError());
 
         IdentityResponse identityResponse = (IdentityResponse) response;
-        String oldNick = identityResponse.getNick();
         String newNick = "John";
 
         response = conn.sendMessage(
@@ -184,6 +183,35 @@ class ServerTest {
         response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), "1234"));
         assertFalse(response.isError());
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
+    }
+
+    @Test
+    public void supplyingWrongPasswordResultsInPasswordError() throws IOException, ClassNotFoundException {
+        Message response;
+
+        ClientConnection host = new ClientConnection("localhost");
+        host.sendMessage(MessageType.CONNECT);
+
+        ClientConnection client = new ClientConnection("localhost");
+        client.sendMessage(MessageType.CONNECT);
+
+        response = host.sendMessage(
+                new NewGameMessage("title", "1234")
+        );
+        assertFalse(response.isError());
+
+        response = client.sendMessage(MessageType.GET_GAME_LIST);
+        assertFalse(response.isError());
+
+        GameListResponse listResponse = (GameListResponse) response;
+        String gameID = listResponse.getGameList().get(0).getID();
+
+        response = client.sendMessage(
+                new JoinGameRequest(gameID, "wrong password")
+        );
+
+        assertTrue(response.isError());
+        assertEquals(MessageType.PASSWORD_ERROR, response.getMessageType());
     }
 
     // TODO: find out why this results in timeouts

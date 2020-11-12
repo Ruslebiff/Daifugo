@@ -3,10 +3,8 @@ package server;
 import common.CardData;
 import common.GameListing;
 import common.PlayerData;
-import server.exceptions.GameException;
-import server.exceptions.GameInProgress;
-import server.exceptions.PlayerAlreadyInGame;
-import server.exceptions.UserSessionError;
+import protocol.PasswordError;
+import server.exceptions.*;
 
 import java.util.*;
 
@@ -71,7 +69,11 @@ public class Game {
 
         games.put(ID, this);
         UserSession ownerSession = UserSession.retrieveSessionFromID(owner);
-        joinGame(ownerSession);
+        try {
+            joinGame(ownerSession, password);
+        } catch (WrongPassword wrongPassword) {
+            wrongPassword.printStackTrace();
+        }
     }
 
     public UUID getID() {
@@ -90,12 +92,17 @@ public class Game {
         return UserSession.retrieveSessionFromID(owner).getNick();
     }
 
-    public void joinGame(UserSession user) throws GameException {
+    public void joinGame(
+            UserSession user,
+            String password
+    ) throws GameException, WrongPassword {
         if (started)
             throw new GameInProgress();
 
         if (players.containsKey(user.getID()))
             throw new PlayerAlreadyInGame();
+
+        if (!password.equals(this.password)) throw new WrongPassword();
 
         PlayerData data = new PlayerData(
                 user.getNick(),

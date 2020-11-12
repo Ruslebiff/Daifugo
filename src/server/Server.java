@@ -4,11 +4,11 @@ import common.GameListing;
 import protocol.*;
 import server.exceptions.GameException;
 import server.exceptions.UserSessionError;
+import server.exceptions.WrongPassword;
 
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.*;
@@ -190,10 +190,13 @@ public class Server {
         private void joinExistingGame(JoinGameRequest request) throws IOException {
             Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
             try {
-                game.joinGame(currentSession);
+                game.joinGame(currentSession, request.getPassword());
 
             } catch (GameException e) {
                 out.writeObject(new ErrorMessage(e.getMessage()));
+                return;
+            } catch (WrongPassword ignored) {
+                out.writeObject(new PasswordError());
                 return;
             }
 
