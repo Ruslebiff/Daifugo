@@ -101,7 +101,7 @@ public class Game {
         if (players.containsKey(user.getID()))
             throw new PlayerAlreadyInGame();
 
-        if (!password.equals(this.password)) throw new WrongPassword();
+        if (!Arrays.equals(password, this.password)) throw new WrongPassword();
 
         PlayerData data = new PlayerData(
                 user.getNick(),
