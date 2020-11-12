@@ -2,6 +2,8 @@ package protocol;
 
 import java.util.UUID;
 
+// TODO: DEPRECATED -- DELETE
+
 public class JoinGameResponse extends Message {
     private String gameID;
 

@@ -2,6 +2,7 @@ package server;
 
 import common.CardData;
 import common.GameListing;
+import common.PlayerData;
 import server.exceptions.GameException;
 import server.exceptions.GameInProgress;
 import server.exceptions.PlayerAlreadyInGame;
@@ -12,7 +13,10 @@ import java.util.*;
 public class Game {
     private static Map<UUID, Game> games = new LinkedHashMap<>();
 
-    public static List<GameListing> getGameList() throws UserSessionError {
+    public static List<GameListing> getGameList() throws UserSessionError, GameException {
+        if (games.size() == 0)
+            throw new GameException("currently no games");
+
         List<GameListing> list = new ArrayList<>();
 
         for (UUID id : games.keySet()) {
@@ -37,7 +41,7 @@ public class Game {
     }
 
     /**
-     * Internal reset of state for testing
+     * Internal reset of static state for testing
      */
     public static void _reset() {
         games = new LinkedHashMap<>();
@@ -47,7 +51,7 @@ public class Game {
     private final UUID owner;
     private final String title;
     private final String password;
-    private final Map<UUID, UserSession> players;
+    private final Map<UUID, PlayerObject> players;
     private int currentPlayer;
     private boolean started;
     private final Map<UUID, List<CardData>> hands;
@@ -62,12 +66,12 @@ public class Game {
         this.title = title;
         this.password = password;
         players = new HashMap<>();
-        UserSession ownerSession = UserSession.retrieveSessionFromID(owner);
-        joinGame(ownerSession);
         hands = new HashMap<>();
         started = false;
 
         games.put(ID, this);
+        UserSession ownerSession = UserSession.retrieveSessionFromID(owner);
+        joinGame(ownerSession);
     }
 
     public UUID getID() {
@@ -93,10 +97,25 @@ public class Game {
         if (players.containsKey(user.getID()))
             throw new PlayerAlreadyInGame();
 
-        players.put(user.getID(), user);
+        PlayerData data = new PlayerData(
+                user.getNick(),
+                0,
+                false,
+                0,
+                0
+        );
+
+        players.put(user.getID(), new PlayerObject(user, data));
         user.joinGame(ID);
     }
 
+    public int getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public List<CardData> getPlayerHand(UUID playerID) {
+        return hands.get(playerID);
+    }
 
     // TODO: game start
     // TODO: game rounds

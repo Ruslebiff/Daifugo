@@ -110,7 +110,7 @@ class ServerTest {
     }
 
     @Test
-    public void creatingNewGameReturnsJoinGameResponse() throws IOException, ClassNotFoundException {
+    public void creatingNewGameReturnsGameState() throws IOException, ClassNotFoundException {
         ClientConnection conn = new ClientConnection("localhost");
         Message response = conn.sendMessage(new Message(MessageType.CONNECT));
         assertFalse(response.isError());
@@ -119,9 +119,9 @@ class ServerTest {
                 "A game title",
                 "secret"
         ));
-        assertFalse(response.isError(), "New game should not return error");
+        assertFalse(response.isError(), response.getErrorMessage());
 
-        assertEquals(MessageType.JOIN_GAME_RESPONSE, response.getMessageType());
+        assertEquals(MessageType.GAME_STATE, response.getMessageType());
 
 
     }
@@ -142,7 +142,7 @@ class ServerTest {
 
 
         response = conn1.sendMessage(new NewGameMessage("first game", ""));
-        assertFalse(response.isError());
+        assertFalse(response.isError(), response.getErrorMessage());
 
         response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
         assertFalse(response.isError());
@@ -173,7 +173,7 @@ class ServerTest {
         ClientConnection host = new ClientConnection("localhost");
         host.sendMessage(MessageType.CONNECT);
         response = host.sendMessage(new NewGameMessage("title", "1234"));
-        assertFalse(response.isError());
+        assertFalse(response.isError(), response.getErrorMessage());
 
         ClientConnection conn = new ClientConnection("localhost");
         conn.sendMessage(MessageType.CONNECT);

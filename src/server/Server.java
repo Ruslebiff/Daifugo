@@ -10,6 +10,7 @@ import java.net.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.*;
 
 import static protocol.MessageType.*;
@@ -159,7 +160,7 @@ public class Server {
 
             try {
                 list = Game.getGameList();
-            } catch (UserSessionError e) {
+            } catch (UserSessionError | GameException e) {
                 out.writeObject(new ErrorMessage(e.toString()));
                 return;
             }
@@ -178,24 +179,40 @@ public class Server {
                         request.getTitle(),
                         request.getPassword()
                 );
+                LOGGER.info("Game created: " + game.getID().toString());
             } catch (UserSessionError | GameException e) {
                 out.writeObject(new ErrorMessage(e.toString()));
                 return;
             }
-            out.writeObject(new JoinGameResponse(game.getID().toString()));
             runGameMode();
         }
 
         private void joinExistingGame(JoinGameRequest request) throws IOException {
-            out.writeObject(new ErrorMessage("not implemented"));
+            Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
+            try {
+                game.joinGame(currentSession);
+
+            } catch (GameException e) {
+                out.writeObject(new ErrorMessage(e.getMessage()));
+                return;
+            }
+
+            runGameMode();
         }
 
         /**
          * Runs a separate game loop, thus entering a new mode of responding
          * to client messages
          */
-        private void runGameMode() {
+        private void runGameMode() throws IOException {
             LOGGER.info("Entered game mode");
+            try {
+                out.writeObject(new GameStateResponse(
+                        currentSession.getGame(), currentSession
+                ));
+            } catch (UserSessionError userSessionError) {
+                out.writeObject(new ErrorMessage(userSessionError.toString()));
+            }
         }
 
         public void run() {

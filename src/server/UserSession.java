@@ -1,8 +1,10 @@
 package server;
 
+import server.exceptions.GameException;
 import server.exceptions.UserSessionError;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.*;
 
 public class UserSession implements Serializable {
@@ -86,8 +88,11 @@ public class UserSession implements Serializable {
     }
 
 
-    public void joinGame(UUID gameID) {
-        currentGame = Game.getGameByID(gameID);
+    public void joinGame(UUID gameID) throws GameException {
+        Game game = Game.getGameByID(gameID);
+        if (game == null)
+            throw  new GameException("No game by ID: " + gameID.toString());
+        currentGame = game;
     }
 
     public Game getGame() {
