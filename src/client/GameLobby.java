@@ -2,9 +2,7 @@ package client;
 
 import client.networking.ClientConnection;
 import common.GameListing;
-import protocol.GameListResponse;
-import protocol.Message;
-import protocol.MessageType;
+import protocol.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -12,6 +10,9 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class GameLobby extends JFrame {
     private String[] columnNames = {
@@ -215,11 +216,35 @@ public class GameLobby extends JFrame {
         });
 
         settingsConfirmButton.addActionListener(e -> {
-            playerName = newNickName.getText();
+            ClientConnection conn = null;
+            try {
+                conn = new ClientConnection("localhost");
+                Message response = conn.sendMessage(
+                        new Message(MessageType.CONNECT)
+                );
+                IdentityResponse identityResponse = (IdentityResponse) response;
+
+                response = conn.sendMessage(
+                        new UpdateNickMessage(identityResponse.getToken(), newNickName.getText())
+                );
+
+                if (response.isError()){
+                    JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
+                    return;
+                }
+
+                IdentityResponse updatedNickResponse = (IdentityResponse) response;
+                playerName = updatedNickResponse.getNick();
+                nickText.setText(playerName);
+
+            } catch (IOException | ClassNotFoundException ioException) {
+                ioException.printStackTrace();
+            }
+
             controlPanel.setVisible(true);
             sp.setVisible(true);
             settingsPanel.setVisible(false);
-            nickText.setText(playerName);
+
         });
 
         newGameButton.addActionListener(e -> {
