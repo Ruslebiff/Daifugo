@@ -24,6 +24,10 @@ public class ClientConnection {
         return (Message) in.readObject();
     }
 
+    public Message sendMessage(MessageType type) throws IOException, ClassNotFoundException {
+        return sendMessage(new Message(type));
+    }
+
     public void disconnect() throws IOException, ClassNotFoundException {
         sendMessage(new Message(MessageType.DISCONNECT));
         in.close();

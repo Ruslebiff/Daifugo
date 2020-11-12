@@ -65,6 +65,7 @@ public class Server {
         // ensures that subsequent server restarts during testing
         // doesn't continue counting from last user number
         UserSession._reset();
+        Game._reset();
     }
 
     public static void main(String[] args) throws IOException {
@@ -185,8 +186,8 @@ public class Server {
             runGameMode();
         }
 
-        private void joinExistingGame(JoinGameRequest request) {
-
+        private void joinExistingGame(JoinGameRequest request) throws IOException {
+            out.writeObject(new ErrorMessage("not implemented"));
         }
 
         /**

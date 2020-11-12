@@ -166,6 +166,26 @@ class ServerTest {
 
     }
 
+    @Test
+    public void joinGameReturnsGameState() throws IOException, ClassNotFoundException {
+        Message response;
+
+        ClientConnection host = new ClientConnection("localhost");
+        host.sendMessage(MessageType.CONNECT);
+        response = host.sendMessage(new NewGameMessage("title", "1234"));
+        assertFalse(response.isError());
+
+        ClientConnection conn = new ClientConnection("localhost");
+        conn.sendMessage(MessageType.CONNECT);
+        response = conn.sendMessage(MessageType.GET_GAME_LIST);
+        assertFalse(response.isError());
+        GameListResponse listResponse = (GameListResponse) response;
+        List<GameListing> list = listResponse.getGameList();
+        response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), "1234"));
+        assertFalse(response.isError());
+        assertEquals(MessageType.GAME_STATE, response.getMessageType());
+    }
+
     // TODO: find out why this results in timeouts
 /*
     @Test

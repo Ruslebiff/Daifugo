@@ -10,7 +10,7 @@ import server.exceptions.UserSessionError;
 import java.util.*;
 
 public class Game {
-    private static final Map<UUID, Game> games = new LinkedHashMap<>();
+    private static Map<UUID, Game> games = new LinkedHashMap<>();
 
     public static List<GameListing> getGameList() throws UserSessionError {
         List<GameListing> list = new ArrayList<>();
@@ -34,6 +34,13 @@ public class Game {
 
     public static Game getGameByID(UUID id) {
         return games.get(id);
+    }
+
+    /**
+     * Internal reset of state for testing
+     */
+    public static void _reset() {
+        games = new LinkedHashMap<>();
     }
 
     private final UUID ID;
