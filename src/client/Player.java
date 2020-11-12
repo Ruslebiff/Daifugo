@@ -17,14 +17,14 @@ public class Player extends JPanel implements GameStateTracker{
     private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
     private final int playerID;     // Id
-    private final String role;      // Role, i.e. president, vice president etc.
+    private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private final ArrayList<Card> hand; // The cards dealt to the player
     private final ArrayList<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
     private JButton addCard;
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
-    private final PlayerButton cancelPlay;
-    private final PlayerButton passTurn;
+    private final PlayerButton cancelBtn;
+    private final PlayerButton passTurnBtn;
     private final int cardWidth = 80;
     private final int cardHeight = 120;
     private final int widthOfComponent;
@@ -34,14 +34,18 @@ public class Player extends JPanel implements GameStateTracker{
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
     private boolean myTurn = true;
+    private boolean giveCards; // Is set by server
+    private boolean cardsClickable = false;
 
 
-    public Player(String name, int playerID, String role, ArrayList<Card> cards, int width) {
+    public Player(String name, int playerID, ArrayList<Card> cards, int width) {
         this.name = name;
         this.playerID = playerID;
-        this.role = role;
+        this.role = 2; // Neutral
         this.hand = cards;
         this.widthOfComponent = width;
+        if(role != 0)       // TODO: Server should set this value on new round
+            giveCards = true;
 
         sortHand(); // Sorts the players hand with respect to the card values
         setLayout(null);
@@ -58,21 +62,27 @@ public class Player extends JPanel implements GameStateTracker{
 
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
-        passTurn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0, // TODO: Give up turn
+        passTurnBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0, // Relinquishes turn
                                         buttonWidth, buttonHeight, "Pass Turn");
-        add(passTurn);
-                                // TODO: Check if selected cards are "legal" to play, if yes -> play on table, else put back in hand/display
-        playCardsBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurn.getBounds().x, 0,
+        passTurnBtn.addActionListener(e -> relinquishTurn());
+        add(passTurnBtn);
+
+        playCardsBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurnBtn.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Play Cards");
         playCardsBtn.setEnabled(false);
-        playCardsBtn.addActionListener(e -> playCards());
-        add(playCardsBtn);
 
-        cancelPlay = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCardsBtn.getBounds().x, 0,
+
+        cancelBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCardsBtn.getBounds().x, 0,
                                         buttonWidth, buttonHeight, "Cancel");
-        cancelPlay.addActionListener(e -> cancel());
-        add(cancelPlay);
+        cancelBtn.addActionListener(e -> cancel());
+        add(cancelBtn);
 
+        playCardsBtn.addActionListener(e -> {
+            playCards();
+            cancelBtn.setEnabled(true);
+            passTurnBtn.setEnabled(true);
+        });
+        add(playCardsBtn);
 
         // TODO: REMOVE ADD AND REMOVE BUTTONS
         addCard = new JButton("Add");
@@ -88,44 +98,53 @@ public class Player extends JPanel implements GameStateTracker{
         removeCard.addActionListener(e -> {
             removeCardFromDisplay();
         });
+
+        giveUpCards();  // TODO: FJERN
     }
 
     public void addListener(Card c) {
-        if(myTurn) {
-            c.addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
+
+        c.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
+                if(myTurn && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
+
                     if(c.isSelected())      // If the card is selected, add it to the arrayList
                         cardsToPlay.add(c);
                     else
                         cardsToPlay.remove(c);
-                    playCardsBtn.setEnabled(checkIfPlayable());
+
+                    if(!giveCards)
+                        playCardsBtn.setEnabled(checkIfPlayable() && myTurn);
+                    else // If the round has just started and you have to relinquish cards
+                        giveUpCards();  // Function checks role and cards you have to give based on role
                 }
+            }
 
-                @Override
-                public void mousePressed(MouseEvent e) {
+            @Override
+            public void mousePressed(MouseEvent e) {
 
-                }
+            }
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
+            @Override
+            public void mouseReleased(MouseEvent e) {
 
-                }
+            }
 
-                @Override
-                public void mouseEntered(MouseEvent e) {
+            @Override
+            public void mouseEntered(MouseEvent e) {
 
-                }
+            }
 
-                @Override
-                public void mouseExited(MouseEvent e) {
+            @Override
+            public void mouseExited(MouseEvent e) {
 
-                }
-            });
-        }
+            }
+        });
+
     }
 
 
@@ -153,8 +172,7 @@ public class Player extends JPanel implements GameStateTracker{
     }
 
     public void rearrangeCardsOnDisplay() {
-        hand.forEach(this::remove);
-
+        hand.forEach(this::remove); // Remove all the cards on the GUI to repaint them centered
         // The spacing between cards
         space = space + ((maxCards - hand.size())/2);
 
@@ -165,9 +183,9 @@ public class Player extends JPanel implements GameStateTracker{
         // The x-coordinate of the first card from right to left
         boundsX = round(((float)widthOfComponent/2)  - ((float)cardWidth/2) + (((float)hand.size()-1)/2) * (float)space);
         int i = 0;
-        for (Card card: hand) {
+        for (Card card: hand) {     // For each card, space it more and more to the left
             card.setBounds(boundsX - ((i++)*space), 50, cardWidth, cardHeight);
-            add(card);
+            add(card);  // Add the cards again with the updated coordinates
         }
         repaint();
     }
@@ -181,7 +199,7 @@ public class Player extends JPanel implements GameStateTracker{
         return name;
     }
 
-    public String getRole() {
+    public int getRole() {
         return role;
     }
 
@@ -213,14 +231,21 @@ public class Player extends JPanel implements GameStateTracker{
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         cardsToPlay.forEach(c -> {
-            hand.remove(c);     // Remove them from hand
-            this.remove(c);     // Remove them from GUI
+           hand.remove(c);     // Remove them from hand
+           this.remove(c);     // Remove them from GUI
         });
         if(hand.size() != 0){   // If player has more cards left
-            sortHand();             // Sort hand accordingly
-            rearrangeCardsOnDisplay(); // Display properly
+           sortHand();             // Sort hand accordingly
+           rearrangeCardsOnDisplay(); // Display properly
         } // else Server.endGameForPlayer, assign role accordingly
         cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
+
+        if(giveCards) {
+            playCardsBtn.setText("Play Cards");
+            giveCards = false;
+            cardsClickable = true;
+        }
+        // TODO: return the cards played to the server or to another players hand
     }
 
     @Override
@@ -247,7 +272,7 @@ public class Player extends JPanel implements GameStateTracker{
             // Check if the card on top of the deck is higher or equal to the player's card
             boolean valid = true;
             for (Card c: cardsToPlay)     // Check that all selected cards are playable
-                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lasstThreeCards
+                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lastThreeCards to the servers cards
                     valid = false;  // If a card is not playable, set valid to false
                     break;
                 }
@@ -261,6 +286,55 @@ public class Player extends JPanel implements GameStateTracker{
 
     @Override
     public int getLastPlayedType() {
+        // 1 = single, 2 = double, 3 = triple
         return 2;
     }
+
+    @Override
+    public void relinquishTurn() {
+        // Next turn
+        myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
+    }
+
+
+    // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
+    // TODO: Kjør også giveUpCards() neste runde uavhengig
+    // TODO: Neste runde så må cardsClickable også settes basert på rolle
+    // Whenever the round starts, the server should run each player's giveUpCards()
+    public void giveUpCards() {
+        if(role != 0) {
+            passTurnBtn.setEnabled(false);  // TODO: Når server indikerer at det er "min" tur, pass knapp og cancel knapp true
+            int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished
+            if(role < 0) {
+                cancelBtn.setEnabled(false);
+                // Highest cards to be selected
+                for (int i = 0; i < amountOfCards; i++) {
+                    Card temp = hand.get(i);
+                    if(temp.getValue() != 16) {
+                        temp.setSelected();
+                        cardsToPlay.add(hand.get(i));
+                    } else
+                        amountOfCards++;
+                }
+                playCardsBtn.setEnabled(true);
+            } else {
+                cardsClickable = true;  // If you are not bum/vice bum
+                // Pick cards to give up (role is higher than neutral), if it is not right amount, disable button
+                playCardsBtn.setEnabled(cardsToPlay.size() == amountOfCards);
+            }
+            playCardsBtn.setText("Give Cards");
+            rearrangeCardsOnDisplay();
+        } else
+            cardsClickable = true;
+    }
+
+    /**
+
+     *
+     *
+     * Server sier fra at man skal gi bort kort, hvor mange og hvilken rolle man har (hvor mange kort som skal gis bort)
+     * Til hvem man skal gi det bort til
+     *
+     */
+
 }

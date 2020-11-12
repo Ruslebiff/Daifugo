@@ -8,6 +8,7 @@ public interface GameStateTracker {
     ArrayList<Card> dealPlayerHand(String token);   // Returns an arraylist to the player with the respective token
     Boolean checkIfPlayable();
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
+    void relinquishTurn();
 
     /**
      * Function populates the deck of cards 'cardList' and shuffles it

@@ -35,16 +35,16 @@ public class Table extends JPanel implements GameStateTracker {
         /**
          * REMOVE LATER
          */
-        ArrayList<Card> p1 = new ArrayList<>();;
+        ArrayList<Card> p1_cards = new ArrayList<>();;
         for (int i = 0; i < cards.size()/3; i++) {
-            p1.add(cards.get(i));
+            p1_cards.add(cards.get(i));
         }
 
         /**
          * REMOVE LATER
          */
         Player[] players = new Player[1];
-        players[0] = new Player("Mohammed Lee", 0, "President", p1, TABLE_WIDTH/2);
+        players[0] = new Player("Mohammed Lee", 0, p1_cards, TABLE_WIDTH/2);
         players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,(TABLE_HEIGHT/2) + 100,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 100);
         add(players[0]);
 
@@ -78,6 +78,11 @@ public class Table extends JPanel implements GameStateTracker {
     @Override
     public int getLastPlayedType() {
         return 0;
+    }
+
+    @Override
+    public void relinquishTurn() {
+
     }
 
 }
