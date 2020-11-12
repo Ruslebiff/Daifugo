@@ -324,7 +324,7 @@ public class GameLobby extends JFrame {
                         listing.getNumberOfPlayers(),
                         listing.hasPassword()
                 );
-                Object[] game = {listing.getID(),listing.getTitle(),listing.getOwner(),listing.getNumberOfPlayers(),listing.hasPassword()};
+                Object[] game = {listing.getID(),listing.getTitle(),listing.getOwner(),listing.getNumberOfPlayers(),listing.hasPassword()}; // TODO: get hasStarted() from server as well
                 gameList.add(game);
 
                 String p = "No";
