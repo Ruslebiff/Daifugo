@@ -3,7 +3,6 @@ package server;
 import common.CardData;
 import common.GameListing;
 import common.PlayerData;
-import protocol.PasswordError;
 import server.exceptions.*;
 
 import java.util.*;
@@ -48,7 +47,7 @@ public class Game {
     private final UUID ID;
     private final UUID owner;
     private final String title;
-    private final String password;
+    private final char[] password;
     private final Map<UUID, PlayerObject> players;
     private int currentPlayer;
     private boolean started;
@@ -57,7 +56,7 @@ public class Game {
     public Game(
             UUID owner,
             String title,
-            String password
+            char[] password
     ) throws UserSessionError, GameException {
         ID = UUID.randomUUID();
         this.owner = owner;
@@ -94,7 +93,7 @@ public class Game {
 
     public void joinGame(
             UserSession user,
-            String password
+            char[] password
     ) throws GameException, WrongPassword {
         if (started)
             throw new GameInProgress();

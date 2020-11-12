@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 public class GameLobby extends JFrame {
     private String[] columnNames = {
             "ID",
@@ -65,7 +67,16 @@ public class GameLobby extends JFrame {
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                // TODO: send disconnect message to server
+                // TODO: does disconnect message work?
+                try {
+                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+                    if (response.isError()){
+                        System.out.println(response.getErrorMessage());
+                    }
+
+                } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -232,8 +243,7 @@ public class GameLobby extends JFrame {
         });
 
         newGameConfirmButton.addActionListener(e -> {
-            Object[] newGameData = {"9", newGameName.getText(), playerName, 0, newGamePrivateCheckbox.isSelected(), "Join"};
-            createNewGame(newGameData);
+            createNewGame(newGameName.getText(), newGamePassword.getPassword());
             controlPanel.setVisible(true);
             sp.setVisible(true);
             newGamePanel.setVisible(false);
@@ -350,8 +360,13 @@ public class GameLobby extends JFrame {
     public void getGamesList(){
         System.out.println("Updating games list ...");
         try {
-            conn.sendMessage(new Message(MessageType.CONNECT));
-            Message response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
+            Message response = null;
+            response = conn.sendMessage(new Message(MessageType.CONNECT));
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return;
+            }
+            response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
             if (response.isError()){
                 System.out.println(response.getErrorMessage());
                 return;
@@ -386,14 +401,32 @@ public class GameLobby extends JFrame {
 
     /**
      * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when refreshed.
-     * @param newGameData - Data for the new game that is being created.
+     * @param gameName
+     * @param gamePassword
      */
-    public void createNewGame(Object[] newGameData) {
-        System.out.println("Creating new game ...");
-
+    public void createNewGame(String gameName, char[] gamePassword) {
         // TODO: create new game on server
+        try {
+            Message response = null;
+            response = conn.sendMessage(new Message(MessageType.CONNECT));
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return;
+            }
+            response = conn.sendMessage(new NewGameMessage(
+                    gameName,
+                    gamePassword
+            ));
 
-        tableModel.addRow(newGameData); // should be added to server, not directly in table. This will make it crash until that is done.
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return;
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         refreshGamesList(); // refresh table
     }
 

@@ -2,9 +2,9 @@ package protocol;
 
 public class JoinGameRequest extends Message {
     private final String gameID;
-    private final String password;
+    private final char[] password;
 
-    public JoinGameRequest(String gameID, String password) {
+    public JoinGameRequest(String gameID, char[] password) {
         super(MessageType.JOIN_GAME);
         this.gameID = gameID;
         this.password = password;
@@ -14,7 +14,7 @@ public class JoinGameRequest extends Message {
         return gameID;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 }
