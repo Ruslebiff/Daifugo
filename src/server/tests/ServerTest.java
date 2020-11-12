@@ -110,27 +110,55 @@ class ServerTest {
     }
 
     @Test
-    public void testingDummyGameList() throws IOException, ClassNotFoundException {
+    public void creatingNewGameReturnsJoinGameResponse() throws IOException, ClassNotFoundException {
         ClientConnection conn = new ClientConnection("localhost");
         Message response = conn.sendMessage(new Message(MessageType.CONNECT));
-        assertFalse(response.isError(), "Connecting should not result in error");
+        assertFalse(response.isError());
 
-        response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
-        assertFalse(response.isError(), "Getting game list should not return error");
+        response = conn.sendMessage(new NewGameMessage(
+                "A game title",
+                "secret"
+        ));
+        assertFalse(response.isError(), "New game should not return error");
 
+        assertEquals(MessageType.JOIN_GAME_RESPONSE, response.getMessageType());
+
+
+    }
+
+    @Test
+    public void retrievingGameListReturnsCorrectly() throws IOException, ClassNotFoundException {
+        ClientConnection conn1 = new ClientConnection("localhost");
+        Message response = conn1.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+        ClientConnection conn2 = new ClientConnection("localhost");
+        response = conn2.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+        ClientConnection conn3 = new ClientConnection("localhost");
+        response = conn3.sendMessage(new Message(MessageType.CONNECT));
+        assertFalse(response.isError());
+
+
+        response = conn1.sendMessage(new NewGameMessage("first game", ""));
+        assertFalse(response.isError());
+
+        response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError());
         GameListResponse listResponse = (GameListResponse) response;
+        assertEquals( 1, listResponse.getGameList().size());
+        assertEquals("first game",
+                listResponse.getGameList().get(0).getTitle()
+        );
 
-        List<GameListing> gameList = listResponse.getGameList();
-        for (GameListing listing : gameList) {
-            System.out.printf(
-                    "%s, %s, %s, %d, %b\n",
-                    listing.getID(),
-                    listing.getTitle(),
-                    listing.getOwner(),
-                    listing.getNumberOfPlayers(),
-                    listing.hasPassword()
-            );
-        }
+        response = conn2.sendMessage(new NewGameMessage("second game", "secret"));
+        assertFalse(response.isError());
+
+        response = conn3.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError());
+        listResponse = (GameListResponse) response;
+        assertEquals( 2, listResponse.getGameList().size());
 
     }
 

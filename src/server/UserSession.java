@@ -12,9 +12,11 @@ public class UserSession implements Serializable {
 
     private final UUID token;
     private String nick;
+    private Game currentGame;
 
     public UserSession() {
         token = UUID.randomUUID();
+        currentGame = null;
 
         synchronized (UserSession.class) {
             sessions.put(token, this);
@@ -34,10 +36,9 @@ public class UserSession implements Serializable {
         }
     }
 
-    public static UserSession retrieveSessionFromToken(
-            String token
+    public static UserSession retrieveSessionFromID(
+            UUID id
     ) throws UserSessionError {
-        UUID id = UUID.fromString(token);
 
         synchronized (UserSession.class) {
             if (!sessions.containsKey(id))
@@ -49,8 +50,16 @@ public class UserSession implements Serializable {
         }
     }
 
+    public static UserSession retrieveSessionFromToken(String token) throws UserSessionError {
+        return UserSession.retrieveSessionFromID(UUID.fromString(token));
+    }
+
     public String getToken() {
         return token.toString();
+    }
+
+    public UUID getID() {
+        return token;
     }
 
     public String getNick() {
@@ -78,12 +87,11 @@ public class UserSession implements Serializable {
 
 
     public void joinGame(UUID gameID) {
-        // TODO
+        currentGame = Game.getGameByID(gameID);
     }
 
-    public UUID getGameID() {
-        //TODO
-        return UUID.randomUUID();
+    public Game getGame() {
+        return currentGame;
     }
 
     public void leaveCurrentGame() {

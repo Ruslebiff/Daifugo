@@ -12,7 +12,8 @@ public class GameListing implements Serializable {
 
     public GameListing(
             String id,
-            String title, String owner,
+            String title,
+            String owner,
             int numberOfPlayers,
             boolean passwordProtected
     ) {

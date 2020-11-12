@@ -13,6 +13,7 @@ public enum MessageType {
     GAME_LIST_RESPONSE,
     NEW_GAME,
     JOIN_GAME,
+    JOIN_GAME_RESPONSE,
     GAME_STATE,
     START_GAME,
     PLAY_CARDS,
