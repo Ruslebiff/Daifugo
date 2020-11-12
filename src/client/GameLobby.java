@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameLobby extends JFrame {
-    private String[] columnNames = {
+    private final String[] columnNames = {
             "ID",
             "Game name",
             "Owner",
@@ -19,18 +19,18 @@ public class GameLobby extends JFrame {
             "Private",
             ""
     };
-    private DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+    private final DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
             return column == 5; // only last column, needed for button to work
         }
     };
-    private JTable gamesTable = new JTable(tableModel);
+    private final JTable gamesTable = new JTable(tableModel);
     private int window_height = 1000;
     private int window_width = 1000;
     private int MAX_PLAYERS = 8;
     private String playerName;
-    private List<GameListing> gameList = new ArrayList<>();
+    private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
 
     public GameLobby() {
@@ -141,7 +141,6 @@ public class GameLobby extends JFrame {
         gbc.gridy = 1;
         settingsPanel.add(settingsConfirmButton, gbc);
 
-        /** Normal view: */
         /* Control bar */
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
@@ -214,8 +213,8 @@ public class GameLobby extends JFrame {
         gamesTable.getColumn("").setCellEditor(new ButtonEditor(joinGameButton, new JCheckBox()));
 
         /* Resize columns in table */
-        gamesTable.getColumnModel().getColumn(0).setMaxWidth(15);
-        gamesTable.getColumnModel().getColumn(0).setMinWidth(15);
+        gamesTable.getColumnModel().getColumn(0).setMaxWidth(25);
+        gamesTable.getColumnModel().getColumn(0).setMinWidth(25);
         gamesTable.getColumnModel().getColumn(1).setPreferredWidth(300);
         gamesTable.getColumnModel().getColumn(1).setMinWidth(100);
         gamesTable.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -231,11 +230,7 @@ public class GameLobby extends JFrame {
 
         /* Button action listeners*/
         newGamePrivateCheckbox.addActionListener(e -> {
-            if (newGamePrivateCheckbox.isSelected()){
-                newGamePassword.setEnabled(true);
-            } else {
-                newGamePassword.setEnabled(false);
-            }
+            newGamePassword.setEnabled(newGamePrivateCheckbox.isSelected());
 
         });
 
@@ -293,8 +288,8 @@ public class GameLobby extends JFrame {
             int gameNumber = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
             int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
-            if (playerCount < 8){   // TODO: Actually join the game
-                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString() == "Yes") { // game is private // TODO: can we use the hasPassword() instead?
+            if (playerCount < 8){
+                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private // TODO: can we use the hasPassword() instead?
                     // show window for entering password
                     JFrame pwFrame = new JFrame("Join game");
                     pwFrame.setLayout(null);
@@ -330,7 +325,6 @@ public class GameLobby extends JFrame {
                                     JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
                                 }
                                 System.out.println(response.getErrorMessage());
-                                return;
                             }
 
                         } catch (IOException | ClassNotFoundException ioException) {
@@ -384,7 +378,7 @@ public class GameLobby extends JFrame {
     public void getGamesList(){
         System.out.println("Updating games list ...");
         try {
-            Message response = null;
+            Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
                 System.out.println(response.getErrorMessage());
@@ -425,12 +419,12 @@ public class GameLobby extends JFrame {
 
     /**
      * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when refreshed.
-     * @param gameName
-     * @param gamePassword
+     * @param gameName The name of the game that should be created.
+     * @param gamePassword The password for the game that should be created. Leave empty char[] if it shouldn't have any password.
      */
     public void createNewGame(String gameName, char[] gamePassword) {
         try {
-            Message response = null;
+            Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
                 System.out.println(response.getErrorMessage());
