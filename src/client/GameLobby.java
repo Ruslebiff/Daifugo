@@ -41,7 +41,7 @@ public class GameLobby extends JFrame {
             System.out.println("ERROR: Failed to connect!");
             e.printStackTrace();
         }
-        
+
         try {
             Message response = conn.sendMessage(
                     new Message(MessageType.CONNECT)
@@ -62,6 +62,12 @@ public class GameLobby extends JFrame {
         setLayout(new BorderLayout());
         setTitle("Daifugo - Lobby");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // TODO: send disconnect message to server
+            }
+        });
 
         /* New game view */
         JPanel newGamePanel = new JPanel();
@@ -212,9 +218,6 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(4).setMinWidth(50);
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
-
-        // TODO: handle kryss - disconnect message til server
-
 
         JScrollPane sp = new JScrollPane(gamesTable);
 
