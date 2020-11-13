@@ -7,7 +7,6 @@ import java.util.Collections;
 public interface GameStateTracker {
     String getActivePlayerID(); // returns nick or unique identifier of current player
     ArrayList<Card> dealPlayerHand(String token);   // Returns an arraylist to the player with the respective token
-
     Boolean checkIfPlayable();
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
     void relinquishTurn();

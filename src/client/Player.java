@@ -34,8 +34,8 @@ public class Player extends JPanel implements GameStateTracker{
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
     private boolean myTurn = true;
-    private boolean giveCards; // Is set by server
-    private boolean cardsClickable = false;
+    private boolean giveCards = false; // Is set by server
+    private boolean cardsClickable = true;
 
 
     public Player(String name, int playerID, ArrayList<Card> cards, int width) {
@@ -44,8 +44,8 @@ public class Player extends JPanel implements GameStateTracker{
         this.role = 2; // Neutral
         this.hand = cards;
         this.widthOfComponent = width;
-        if(role != 0)       // TODO: Server should set this value on new round
-            giveCards = true;
+//        if(role != 0)       // TODO: Server should set this value on new round
+//            giveCards = true;
 
         sortHand(); // Sorts the players hand with respect to the card values
         setLayout(null);
@@ -99,7 +99,7 @@ public class Player extends JPanel implements GameStateTracker{
             removeCardFromDisplay();
         });
 
-        giveUpCards();  // TODO: FJERN
+//        giveUpCards();  // TODO: FJERN
     }
 
     public void addListener(Card c) {
@@ -282,13 +282,15 @@ public class Player extends JPanel implements GameStateTracker{
     @Override
     public int getLastPlayedType() {
         // 1 = single, 2 = double, 3 = triple
-        return 2;
+        return 3;
     }
 
     @Override
     public void relinquishTurn() {
         // Next turn
+        cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
+        toggleAllButtons();
     }
 
     @Override
@@ -345,5 +347,12 @@ public class Player extends JPanel implements GameStateTracker{
      * 	- Del ut kort
      *
      */
+
+    // Enables/disables all the buttons based on what they previously were
+    public void toggleAllButtons() {
+        playCardsBtn.setEnabled(!playCardsBtn.isEnabled());
+        passTurnBtn.setEnabled(!passTurnBtn.isEnabled());
+        cancelBtn.setEnabled(!cancelBtn.isEnabled());
+    }
 
 }
