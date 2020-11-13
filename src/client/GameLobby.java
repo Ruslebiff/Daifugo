@@ -10,6 +10,13 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+// TODO: a filter box to search through available games
+// TODO: list of games can be sorted in different ways
+// TODO: an option for using a non-default server address is available
 
 public class GameLobby extends JFrame {
     private final String[] columnNames = {
@@ -33,6 +40,7 @@ public class GameLobby extends JFrame {
     private String playerName;
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
+    private int latency = 0;
 
     public GameLobby() {
         try {
@@ -43,9 +51,7 @@ public class GameLobby extends JFrame {
         }
 
         try {
-            Message response = conn.sendMessage(
-                    new Message(MessageType.CONNECT)
-            );
+            Message response = conn.sendMessage(new Message(MessageType.CONNECT));
             IdentityResponse identityResponse = (IdentityResponse) response;
             if (response.isError()){
                 System.out.println(response.getErrorMessage());
@@ -62,21 +68,7 @@ public class GameLobby extends JFrame {
         setLayout(new BorderLayout());
         setTitle("Daifugo - Lobby");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                // TODO: does disconnect message work?
-                try {
-                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
-                    if (response.isError()){
-                        System.out.println(response.getErrorMessage());
-                    }
 
-                } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         /* New game view */
         JPanel newGamePanel = new JPanel();
@@ -196,7 +188,14 @@ public class GameLobby extends JFrame {
         statusBar.setLayout(new BorderLayout());
 
         JLabel latencyLabel = new JLabel();
-        int latency = getLatency();         // TODO: get new latency every second(?)
+        Runnable latencyRunnable = () -> {
+            latency = getLatency();
+            latencyLabel.setText("Latency: " + latency + "  ");
+        };
+        ScheduledExecutorService heartbeatExecutor = Executors.newScheduledThreadPool(1);
+        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
+
+
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
@@ -318,9 +317,9 @@ public class GameLobby extends JFrame {
 
                             String gameID;
                             gameID = gameList.get(gameNumber-1).getID();
-                            System.out.println("GAME ID " + gameID);
+                            System.out.println("Entering game with ID: " + gameID);
 
-                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));  // TODO: This throws EOFException now
+                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));
                             if (response.isError()){
                                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
                                     JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
@@ -329,7 +328,6 @@ public class GameLobby extends JFrame {
                             }
 
                         } catch (IOException | ClassNotFoundException ioException) {
-                            System.out.println("EOFEOFEOF");
                             ioException.printStackTrace();
                         }
 
@@ -346,6 +344,23 @@ public class GameLobby extends JFrame {
             } else {
                 System.out.println("game full!");
                 JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
+            }
+        });
+
+        /* Handle close window */
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                heartbeatExecutor.shutdown();    // kill latency thread
+                try {
+                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+                    if (response.isError()){
+                        System.out.println(response.getErrorMessage());
+                    }
+
+                } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -449,35 +464,29 @@ public class GameLobby extends JFrame {
     }
 
     public int getLatency(){
-        int latency = 0;
+        int l = 0;
         long timestampBefore = Instant.now().toEpochMilli();
 
         try {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return 0;
             }
             HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
                     new HeartbeatMessage(timestampBefore)
             );
-
             if (heartbeatResponse.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return 0;
             }
 
-            latency = (int) (heartbeatResponse.getTime() - timestampBefore);
-
-
+            l = (int) (heartbeatResponse.getTime() - timestampBefore);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-
-
-        return latency;
+        return l;
     }
 }
 
