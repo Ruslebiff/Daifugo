@@ -236,7 +236,7 @@ public class Server {
 
                     Message request;
                     try {
-                        request = (Message) in.readObject();
+                        request = (Message) in.readObject(); // EOF
                     } catch (SocketTimeoutException e) {
                         LOGGER.info("socket exception, breaking runloop");
                         break;
