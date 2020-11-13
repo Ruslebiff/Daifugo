@@ -414,7 +414,7 @@ public class GameLobby extends JFrame {
 //                        listing.getTitle(),
 //                        listing.getOwner(),
 //                        listing.getNumberOfPlayers(),
-//                        listing.hasPassword() // TODO: this is always true :(
+//                        listing.hasPassword()
 //                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
