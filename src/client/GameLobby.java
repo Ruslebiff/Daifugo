@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,7 +196,7 @@ public class GameLobby extends JFrame {
         statusBar.setLayout(new BorderLayout());
 
         JLabel latencyLabel = new JLabel();
-        int latency = 123;         // TODO: get network latency to server
+        int latency = getLatency();         // TODO: get network latency to server
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
@@ -393,14 +394,14 @@ public class GameLobby extends JFrame {
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
             for (GameListing listing : gamesFromServer) {
-                System.out.printf(
-                        "%s, %s, %s, %d, %b\n",
-                        listing.getID(),
-                        listing.getTitle(),
-                        listing.getOwner(),
-                        listing.getNumberOfPlayers(),
-                        listing.hasPassword() // TODO: this is always true :(
-                );
+//                System.out.printf(
+//                        "%s, %s, %s, %d, %b\n",
+//                        listing.getID(),
+//                        listing.getTitle(),
+//                        listing.getOwner(),
+//                        listing.getNumberOfPlayers(),
+//                        listing.hasPassword() // TODO: this is always true :(
+//                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
@@ -445,6 +446,38 @@ public class GameLobby extends JFrame {
         }
 
         refreshGamesList(); // refresh table
+    }
+
+    public int getLatency(){
+        int latency = 0;
+        long timestamp = Instant.now().toEpochMilli();
+
+        try {
+            Message response;
+            response = conn.sendMessage(new Message(MessageType.CONNECT));
+            if (response.isError()){
+                System.out.println(response.getErrorMessage());
+                return 0;
+            }
+            HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(   // TODO: EOFException
+                    new HeartbeatMessage(timestamp)
+            );
+
+            if (heartbeatResponse.isError()){
+                System.out.println(response.getErrorMessage());
+                return 0;
+            }
+
+            System.out.println("Timestamp: " + timestamp);
+            System.out.println("heartbeatResponse: " + heartbeatResponse);
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
+        return latency;
     }
 }
 
