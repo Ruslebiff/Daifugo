@@ -8,42 +8,56 @@ import server.exceptions.*;
 import java.util.*;
 
 public class Game {
+
+    /**
+     * Static stuff
+     ***********************/
+
+
     private static Map<UUID, Game> games = new LinkedHashMap<>();
 
     public static List<GameListing> getGameList() throws UserSessionError, GameException {
-        if (games.size() == 0)
-            throw new GameException("currently no games");
+        synchronized (Game.class) {
+            if (games.size() == 0)
+                throw new GameException("currently no games");
 
-        List<GameListing> list = new ArrayList<>();
+            List<GameListing> list = new ArrayList<>();
 
-        for (UUID id : games.keySet()) {
-            Game game = games.get(id);
-            list.add(
-                    new GameListing(
-                            id.toString(),
-                            game.title,
-                            game.getOwnerNick(),
-                            game.players.size(),
-                            game.password != null,
-                            game.started
-                    )
-            );
+            for (UUID id : games.keySet()) {
+                Game game = games.get(id);
+                list.add(
+                        new GameListing(
+                                id.toString(),
+                                game.title,
+                                game.getOwnerNick(),
+                                game.players.size(),
+                                game.password != null,
+                                game.started
+                        )
+                );
+            }
+
+            return list;
         }
-
-        return list;
     }
 
     public static Game getGameByID(UUID id) {
-        return games.get(id);
+        synchronized (Game.class) {
+            return games.get(id);
+        }
     }
+
+    // internal reset of static variables for testing
+    public static void _reset() {
+        synchronized (Game.class) {
+            games = new LinkedHashMap<>();
+        }
+    }
+
 
     /**
-     * Internal reset of static state for testing
-     */
-    public static void _reset() {
-        games = new LinkedHashMap<>();
-    }
-
+     * Data members
+     ***********************/
     private final UUID ID;
     private final UUID owner;
     private final String title;
@@ -52,7 +66,22 @@ public class Game {
     private int currentPlayer;
     private boolean started;
     private final Map<UUID, List<CardData>> hands;
+    private boolean cancelled;
 
+
+    /**
+     * Public interface
+     ***************************/
+
+
+    /**
+     * Constructor
+     * @param owner UUID of the game's creator
+     * @param title String title of the game
+     * @param password char[] password, or null if game is public
+     * @throws UserSessionError that propagates from calls to owners UserSession
+     * @throws GameException in the very unlikely event that owner is already in the game
+     */
     public Game(
             UUID owner,
             String title,
@@ -62,11 +91,15 @@ public class Game {
         this.owner = owner;
         this.title = title;
         this.password = password;
+        cancelled = false;
         players = new HashMap<>();
         hands = new HashMap<>();
         started = false;
 
-        games.put(ID, this);
+        synchronized (Game.class) {
+            games.put(ID, this);
+        }
+
         UserSession ownerSession = UserSession.retrieveSessionFromID(owner);
         try {
             joinGame(ownerSession, password);
@@ -75,8 +108,15 @@ public class Game {
         }
     }
 
+
     public UUID getID() {
         return ID;
+    }
+
+    public Map<UUID, PlayerObject> getPlayers() {
+        synchronized (this) {
+            return players;
+        }
     }
 
     public String getTitle() {
@@ -84,7 +124,9 @@ public class Game {
     }
 
     public boolean hasStarted() {
-        return started;
+        synchronized (this) {
+            return started;
+        }
     }
 
     public String getOwnerNick() throws UserSessionError {
@@ -111,17 +153,53 @@ public class Game {
                 0
         );
 
-        players.put(user.getID(), new PlayerObject(user, data));
-        user.joinGame(ID);
+        synchronized (this) {
+            players.put(user.getID(), new PlayerObject(user, data));
+            user.joinGame(ID);
+        }
     }
 
     public int getCurrentPlayer() {
-        return currentPlayer;
+        synchronized (this) {
+            return currentPlayer;
+        }
     }
 
     public List<CardData> getPlayerHand(UUID playerID) {
-        return hands.get(playerID);
+        synchronized (this) {
+            return hands.get(playerID);
+        }
     }
+
+    public void cancelGame() {
+        synchronized (this) {
+            cancelled = true;
+            leaveGame(owner);
+            propagateChange();
+        }
+    }
+
+    public boolean isCancelled() {
+        synchronized (this) {
+            return cancelled;
+        }
+    }
+
+    public void leaveGame(UUID player) {
+        synchronized (this) {
+            players.remove(player);
+            if (players.size() == 0) {
+               removeFromList();
+            }
+        }
+    }
+
+    public void registerGameStateChange() {
+        synchronized (this) {
+            propagateChange();
+        }
+    }
+
 
     // TODO: game start
     // TODO: game rounds
@@ -130,8 +208,25 @@ public class Game {
         // TODO: will players continue?
 
 
-    // TODO: game end
-    public void endGame() {
-        games.remove(ID);
+    /**
+     * Private helpers
+     ************************/
+
+    // TODO: removing game from list when done with it
+    private void removeFromList() {
+        synchronized (Game.class) {
+            games.remove(ID);
+        }
+    }
+
+    private void propagateChange() {
+        for (PlayerObject player : players.values()) {
+            player.newStateAvailable();
+        }
+    }
+
+    private void nextPlayer() {
+        //TODO: make loop-around code
+        currentPlayer++;
     }
 }

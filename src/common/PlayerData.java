@@ -2,7 +2,7 @@ package common;
 
 public class PlayerData {
     private String nick;
-    private int latency;
+    private long latency;
     private int numberOfCards;
     private boolean connectionLost;
     private int role;
@@ -29,7 +29,7 @@ public class PlayerData {
         return nick;
     }
 
-    public int getLatency() {
+    public long getLatency() {
         return latency;
     }
 
@@ -49,7 +49,7 @@ public class PlayerData {
         this.connectionLost = connectionLost;
     }
 
-    public void setLatency(int latency) {
+    public void setLatency(long latency) {
         this.latency = latency;
     }
 

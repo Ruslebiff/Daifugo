@@ -100,7 +100,8 @@ public class UserSession implements Serializable {
     }
 
     public void leaveCurrentGame() {
-        // TODO
+            currentGame.leaveGame(getID());
+            currentGame = null;
     }
 
     /**
