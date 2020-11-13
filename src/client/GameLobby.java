@@ -311,7 +311,7 @@ public class GameLobby extends JFrame {
                                     new Message(MessageType.CONNECT)
                             );
                             if (response.isError()){
-                                System.out.println(response.getErrorMessage());
+                                System.out.println("ERROR: " + response.getErrorMessage());
                                 return;
                             }
 
@@ -324,7 +324,7 @@ public class GameLobby extends JFrame {
                                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
                                     JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
                                 }
-                                System.out.println(response.getErrorMessage());
+                                System.out.println("ERROR: " + response.getErrorMessage());
                             }
 
                         } catch (IOException | ClassNotFoundException ioException) {
@@ -355,7 +355,7 @@ public class GameLobby extends JFrame {
                 try {
                     Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
                     if (response.isError()){
-                        System.out.println(response.getErrorMessage());
+                        System.out.println("ERROR: " + response.getErrorMessage());
                     }
 
                 } catch (ClassNotFoundException | IOException e) {
@@ -385,7 +385,6 @@ public class GameLobby extends JFrame {
         gameList.removeAll(gameList); // Clear gameList
         // Fill table again
         getGamesList();
-        System.out.println(gameList.size());
     }
 
     /**
@@ -397,12 +396,12 @@ public class GameLobby extends JFrame {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             GameListResponse listResponse = (GameListResponse) response;
@@ -443,7 +442,7 @@ public class GameLobby extends JFrame {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             response = conn.sendMessage(new NewGameMessage(
@@ -452,7 +451,7 @@ public class GameLobby extends JFrame {
             ));
 
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
 
@@ -463,6 +462,10 @@ public class GameLobby extends JFrame {
         refreshGamesList(); // refresh table
     }
 
+    /**
+     * Sends a HeartbeatMessage to the server and calculates the time it took.
+     * @return the time between your heartbeat request was sent from you and received by the server.
+     */
     public int getLatency(){
         int l = 0;
         long timestampBefore = Instant.now().toEpochMilli();
