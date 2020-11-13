@@ -113,10 +113,10 @@ class ServerTest {
         ClientConnection conn = new ClientConnection("localhost");
         Message response = conn.sendMessage(new Message(MessageType.CONNECT));
         assertFalse(response.isError());
-
+        char[] pw = {'s', 'e', 'c', 'r', 'e', 't'};
         response = conn.sendMessage(new NewGameMessage(
                 "A game title",
-                "secret"
+                pw
         ));
         assertFalse(response.isError(), response.getErrorMessage());
 
@@ -140,7 +140,8 @@ class ServerTest {
         assertFalse(response.isError());
 
 
-        response = conn1.sendMessage(new NewGameMessage("first game", ""));
+        char[] pw = {}; // empty char array
+        response = conn1.sendMessage(new NewGameMessage("first game", pw));
         assertFalse(response.isError(), response.getErrorMessage());
 
         response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
@@ -151,7 +152,8 @@ class ServerTest {
                 listResponse.getGameList().get(0).getTitle()
         );
 
-        response = conn2.sendMessage(new NewGameMessage("second game", "secret"));
+        char[] pw2 = {'s', 'e', 'c', 'r', 'e', 't'};
+        response = conn2.sendMessage(new NewGameMessage("second game", pw2));
         assertFalse(response.isError());
 
         response = conn3.sendMessage(new Message(MessageType.GET_GAME_LIST));
@@ -171,7 +173,8 @@ class ServerTest {
 
         ClientConnection host = new ClientConnection("localhost");
         host.sendMessage(MessageType.CONNECT);
-        response = host.sendMessage(new NewGameMessage("title", "1234"));
+        char[] pw = {'1', '2', '3', '4'};
+        response = host.sendMessage(new NewGameMessage("title", pw));
         assertFalse(response.isError(), response.getErrorMessage());
 
         ClientConnection conn = new ClientConnection("localhost");
@@ -180,7 +183,7 @@ class ServerTest {
         assertFalse(response.isError());
         GameListResponse listResponse = (GameListResponse) response;
         List<GameListing> list = listResponse.getGameList();
-        response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), "1234"));
+        response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), pw));
         assertFalse(response.isError());
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
     }
@@ -195,8 +198,9 @@ class ServerTest {
         ClientConnection client = new ClientConnection("localhost");
         client.sendMessage(MessageType.CONNECT);
 
+        char[] pw = {'1', '2', '3', '4'};
         response = host.sendMessage(
-                new NewGameMessage("title", "1234")
+                new NewGameMessage("title", pw)
         );
         assertFalse(response.isError());
 
@@ -206,8 +210,9 @@ class ServerTest {
         GameListResponse listResponse = (GameListResponse) response;
         String gameID = listResponse.getGameList().get(0).getID();
 
+        char[] pwWrong = {'W', 'r', 'o', 'n', 'g'};
         response = client.sendMessage(
-                new JoinGameRequest(gameID, "wrong password")
+                new JoinGameRequest(gameID, pwWrong)
         );
 
         assertTrue(response.isError());

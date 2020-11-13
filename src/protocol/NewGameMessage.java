@@ -2,9 +2,9 @@ package protocol;
 
 public class NewGameMessage extends Message {
     private final String title;
-    private final String password;
+    private final char[] password;
 
-    public NewGameMessage(String title, String password) {
+    public NewGameMessage(String title, char[] password) {
         super(MessageType.NEW_GAME);
         this.title = title;
         this.password = password;
@@ -14,7 +14,7 @@ public class NewGameMessage extends Message {
         return title;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 }
