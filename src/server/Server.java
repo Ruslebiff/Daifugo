@@ -250,7 +250,7 @@ public class Server {
 
                     if (currentSession == null
                             && request.getMessageType() != CONNECT
-                            && request.getMessageType() != RECONNECT
+                            //&& request.getMessageType() != RECONNECT
                             && request.getMessageType() != DISCONNECT
                     ) {
                         sendInvalidRequest();
