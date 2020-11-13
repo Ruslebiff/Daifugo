@@ -2,6 +2,7 @@ package server;
 
 import common.GameListing;
 import protocol.*;
+import server.exceptions.GameDisconnect;
 import server.exceptions.GameException;
 import server.exceptions.UserSessionError;
 import server.exceptions.WrongPassword;
@@ -17,8 +18,8 @@ import static protocol.MessageType.*;
 
 
 public class Server {
-    private static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
-    private static FileHandler FILE_HANDLER = null;
+    public static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
+    public static FileHandler FILE_HANDLER = null;
 
     static {
         try {
@@ -170,7 +171,7 @@ public class Server {
             );
         }
 
-        private void createNewGame(NewGameMessage request) throws IOException {
+        private void createNewGame(NewGameMessage request) throws IOException, GameDisconnect {
             LOGGER.info("Creating new game");
             Game game;
             try {
@@ -187,7 +188,7 @@ public class Server {
             runGameMode();
         }
 
-        private void joinExistingGame(JoinGameRequest request) throws IOException {
+        private void joinExistingGame(JoinGameRequest request) throws IOException, GameDisconnect {
             Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
             try {
                 game.joinGame(currentSession, request.getPassword());
@@ -207,15 +208,8 @@ public class Server {
          * Runs a separate game loop, thus entering a new mode of responding
          * to client messages
          */
-        private void runGameMode() throws IOException {
-            LOGGER.info("Entered game mode");
-            try {
-                out.writeObject(new GameStateResponse(
-                        currentSession.getGame(), currentSession
-                ));
-            } catch (UserSessionError userSessionError) {
-                out.writeObject(new ErrorMessage(userSessionError.toString()));
-            }
+        private void runGameMode() throws IOException, GameDisconnect {
+            new GameRunner(currentSession, in, out).run();
         }
 
         public void run() {
@@ -236,9 +230,19 @@ public class Server {
 
                     Message request;
                     try {
-                        request = (Message) in.readObject();
+                        request = (Message) in.readObject(); // EOF
                     } catch (SocketTimeoutException e) {
                         LOGGER.info("socket exception, breaking runloop");
+                        break;
+                    } catch (EOFException e) {
+                        LOGGER.warning(
+                                "Got EOF while reading request from client. Maybe you forgot to call disconnect()?"
+                                // TODO: maybe this happens because DISCONNECT not sent?
+                                // yup
+                                // no, it happens because unclean socket termination
+                        );
+                        //LOGGER.warning("Disconnecting from client");
+                        //request = new Message(DISCONNECT);
                         break;
                     }
 
@@ -246,7 +250,7 @@ public class Server {
 
                     if (currentSession == null
                             && request.getMessageType() != CONNECT
-                            && request.getMessageType() != RECONNECT
+                            //&& request.getMessageType() != RECONNECT
                             && request.getMessageType() != DISCONNECT
                     ) {
                         sendInvalidRequest();
@@ -277,6 +281,9 @@ public class Server {
 
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
+                    break;
+                } catch (GameDisconnect ignored) {
+                    currentSession.endSession();
                     break;
                 }
             }

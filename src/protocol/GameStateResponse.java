@@ -14,4 +14,8 @@ public class GameStateResponse extends Message {
 
         state = new GameState(game, playerSession);
     }
+
+    public GameState getState() {
+        return state;
+    }
 }

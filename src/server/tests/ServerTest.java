@@ -71,6 +71,8 @@ class ServerTest {
         );
         assertEquals(MessageType.IDENTITY_RESPONSE, response.getMessageType());
         assertEquals("User1", response.getNick());
+
+        conn.disconnect();
     }
 
     @Test
@@ -82,6 +84,8 @@ class ServerTest {
         );
         assertTrue(response.isError());
         assertEquals("Invalid request", response.getErrorMessage());
+
+        conn.disconnect();
     }
 
     @Test
@@ -106,6 +110,8 @@ class ServerTest {
         String got = updatedNickResponse.getNick();
 
         assertEquals(newNick, got);
+
+        conn.disconnect();
     }
 
     @Test
@@ -122,7 +128,7 @@ class ServerTest {
 
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
 
-
+        conn.disconnect();
     }
 
     @Test
@@ -144,10 +150,14 @@ class ServerTest {
         response = conn1.sendMessage(new NewGameMessage("first game", pw));
         assertFalse(response.isError(), response.getErrorMessage());
 
-        response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
-        assertFalse(response.isError());
+        response = conn2.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError(), response.getErrorMessage());
         GameListResponse listResponse = (GameListResponse) response;
         assertEquals( 1, listResponse.getGameList().size());
+
+        // only null results in unprotected game:
+        assertTrue(listResponse.getGameList().get(0).hasPassword());
+
         assertEquals("first game",
                 listResponse.getGameList().get(0).getTitle()
         );
@@ -165,6 +175,9 @@ class ServerTest {
         assertTrue(gameList.get(1).hasPassword());
         assertFalse(gameList.get(0).hasStarted());
 
+        conn1.disconnect();
+        conn2.disconnect();
+        conn3.disconnect();
     }
 
     @Test
@@ -186,6 +199,9 @@ class ServerTest {
         response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), pw));
         assertFalse(response.isError());
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
+
+        host.disconnect();
+        conn.disconnect();
     }
 
     @Test
@@ -217,6 +233,43 @@ class ServerTest {
 
         assertTrue(response.isError());
         assertEquals(MessageType.PASSWORD_ERROR, response.getMessageType());
+
+        host.disconnect();
+        client.disconnect();
+    }
+
+
+    @Test
+    public void supplyingNoPasswordShouldNotResultInProtectedGame() throws IOException, ClassNotFoundException {
+        ClientConnection host = new ClientConnection("localhost");
+        host.sendMessage(MessageType.CONNECT);
+
+        ClientConnection conn = new ClientConnection("localhost");
+        conn.sendMessage(MessageType.CONNECT);
+
+        Message response;
+
+        response = host.sendMessage(new NewGameMessage("title", null));
+        assertFalse(response.isError());
+
+        response = conn.sendMessage(MessageType.GET_GAME_LIST);
+        assertFalse(response.isError());
+
+        GameListResponse listResponse = (GameListResponse) response;
+        assertFalse(
+                listResponse.getGameList().get(0).hasPassword(),
+                "null as password should result in unprotected game"
+        );
+
+        // checking if joining works
+        String gameID = listResponse.getGameList().get(0).getID();
+
+        response = conn.sendMessage(new JoinGameRequest(gameID, null));
+        assertFalse(response.isError());
+
+        host.disconnect();
+        conn.disconnect();
+
     }
 
     // TODO: find out why this results in timeouts

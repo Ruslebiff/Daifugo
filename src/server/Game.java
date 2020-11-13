@@ -24,7 +24,7 @@ public class Game {
                             game.title,
                             game.getOwnerNick(),
                             game.players.size(),
-                            !game.password.equals(""),
+                            game.password != null,
                             game.started
                     )
             );
