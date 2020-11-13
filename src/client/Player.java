@@ -354,5 +354,4 @@ public class Player extends JPanel implements GameStateTracker{
         passTurnBtn.setEnabled(!passTurnBtn.isEnabled());
         cancelBtn.setEnabled(!cancelBtn.isEnabled());
     }
-
 }
