@@ -71,6 +71,8 @@ class ServerTest {
         );
         assertEquals(MessageType.IDENTITY_RESPONSE, response.getMessageType());
         assertEquals("User1", response.getNick());
+
+        conn.disconnect();
     }
 
     @Test
@@ -82,6 +84,8 @@ class ServerTest {
         );
         assertTrue(response.isError());
         assertEquals("Invalid request", response.getErrorMessage());
+
+        conn.disconnect();
     }
 
     @Test
@@ -106,6 +110,8 @@ class ServerTest {
         String got = updatedNickResponse.getNick();
 
         assertEquals(newNick, got);
+
+        conn.disconnect();
     }
 
     @Test
@@ -122,7 +128,7 @@ class ServerTest {
 
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
 
-
+        conn.disconnect();
     }
 
     @Test
@@ -151,7 +157,7 @@ class ServerTest {
 
         // only null results in unprotected game:
         assertTrue(listResponse.getGameList().get(0).hasPassword());
-        
+
         assertEquals("first game",
                 listResponse.getGameList().get(0).getTitle()
         );
@@ -169,6 +175,9 @@ class ServerTest {
         assertTrue(gameList.get(1).hasPassword());
         assertFalse(gameList.get(0).hasStarted());
 
+        conn1.disconnect();
+        conn2.disconnect();
+        conn3.disconnect();
     }
 
     @Test
@@ -190,6 +199,9 @@ class ServerTest {
         response = conn.sendMessage(new JoinGameRequest(list.get(0).getID(), pw));
         assertFalse(response.isError());
         assertEquals(MessageType.GAME_STATE, response.getMessageType());
+
+        host.disconnect();
+        conn.disconnect();
     }
 
     @Test
@@ -221,6 +233,9 @@ class ServerTest {
 
         assertTrue(response.isError());
         assertEquals(MessageType.PASSWORD_ERROR, response.getMessageType());
+
+        host.disconnect();
+        client.disconnect();
     }
 
 
@@ -252,6 +267,8 @@ class ServerTest {
         response = conn.sendMessage(new JoinGameRequest(gameID, null));
         assertFalse(response.isError());
 
+        host.disconnect();
+        conn.disconnect();
 
     }
 

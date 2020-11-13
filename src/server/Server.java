@@ -240,6 +240,15 @@ public class Server {
                     } catch (SocketTimeoutException e) {
                         LOGGER.info("socket exception, breaking runloop");
                         break;
+                    } catch (EOFException e) {
+                        LOGGER.warning(
+                                "Got EOF while reading request from client. Maybe you forgot to call disconnect()?"
+                                // TODO: maybe this happens because DISCONNECT not sent?
+                                // yup
+                        );
+                        //LOGGER.warning("Disconnecting from client");
+                        //request = new Message(DISCONNECT);
+                        break;
                     }
 
                     LOGGER.fine("past first try-catch");
