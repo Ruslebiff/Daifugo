@@ -18,8 +18,8 @@ public enum MessageType {
     GAME_STATE,
     CANCEL_GAME,    // owner ends game
     CANCEL_GAME_ERROR,      // propagated to players if a game is cancelled
-    START_GAME,     // owner starts game
     LEAVE_GAME,     // a player leaving a game that may or may not be started
+    START_GAME,     // owner starts game
     PLAY_CARDS,
     PASS_TURN,
     GIVE_CARDS,     // trade cards between presidents and bums

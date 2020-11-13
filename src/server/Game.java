@@ -212,6 +212,7 @@ public class Game {
      * Private helpers
      ************************/
 
+
     // TODO: removing game from list when done with it
     private void removeFromList() {
         synchronized (Game.class) {
@@ -228,5 +229,23 @@ public class Game {
     private void nextPlayer() {
         //TODO: make loop-around code
         currentPlayer++;
+    }
+
+
+
+    /**
+     * Game mechanics
+     */
+
+    private void dealCards() {
+        //TODO
+    }
+
+    private void shufflePlayerOrder() {
+        //TODO
+    }
+
+    private void findStartingPlayer() {
+        //TODO: depends on roles, or location of three of diamonds if first round
     }
 }

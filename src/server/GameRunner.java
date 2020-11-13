@@ -49,10 +49,6 @@ public class GameRunner {
         );
     }
 
-
-    // TODO: handle game cancel
-
-
     private void sendHeartbeatResponse(HeartbeatMessage request) throws IOException {
 
         // if state hasn't been updated, simply heartbeat back
@@ -98,7 +94,7 @@ public class GameRunner {
             out.writeObject(new ErrorMessage(userSessionError.getMessage()));
             return;
         }
-        
+
         game.cancelGame();
         throw new LeftGame();
 
