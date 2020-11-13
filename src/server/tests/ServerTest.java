@@ -150,8 +150,8 @@ class ServerTest {
         response = conn1.sendMessage(new NewGameMessage("first game", pw));
         assertFalse(response.isError(), response.getErrorMessage());
 
-        response = conn1.sendMessage(new Message(MessageType.GET_GAME_LIST));
-        assertFalse(response.isError());
+        response = conn2.sendMessage(new Message(MessageType.GET_GAME_LIST));
+        assertFalse(response.isError(), response.getErrorMessage());
         GameListResponse listResponse = (GameListResponse) response;
         assertEquals( 1, listResponse.getGameList().size());
 
