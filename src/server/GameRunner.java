@@ -84,20 +84,40 @@ public class GameRunner {
 
     }
 
-    private void validateCancellation() throws IOException, LeftGame {
+    private boolean userNotOwner() throws IOException {
         try {
             if (!game.getOwnerNick().equals(userSession.getNick())) {
                 out.writeObject(new ErrorMessage("Not allowed"));
-                return;
+                return true;
             }
         } catch (UserSessionError userSessionError) {
             out.writeObject(new ErrorMessage(userSessionError.getMessage()));
-            return;
+            return true;
         }
+
+        return false;
+    }
+
+    private void validateCancellation() throws IOException, LeftGame {
+
+        if (userNotOwner())
+            return;
 
         game.cancelGame();
         throw new LeftGame();
+    }
 
+    private void validateGameStart() throws IOException {
+        if (userNotOwner())
+            return;
+
+        game.start();
+
+    }
+
+    private void playerDisconnect() throws GameDisconnect {
+        userSession.leaveCurrentGame();
+        throw new GameDisconnect();
     }
 
     public void run() throws GameDisconnect, IOException {
@@ -116,7 +136,7 @@ public class GameRunner {
 
                 Message request;
                 try {
-                    request = (Message) in.readObject(); // EOF
+                    request = (Message) in.readObject();
                 } catch (SocketTimeoutException e) {
                     LOGGER.info("socket exception, breaking runloop");
                     break;
@@ -134,10 +154,11 @@ public class GameRunner {
                             if (!handleReconnection(request))
                                 break runLoop;
                         }*/
+                    case START_GAME -> validateGameStart();
                     case LEAVE_GAME -> userSession.leaveCurrentGame();
                     case CANCEL_GAME -> validateCancellation();
                     case HEARTBEAT -> sendHeartbeatResponse((HeartbeatMessage) request);
-                    case DISCONNECT -> throw new GameDisconnect();
+                    case DISCONNECT -> playerDisconnect();
                     default -> out.writeObject(new ErrorMessage("Invalid game request"));
                 }
 

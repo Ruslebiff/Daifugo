@@ -1,11 +1,14 @@
 package common;
 
 import server.Game;
+import server.PlayerObject;
 import server.UserSession;
 import server.exceptions.UserSessionError;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class GameState implements Serializable {
@@ -35,6 +38,13 @@ public class GameState implements Serializable {
 
         hand = game.getPlayerHand(session.getID());
 
+        Map<UUID, PlayerObject> playerMap = game.getPlayers();
+        players = new ArrayList<>();
+        for (UUID id : game.getTurnSequence()) {
+            players.add(playerMap.get(id).getGameData());
+        }
+
+        started = game.hasStarted();
     }
 
     public boolean isMyTurn() {
@@ -52,4 +62,13 @@ public class GameState implements Serializable {
     public String getGameID() {
         return gameID.toString();
     }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public List<PlayerData> getPlayers() {
+        return players;
+    }
+
 }

@@ -67,6 +67,7 @@ public class Game {
     private boolean started;
     private final Map<UUID, List<CardData>> hands;
     private boolean cancelled;
+    private List<UUID> turnSequence;
 
 
     /**
@@ -94,6 +95,7 @@ public class Game {
         cancelled = false;
         players = new HashMap<>();
         hands = new HashMap<>();
+        turnSequence = new ArrayList<>();
         started = false;
 
         synchronized (Game.class) {
@@ -171,6 +173,10 @@ public class Game {
         }
     }
 
+    public List<UUID> getTurnSequence() {
+        return turnSequence;
+    }
+
     public void cancelGame() {
         synchronized (this) {
             cancelled = true;
@@ -191,6 +197,30 @@ public class Game {
             if (players.size() == 0) {
                removeFromList();
             }
+        }
+    }
+
+    public void start() {
+        synchronized (this) {
+            started = true;
+            shufflePlayerOrder();
+            dealCards();
+            findStartingPlayer();
+            propagateChange();
+        }
+    }
+
+    private void assignRoles() {
+        //TODO: assigns roles to players based on player count and results of last round
+    }
+
+    public void newRound() {
+        synchronized (this) {
+            //TODO: handle a player having left
+            assignRoles();
+            dealCards();
+            findStartingPlayer();
+            propagateChange();
         }
     }
 
@@ -227,7 +257,7 @@ public class Game {
     }
 
     private void nextPlayer() {
-        //TODO: make loop-around code
+        //TODO: make loop-around code -- also, players may go out
         currentPlayer++;
     }
 
@@ -247,5 +277,8 @@ public class Game {
 
     private void findStartingPlayer() {
         //TODO: depends on roles, or location of three of diamonds if first round
+
+        // if any player has an out-count of 0, use 3 of diamonds
+        // else select bum
     }
 }
