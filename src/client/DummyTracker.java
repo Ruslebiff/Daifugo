@@ -1,7 +1,10 @@
 package client;
 
+import common.PlayerData;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class DummyTracker implements GameStateTracker{
     private ArrayList<Card> deck = new ArrayList<>();
@@ -20,6 +23,21 @@ public class DummyTracker implements GameStateTracker{
         for (int i = 0; i < deck.size()/3; i++) {
             p1_cards.add(deck.get(i));      // TODO: Change later
         }
+    }
+
+    @Override
+    public boolean isMyTurn() {
+        return false;
+    }
+
+    @Override
+    public List<PlayerData> getPlayerList() {
+        return null;
+    }
+
+    @Override
+    public int getActivePlayerIndex() {
+        return 0;
     }
 
     @Override

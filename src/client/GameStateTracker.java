@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface GameStateTracker {
-    String getActivePlayerID(); // returns nick or unique identifier of current player
+    /** forslag */
+    boolean isMyTurn();                 // er det min tur?
+    List<PlayerData> getPlayerList();   // liste over spillere, i turn order
+    int getActivePlayerIndex();         // aktiv spillers index i liste
+                                        //   erstatter getActivePlayerID
+    String getActivePlayerID();
     ArrayList<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
     void relinquishTurn();
