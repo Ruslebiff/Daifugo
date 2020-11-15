@@ -1,5 +1,7 @@
 package client;
 
+import client.networking.ClientConnection;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -12,13 +14,14 @@ import java.util.ArrayList;
 
 import static java.lang.Math.round;
 
-public class Player extends JPanel implements GameStateTracker{
+public class Player extends JPanel{
+    private GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
     private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
     private final int playerID;     // Id
-    private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
-    private final ArrayList<Card> hand; // The cards dealt to the player
+    private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
+    private ArrayList<Card> hand; // The cards dealt to the player
     private final ArrayList<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
     private JButton addCard;
@@ -34,19 +37,20 @@ public class Player extends JPanel implements GameStateTracker{
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
     private boolean myTurn = true;
-    private boolean giveCards; // Is set by server
-    private boolean cardsClickable = false;
+    private boolean giveCards = false; // Is set by server
+    private boolean cardsClickable = true;
+    private ClientConnection conn = null;
 
 
-    public Player(String name, int playerID, ArrayList<Card> cards, int width) {
+    public Player(String name, int playerID, ArrayList<Card> cards, int width, GameStateTracker sT) {
+        this.stateTracker = sT;
         this.name = name;
         this.playerID = playerID;
-        this.role = 2; // Neutral
+        this.role = 2; // Upon creation of a player, the player will be set to neutral, as the game has just begun
         this.hand = cards;
         this.widthOfComponent = width;
-        if(role != 0)       // TODO: Server should set this value on new round
-            giveCards = true;
-
+//        if(role != 0)       // TODO: Server should set this value on new round
+//            giveCards = true;
         sortHand(); // Sorts the players hand with respect to the card values
         setLayout(null);
         setOpaque(true);
@@ -62,18 +66,18 @@ public class Player extends JPanel implements GameStateTracker{
 
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
-        passTurnBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth) + 15, 0, // Relinquishes turn
-                                        buttonWidth, buttonHeight, "Pass Turn");
+        passTurnBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth) + 15, 0, // Relinquishes turn
+                buttonWidth, buttonHeight, "Pass Turn");
         passTurnBtn.addActionListener(e -> relinquishTurn());
         add(passTurnBtn);
 
-        playCardsBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + passTurnBtn.getBounds().x, 0,
-                                        buttonWidth, buttonHeight, "Play Cards");
+        playCardsBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth / 2) + passTurnBtn.getBounds().x, 0,
+                buttonWidth, buttonHeight, "Play Cards");
         playCardsBtn.setEnabled(false);
 
 
-        cancelBtn = new PlayerButton((widthOfComponent/3)-(buttonWidth/2) + playCardsBtn.getBounds().x, 0,
-                                        buttonWidth, buttonHeight, "Cancel");
+        cancelBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth / 2) + playCardsBtn.getBounds().x, 0,
+                buttonWidth, buttonHeight, "Cancel");
         cancelBtn.addActionListener(e -> cancel());
         add(cancelBtn);
 
@@ -86,20 +90,20 @@ public class Player extends JPanel implements GameStateTracker{
 
         // TODO: REMOVE ADD AND REMOVE BUTTONS
         addCard = new JButton("Add");
-        addCard.setBounds(0,175,buttonWidth,buttonHeight);
+        addCard.setBounds(0, 175, buttonWidth, buttonHeight);
         add(addCard);
-        addCard.addActionListener( e -> {
+        addCard.addActionListener(e -> {
             viewDealtHand();
         });
 
         removeCard = new JButton("Remove");
-        removeCard.setBounds(100,175,100,50);
+        removeCard.setBounds(100, 175, 100, 50);
         add(removeCard);
         removeCard.addActionListener(e -> {
             removeCardFromDisplay();
         });
 
-        giveUpCards();  // TODO: FJERN
+//        giveUpCards();  // TODO: FJERN
     }
 
     public void addListener(Card c) {
@@ -107,17 +111,17 @@ public class Player extends JPanel implements GameStateTracker{
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
-                if(myTurn && cardsClickable) {
+                if (myTurn && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
 
-                    if(c.isSelected())      // If the card is selected, add it to the arrayList
+                    if (c.isSelected())      // If the card is selected, add it to the arrayList
                         cardsToPlay.add(c);
                     else
                         cardsToPlay.remove(c);
 
-                    if(!giveCards)
+                    if (!giveCards)
                         playCardsBtn.setEnabled(checkIfPlayable() && myTurn);
                     else // If the round has just started and you have to relinquish cards
                         giveUpCards();  // Function checks role and cards you have to give based on role
@@ -156,11 +160,11 @@ public class Player extends JPanel implements GameStateTracker{
     // TODO: Y-coordinate must be further down
 
     public void viewDealtHand() {
-        space = space + ((maxCards - hand.size())/2);
-        boundsX = (widthOfComponent/2) - (cardWidth/2) + (((hand.size()-1)/2) * space);
+        space = space + ((maxCards - hand.size()) / 2);
+        boundsX = (widthOfComponent / 2) - (cardWidth / 2) + (((hand.size() - 1) / 2) * space);
         int i = 0;
-        for (Card card: hand) {
-            card.setBounds(boundsX - ((i++)*space), 50, cardWidth, cardHeight);
+        for (Card card : hand) {
+            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
             add(card);
         }
         repaint();
@@ -169,17 +173,17 @@ public class Player extends JPanel implements GameStateTracker{
     public void rearrangeCardsOnDisplay() {
         hand.forEach(this::remove); // Remove all the cards on the GUI to repaint them centered
         // The spacing between cards
-        space = space + ((maxCards - hand.size())/2);
+        space = space + ((maxCards - hand.size()) / 2);
 
-        if(hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
+        if (hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
             space = cardWidth;
 
         // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
-        boundsX = round(((float)widthOfComponent/2)  - ((float)cardWidth/2) + (((float)hand.size()-1)/2) * (float)space);
+        boundsX = round(((float) widthOfComponent / 2) - ((float) cardWidth / 2) + (((float) hand.size() - 1) / 2) * (float) space);
         int i = 0;
-        for (Card card: hand) {     // For each card, space it more and more to the left
-            card.setBounds(boundsX - ((i++)*space), 50, cardWidth, cardHeight);
+        for (Card card : hand) {     // For each card, space it more and more to the left
+            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
             add(card);  // Add the cards again with the updated coordinates
         }
         repaint();
@@ -190,7 +194,7 @@ public class Player extends JPanel implements GameStateTracker{
         QuickSort.sort(this.hand, 0, this.hand.size() - 1);
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -215,7 +219,7 @@ public class Player extends JPanel implements GameStateTracker{
     public Boolean allTheSameCards() {
         boolean equal = true;
         int val = cardsToPlay.get(0).getValue();    // Get the value from one of the cards
-        for(Card c: cardsToPlay)                    // Go through each card
+        for (Card c : cardsToPlay)                    // Go through each card
             if (val != c.getValue()) {              // If the value is not the same, one of the cards is different
                 equal = false;
                 break;
@@ -225,92 +229,76 @@ public class Player extends JPanel implements GameStateTracker{
 
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
-        cardsToPlay.forEach(c -> {
-           hand.remove(c);     // Remove them from hand
-           this.remove(c);     // Remove them from GUI
-        });
-        if(hand.size() != 0){   // If player has more cards left
-           sortHand();             // Sort hand accordingly
-           rearrangeCardsOnDisplay(); // Display properly
-        } // else Server.endGameForPlayer, assign role accordingly
-        cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
-
-        if(giveCards) {
+        if(!giveCards) {   // If it is a normal round, play the cards
+            if(stateTracker.playCards(cardsToPlay))
+                stateTracker.setNextTurn();
+        } else {            // If it is at the beginning of the round
             playCardsBtn.setText("Play Cards");
             giveCards = false;
             cardsClickable = true;
+            if(stateTracker.giveCards(cardsToPlay, role))
+                stateTracker.setNextTurn();
         }
-        // TODO: return the cards played to the server or to another players hand
+
+        // Clean up the buffer of cards to play
+        cardsToPlay.forEach(c -> {
+            hand.remove(c);     // Remove them from hand
+            this.remove(c);     // Remove them from GUI
+        });
+        if (hand.size() != 0) {   // If player has more cards left
+            sortHand();             // Sort hand accordingly
+            rearrangeCardsOnDisplay(); // Display properly
+        } // else Server.endGameForPlayer, assign role accordingly
+        cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
     }
 
-    @Override
-    public String getActivePlayerID() {
-        return null;
-    }
-
-    @Override
-    public ArrayList<Card> dealPlayerHand(String token) {
-        return null;
-    }
-
-    @Override
     public Boolean checkIfPlayable() {
         int nCards = cardsToPlay.size();  // Amount of cards played
-        int [] lastThreeCards = new int[3];
-        lastThreeCards[0] = 8;
-        lastThreeCards[1] = 9;
-        lastThreeCards[2] = 4;
+        ArrayList<Card> lastFourCards = new ArrayList<>();
+        ArrayList<Card> tableCards = stateTracker.getLastPlayedCards();
+//        for (int i = 1; i <= tableCards.size(); i++)
+//            lastFourCards.add(tableCards.get(tableCards.size() - i));
 
-        // Check if player has selected cards to play, and if they match the types on the table, i.e. singles, doubles
-        // or triples, alternatively that the card played is clover 3
-        if(nCards != 0 && ((nCards == getLastPlayedType()) || (cardsToPlay.get(nCards - 1).getValue() == 16))) {
-            // Check if the card on top of the deck is higher or equal to the player's card
-            boolean valid = true;
-            for (Card c: cardsToPlay)     // Check that all selected cards are playable
-                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lastThreeCards to the servers cards
-                    valid = false;  // If a card is not playable, set valid to false
-                    break;
-                }
-            if(!allTheSameCards())  // If the selected cards vary in value, validity is false
-                valid = false;
-
-            return valid;
-        }
+//        // Check if player has selected cards to play, and if they match the types on the table, i.e. singles, doubles
+//        // or triples, alternatively that the card played is clover 3
+//        if (nCards != 0 && ((nCards == stateTracker.getLastPlayedType()) || (cardsToPlay.get(nCards - 1).getValue() == 16))) {
+//            // Check if the card on top of the deck is higher or equal to the player's card
+//            boolean valid = true;
+//            for (Card c : cardsToPlay)     // Check that all selected cards are playable
+//                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lastThreeCards to the servers cards
+//                    valid = false;  // If a card is not playable, set valid to false
+//                    break;
+//                }
+//            if (!allTheSameCards())  // If the selected cards vary in value, validity is false
+//                valid = false;
+//
+//            return valid;
+//        }
         return false;
     }
 
-    @Override
-    public int getLastPlayedType() {
-        // 1 = single, 2 = double, 3 = triple
-        return 2;
-    }
 
-    @Override
     public void relinquishTurn() {
         // Next turn
+        cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
+        toggleAllButtons();
     }
-
-    @Override
-    public void playCards(ArrayList<Card> playedCards) {
-
-    }
-
 
     // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
     // TODO: Kjør også giveUpCards() neste runde uavhengig
     // TODO: Neste runde så må cardsClickable også settes basert på rolle
     // Whenever the round starts, the server should run each player's giveUpCards()
     public void giveUpCards() {
-        if(role != 0) {
+        if (role != 0) {
             passTurnBtn.setEnabled(false);  // TODO: Når server indikerer at det er "min" tur, pass knapp og cancel knapp true
             int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished
-            if(role < 0) {
+            if (role < 0) {
                 cancelBtn.setEnabled(false);
                 // Highest cards to be selected
                 for (int i = 0; i < amountOfCards; i++) {
                     Card temp = hand.get(i);
-                    if(temp.getValue() != 16) {
+                    if (temp.getValue() != 16) {
                         temp.setSelected();
                         cardsToPlay.add(hand.get(i));
                     } else
@@ -331,19 +319,36 @@ public class Player extends JPanel implements GameStateTracker{
     /**
      * TODO: Server
      * *Når en spiller er tom for kort, si i fra til server -> server legger til
-     *  spillerID/uid i en List, sjekker størrelsen på den listen, hvis den
-     *  lista er antallSpillere-1 så er spillet over, og roller deles ut
-     * 	- Må ta rede for at det kan være 3-8 spillere
-     * 	- Dersom det er 3 spillere, bare sett rollene på dem manuelt
-     * 	- Hvis det er flere:
-     * 		* fori-loop
-     * 			if(i == 0): player.assignRole(2)
-     * 			elif(i == 1): player.assignRole(1)
-     * 			elif(i == (antall.size() - 2): player.assignRole(-1)
-     * 			elif(i == (antall.size() - 1): player.assignRole(-2)
-     * 	- Etter at roller deles ut, start et nytt spill
-     * 	- Del ut kort
-     *
+     * spillerID/uid i en List, sjekker størrelsen på den listen, hvis den
+     * lista er antallSpillere-1 så er spillet over, og roller deles ut
+     * - Må ta rede for at det kan være 3-8 spillere
+     * - Dersom det er 3 spillere, bare sett rollene på dem manuelt
+     * - Hvis det er flere:
+     * * fori-loop
+     * if(i == 0): player.assignRole(2)
+     * elif(i == 1): player.assignRole(1)
+     * elif(i == (antall.size() - 2): player.assignRole(-1)
+     * elif(i == (antall.size() - 1): player.assignRole(-2)
+     * - Etter at roller deles ut, start et nytt spill
+     * - Del ut kort
      */
 
+    // Enables/disables all the buttons based on what they previously were
+    public void toggleAllButtons() {
+        playCardsBtn.setEnabled(!playCardsBtn.isEnabled());
+        passTurnBtn.setEnabled(!passTurnBtn.isEnabled());
+        cancelBtn.setEnabled(!cancelBtn.isEnabled());
+    }
+
+    public void setHand(ArrayList<Card> dealtCards) {
+        this.hand = dealtCards;
+    }
+
+    public void setRole(int role) {
+        this.role = role;
+    }
+
+    public void setMyTurn() {
+        this.myTurn = true;
+    }
 }

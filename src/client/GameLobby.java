@@ -196,7 +196,7 @@ public class GameLobby extends JFrame {
         statusBar.setLayout(new BorderLayout());
 
         JLabel latencyLabel = new JLabel();
-        int latency = getLatency();         // TODO: get network latency to server
+        int latency = getLatency();         // TODO: get new latency every second(?)
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
@@ -450,7 +450,7 @@ public class GameLobby extends JFrame {
 
     public int getLatency(){
         int latency = 0;
-        long timestamp = Instant.now().toEpochMilli();
+        long timestampBefore = Instant.now().toEpochMilli();
 
         try {
             Message response;
@@ -459,8 +459,8 @@ public class GameLobby extends JFrame {
                 System.out.println(response.getErrorMessage());
                 return 0;
             }
-            HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(   // TODO: EOFException
-                    new HeartbeatMessage(timestamp)
+            HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
+                    new HeartbeatMessage(timestampBefore)
             );
 
             if (heartbeatResponse.isError()){
@@ -468,8 +468,8 @@ public class GameLobby extends JFrame {
                 return 0;
             }
 
-            System.out.println("Timestamp: " + timestamp);
-            System.out.println("heartbeatResponse: " + heartbeatResponse);
+            latency = (int) (heartbeatResponse.getTime() - timestampBefore);
+
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
