@@ -1,7 +1,10 @@
 package client;
 
 
+import common.PlayerData;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public interface GameStateTracker {
     String getActivePlayerID(); // returns nick or unique identifier of current player

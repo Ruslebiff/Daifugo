@@ -1,5 +1,6 @@
 package server;
 
+import client.Card;
 import common.CardData;
 import common.GameListing;
 import common.PlayerData;
@@ -195,10 +196,12 @@ public class Game {
     public void leaveGame(UUID player) {
         synchronized (this) {
             players.remove(player);
+            turnSequence.remove(player);
             if (players.size() == 0) {
                removeFromList();
             }
         }
+        // TODO: calle newRound() direkte her, eller gjøre noe annet?
     }
 
     public void start() {
@@ -251,6 +254,18 @@ public class Game {
      * Private helpers
      ************************/
 
+    private List<CardData> prepareDeck() {
+        List<CardData> deck = new ArrayList<>();
+
+        char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
+        for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
+            for (int number = 2; number < 15; number++)
+                deck.add(new CardData(number, suits[suit]));    // Add the card to the cardList
+        Collections.shuffle(deck);          // Shuffle the cards
+
+        return deck;
+    }
+
 
     private void removeFromList() {
         synchronized (Game.class) {
@@ -266,6 +281,7 @@ public class Game {
 
     private void nextPlayer() {
         //TODO: make loop-around code -- also, players may go out
+        // TODO: throw roundOver exception if only one hand remains?
         currentPlayer++;
     }
 
@@ -273,14 +289,52 @@ public class Game {
 
     /**
      * Game mechanics
-     */
+     **************************************/
 
-    private void dealCards() {
-        //TODO
+
+    /**
+     * Populates the player hands with new cards.
+     *
+     * Turn sequence must be determined before calling this function.
+     *
+     * @return UUID id of the hand with the 3 of diamonds
+     */
+    private UUID dealCards() {
+        int player = 0;
+        UUID playerWithThreeOfDiamonds = null;
+        UUID tmp;
+
+
+        // empties all hands
+        for (UUID hand : hands.keySet()) {
+            hands.remove(hand);
+            hands.put(hand, new ArrayList<>());
+        }
+
+        // deals new cards
+        for (CardData card : prepareDeck()) {
+
+            if (player == turnSequence.size())
+                player = 0;
+
+            tmp = turnSequence.get(player++);
+            hands.get(tmp).add(card);
+
+            if (playerWithThreeOfDiamonds == null
+                    && card.getNumber() == 3
+                    && card.getSuit() == 'D'
+            ) {
+                playerWithThreeOfDiamonds = tmp;
+            }
+        }
+
+        return playerWithThreeOfDiamonds;
     }
 
     private void shufflePlayerOrder() {
-        //TODO
+        turnSequence = new ArrayList<>();
+        turnSequence.addAll(players.keySet());
+        Collections.shuffle(turnSequence);
     }
 
     private void findStartingPlayer() {
