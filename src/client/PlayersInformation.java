@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
-public class PlayersInformation extends JPanel implements GameStateTracker {
+public class PlayersInformation extends JPanel {
+    private GameStateTracker stateTracker;
     private final Player[] players;     // Array of the players in the game
     private JLabel[] playerInfo;        // Array of the labels representing the players
     private int previousTurn;           // ID of the player before you
@@ -14,7 +15,8 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
     private Color neutralColor = new Color(119,136,153);
     private HashMap<Integer, String> roleIdentifier;
 
-    public PlayersInformation(Player[] players) {
+    public PlayersInformation(Player[] players, GameStateTracker stateTracker) {
+        this.stateTracker = stateTracker;
         this.players = players;
         int WIDTH = 100;
         int HEIGHT = 50;
@@ -50,7 +52,7 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
 
     // Change color to the current player and turn the others gray
     public void indicateTurn() {
-        int pID = Integer.parseInt(getActivePlayerID());    // Get the ID of the active player
+        int pID = Integer.parseInt(stateTracker.getActivePlayerID());    // Get the ID of the active player
 
         if(previousTurn != pID) {       // If the turn is supposed to go to the next player, else do nothing
             playerInfo[previousTurn].setBackground(neutralColor);
@@ -59,33 +61,4 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
         }
     }
 
-    @Override
-    public String getActivePlayerID() {
-        return "0";
-    }
-
-    @Override
-    public ArrayList<Card> dealPlayerHand(String token) {
-        return null;
-    }
-
-    @Override
-    public Boolean checkIfPlayable() {
-        return null;
-    }
-
-    @Override
-    public int getLastPlayedType() {
-        return 0;
-    }
-
-    @Override
-    public void relinquishTurn() {
-
-    }
-
-    @Override
-    public void playCards(ArrayList<Card> playedCards) {
-
-    }
 }
