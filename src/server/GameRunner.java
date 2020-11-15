@@ -60,7 +60,7 @@ public class GameRunner {
             );
 
             po.getGameData().setLatency(receiveTime - request.getTime());
-            game.registerGameStateChange();     //TODO: maybe overkill, needs live testing
+            //game.registerGameStateChange();     //TODO: maybe overkill, needs live testing
             return;
         }
 
