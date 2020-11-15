@@ -14,7 +14,6 @@ public class ServerTracker implements GameStateTracker {
     
 
 
-    // TODO: go over overrides when syncing with new changes from table_class branch
 
     @Override
     public String getActivePlayerID() {
@@ -22,12 +21,7 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public ArrayList<Card> dealPlayerHand(String token) {
-        return null;
-    }
-
-    @Override
-    public Boolean checkIfPlayable() {
+    public ArrayList<Card> getHand(String token) {
         return null;
     }
 
@@ -42,7 +36,22 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public void playCards(ArrayList<Card> playedCards) {
+    public void setNextTurn() {
 
+    }
+
+    @Override
+    public boolean playCards(ArrayList<Card> playedCards) {
+        return false;
+    }
+
+    @Override
+    public boolean giveCards(ArrayList<Card> cards, int role) {
+        return false;
+    }
+
+    @Override
+    public ArrayList<Card> getLastPlayedCards() {
+        return null;
     }
 }
