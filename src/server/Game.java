@@ -201,15 +201,14 @@ public class Game {
                removeFromList();
             }
         }
-        // TODO: calle newRound() direkte her, eller gjøre noe annet?
+        // TODO: call resetRound() if the game is started.
     }
 
     public void start() {
         synchronized (this) {
             started = true;
             shufflePlayerOrder();
-            dealCards();
-            findStartingPlayer();
+            findStartingPlayer(dealCards());
             propagateChange();
         }
     }
@@ -228,10 +227,8 @@ public class Game {
 
     public void newRound() {
         synchronized (this) {
-            //TODO: handle a player having left
             assignRoles();
-            dealCards();
-            findStartingPlayer();
+            findStartingPlayer(dealCards());
             propagateChange();
         }
     }
@@ -283,6 +280,12 @@ public class Game {
         //TODO: make loop-around code -- also, players may go out
         // TODO: throw roundOver exception if only one hand remains?
         currentPlayer++;
+    }
+
+    private void resetRound() {
+        // TODO: this function is called when a player has left, so resetting round
+        // sets all roles back to neutral, and starts a new round with remaining
+        // players, if enough.
     }
 
 
@@ -337,10 +340,24 @@ public class Game {
         Collections.shuffle(turnSequence);
     }
 
-    private void findStartingPlayer() {
-        //TODO: depends on roles, or location of three of diamonds if first round
+    /**
+     * Setting currentPlayer for the start of a round.
+     *
+     * MUST be called inside a 'synchronized' block!
+     *
+     * @param threeOfDiamonds UUID ID of player having the three of diamonds
+     */
+    private void findStartingPlayer(UUID threeOfDiamonds) {
 
-        // if any player has an out-count of 0, use 3 of diamonds
-        // else select bum
+        currentPlayer = -1;
+        for (UUID id : turnSequence) {
+            if (players.get(id).getGameData().getRole() == Role.BUM) {
+                currentPlayer = turnSequence.indexOf(id);
+                break;
+            }
+        }
+
+        if (currentPlayer < 0)
+            currentPlayer = turnSequence.indexOf(threeOfDiamonds);
     }
 }

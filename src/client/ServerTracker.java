@@ -1,8 +1,10 @@
 package client;
 
 import client.networking.ClientConnection;
+import common.PlayerData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ServerTracker implements GameStateTracker {
 
@@ -11,9 +13,22 @@ public class ServerTracker implements GameStateTracker {
     public ServerTracker(ClientConnection connection) {
         this.connection = connection;
     }
-    
 
 
+    @Override
+    public boolean isMyTurn() {
+        return false;
+    }
+
+    @Override
+    public List<PlayerData> getPlayerList() {
+        return null;
+    }
+
+    @Override
+    public int getActivePlayerIndex() {
+        return 0;
+    }
 
     @Override
     public String getActivePlayerID() {
