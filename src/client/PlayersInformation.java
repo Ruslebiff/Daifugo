@@ -3,6 +3,7 @@ package client;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
 public class PlayersInformation extends JPanel implements GameStateTracker {
@@ -11,6 +12,7 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
     private int previousTurn;           // ID of the player before you
     private Color turnColor = new Color(135,206,250);
     private Color neutralColor = new Color(119,136,153);
+    private HashMap<Integer, String> roleIdentifier;
 
     public PlayersInformation(Player[] players) {
         this.players = players;
@@ -18,6 +20,13 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
         int HEIGHT = 50;
         int PANEL_HEIGHT = players.length * HEIGHT;
         playerInfo = new JLabel[players.length];
+
+        roleIdentifier = new HashMap<Integer, String>();
+        roleIdentifier.put(-2, "Bum");
+        roleIdentifier.put(-1, "Vice Bum");
+        roleIdentifier.put(0, "Neutral");
+        roleIdentifier.put(1, "Vice President");
+        roleIdentifier.put(2, "President");
 
         setLayout(new GridLayout(0,1));
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
@@ -28,7 +37,7 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
 
         // For each player in the game, create a JLabel
         for (int i = 0; i < players.length; i++) {
-            String playerInformationTxt = players[i].getName() + " - " + players[i].getRole();
+            String playerInformationTxt = players[i].getName() + " - " + roleIdentifier.get(players[i].getRole());
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setSize(new Dimension(WIDTH, HEIGHT));
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
@@ -60,4 +69,23 @@ public class PlayersInformation extends JPanel implements GameStateTracker {
         return null;
     }
 
+    @Override
+    public Boolean checkIfPlayable() {
+        return null;
+    }
+
+    @Override
+    public int getLastPlayedType() {
+        return 0;
+    }
+
+    @Override
+    public void relinquishTurn() {
+
+    }
+
+    @Override
+    public void playCards(ArrayList<Card> playedCards) {
+
+    }
 }

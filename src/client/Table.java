@@ -35,23 +35,30 @@ public class Table extends JPanel implements GameStateTracker {
         /**
          * REMOVE LATER
          */
-        ArrayList<Card> p1 = new ArrayList<>();;
-        for (int i = 0; i < 19; i++) {
-            p1.add(cards.get(i));
+        ArrayList<Card> p1_cards = new ArrayList<>();;
+        for (int i = 0; i < cards.size()/3; i++) {
+            p1_cards.add(cards.get(i));
         }
 
         /**
          * REMOVE LATER
          */
         Player[] players = new Player[1];
-        players[0] = new Player("Mohammed Lee", 0, "President", p1);
-        players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,700,TABLE_WIDTH/2,TABLE_HEIGHT/8);
+        players[0] = new Player("Mohammed Lee", 0, p1_cards, TABLE_WIDTH/2);
+        players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,(TABLE_HEIGHT/2) + 100,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 100);
         add(players[0]);
 
 
         PlayersInformation playersInformation = new PlayersInformation(players);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
+
+
+        int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
+        CardsOnTable cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight);
+        cardsOnTable.setBounds((TABLE_WIDTH/2) - (cardsOnTableWidth/2), (TABLE_HEIGHT/3) - (cardsOnTableHeight/2),
+                                cardsOnTableWidth, cardsOnTableHeight);
+        add(cardsOnTable);
     }
 
     @Override
@@ -69,4 +76,25 @@ public class Table extends JPanel implements GameStateTracker {
     public ArrayList<Card> dealPlayerHand(String token) {
         return null;
     }
+
+    @Override
+    public Boolean checkIfPlayable() {
+        return null;
+    }
+
+    @Override
+    public int getLastPlayedType() {
+        return 0;
+    }
+
+    @Override
+    public void relinquishTurn() {
+
+    }
+
+    @Override
+    public void playCards(ArrayList<Card> playedCards) {
+
+    }
+
 }

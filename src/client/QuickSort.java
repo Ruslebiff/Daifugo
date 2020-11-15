@@ -12,7 +12,7 @@ public class QuickSort {
         for (int j=low; j<high; j++)
         {
             // If current element is smaller than the pivot
-            if (arr.get(j).getValue() < pivot)
+            if (arr.get(j).getValue() > pivot)      // The greater than sorts the array from lowest to highest
             {
                 i++;
 
