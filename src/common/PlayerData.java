@@ -8,17 +8,17 @@ public class PlayerData {
     private long latency;
     private int numberOfCards;
     private boolean connectionLost;
-    private int role;
+    private Role role;
     private boolean passed;
     private boolean outOfRound;
     private int outCount;
-    private List<Integer> previousRoles;
+    private List<Role> previousRoles;
 
     public PlayerData(
             String nick,
             int numberOfCards,
             boolean passed,
-            int role,
+            Role role,
             int latency
     ) {
        this.nick = nick;
@@ -47,7 +47,7 @@ public class PlayerData {
         return numberOfCards;
     }
 
-    public int getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -76,7 +76,7 @@ public class PlayerData {
         return passed;
     }
 
-    public void setRole(int role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -96,5 +96,31 @@ public class PlayerData {
         return outOfRound;
     }
 
+    public void assignRoleFewPlayers() {
+        if (outCount == 1) {
+            role = Role.PRESIDENT;
+        } else if (outCount == 3) {
+            role = Role.BUM;
+        } else {
+            role = Role.NEUTRAL;
+        }
+        previousRoles.add(role);
+    }
+
+
+    public void assignRoleManyPlayers(int playerAmount) {
+        if (outCount == 1) {
+            role = Role.PRESIDENT;
+        } else if (outCount == 2) {
+            role = Role.VICE_PRESIDENT;
+        } else if (outCount == playerAmount - 1) {
+            role = Role.VICE_BUM;
+        } else if (outCount == playerAmount) {
+            role = Role.BUM;
+        } else {
+            role = Role.NEUTRAL;
+        }
+        previousRoles.add(role);
+    }
 
 }

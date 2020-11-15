@@ -3,6 +3,7 @@ package server;
 import common.CardData;
 import common.GameListing;
 import common.PlayerData;
+import common.Role;
 import server.exceptions.*;
 
 import java.util.*;
@@ -151,7 +152,7 @@ public class Game {
                 user.getNick(),
                 0,
                 false,
-                0,
+                Role.NEUTRAL,
                 0
         );
 
@@ -211,7 +212,15 @@ public class Game {
     }
 
     private void assignRoles() {
-        //TODO: assigns roles to players based on player count and results of last round
+        if (players.size() == 3) {
+            for (PlayerObject po : players.values()) {
+                po.getGameData().assignRoleFewPlayers();
+            }
+        } else {
+            for (PlayerObject po : players.values()) {
+                po.getGameData().assignRoleManyPlayers(players.size());
+            }
+        }
     }
 
     public void newRound() {
@@ -243,7 +252,6 @@ public class Game {
      ************************/
 
 
-    // TODO: removing game from list when done with it
     private void removeFromList() {
         synchronized (Game.class) {
             games.remove(ID);
