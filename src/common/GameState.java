@@ -1,15 +1,10 @@
 package common;
 
-import server.Game;
-import server.PlayerObject;
-import server.UserSession;
-import server.exceptions.UserSessionError;
+import server.*;
+import server.exceptions.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class GameState implements Serializable {
     private List<PlayerData> players;

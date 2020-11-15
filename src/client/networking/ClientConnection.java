@@ -1,8 +1,6 @@
 package client.networking;
 
-import protocol.Message;
-import protocol.MessageType;
-import protocol.Protocol;
+import protocol.*;
 
 import java.net.*;
 import java.io.*;

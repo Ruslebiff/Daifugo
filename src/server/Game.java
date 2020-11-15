@@ -1,10 +1,6 @@
 package server;
 
-import client.Card;
-import common.CardData;
-import common.GameListing;
-import common.PlayerData;
-import common.Role;
+import common.*;
 import server.exceptions.*;
 
 import java.util.*;

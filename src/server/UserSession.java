@@ -1,10 +1,8 @@
 package server;
 
-import server.exceptions.GameException;
-import server.exceptions.UserSessionError;
+import server.exceptions.*;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 import java.util.*;
 
 public class UserSession implements Serializable {
