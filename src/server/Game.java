@@ -238,6 +238,7 @@ public class Game {
     }
 
     public void start() {
+        // TODO: check if enough players
         synchronized (this) {
             started = true;
             shufflePlayerOrder();
