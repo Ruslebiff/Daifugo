@@ -205,6 +205,7 @@ public class GameLobby extends JFrame {
         gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
+        gamesTable.setAutoCreateRowSorter(true);
 
         JButton joinGameButton = new JButton();
 
