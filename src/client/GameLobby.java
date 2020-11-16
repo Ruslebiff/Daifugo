@@ -258,10 +258,10 @@ public class GameLobby extends JFrame {
 
         newGameConfirmButton.addActionListener(e -> {
             char[] pw;
-            if (newGamePrivateCheckbox.isSelected()){
+            if (newGamePrivateCheckbox.isSelected() && newGamePassword.getPassword().length > 0){
                 pw = newGamePassword.getPassword();
             } else {
-                pw = new char[0];
+                pw = null;
             }
             createNewGame(newGameName.getText(), pw);
             controlPanel.setVisible(true);
@@ -450,14 +450,14 @@ public class GameLobby extends JFrame {
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
             for (GameListing listing : gamesFromServer) {
-//                System.out.printf(
-//                        "%s, %s, %s, %d, %b\n",
-//                        listing.getID(),
-//                        listing.getTitle(),
-//                        listing.getOwner(),
-//                        listing.getNumberOfPlayers(),
-//                        listing.hasPassword()
-//                );
+                System.out.printf(
+                        "%s, %s, %s, %d, %b\n",
+                        listing.getID(),
+                        listing.getTitle(),
+                        listing.getOwner(),
+                        listing.getNumberOfPlayers(),
+                        listing.hasPassword()
+                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
@@ -475,9 +475,10 @@ public class GameLobby extends JFrame {
     }
 
     /**
-     * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when refreshed.
+     * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when
+     * refreshed.
      * @param gameName The name of the game that should be created.
-     * @param gamePassword The password for the game that should be created. Leave empty char[] if it shouldn't have any password.
+     * @param gamePassword The password for the game that should be created. Use null if it shouldn't have any password.
      */
     public void createNewGame(String gameName, char[] gamePassword) {
         try {
