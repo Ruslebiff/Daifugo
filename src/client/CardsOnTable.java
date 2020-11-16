@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
     private final String filePath;  // Path to image of green felt
-    private final ArrayList<Card> lastFourCards = new ArrayList<>();   // The last three cards played
+    private ArrayList<Card> lastFourCards = new ArrayList<>();   // The last three cards played
     private GameStateTracker stateTracker;
 
     public CardsOnTable(int widht, int height, GameStateTracker sT) {
@@ -29,12 +29,10 @@ public class CardsOnTable extends JPanel{
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     }
 
-    // Function shows the last three cards played on the table
-    // Får kort fra server
+    // Function shows the last cards played on the table
     public void updateCardsOnTable() {
         int cardWidth = 80, cardHeight = 120;
-
-//        lastFourCards = stateTracker.getCardsOnTable();
+        lastFourCards = stateTracker.getLastPlayedCards();
         lastFourCards.forEach(c -> {
             c.setBounds((this.getWidth()/2) - (cardWidth/2), (this.getHeight()/2) - (cardHeight/2),
                         cardWidth, cardHeight);

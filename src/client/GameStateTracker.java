@@ -17,7 +17,12 @@ public interface GameStateTracker {
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
     void relinquishTurn();
     void setNextTurn();
+    boolean getIsMyTurn();
     boolean playCards(ArrayList<Card> playedCards);
     boolean giveCards(ArrayList<Card> cards, int role);
+    boolean isNewTrick();
     ArrayList<Card> getLastPlayedCards();
+    ArrayList<Card> getRoundCards();
+    void resetRound();
+    void setAllFourSameCards();
 }

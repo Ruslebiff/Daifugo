@@ -9,8 +9,10 @@ import java.util.List;
 public class DummyTracker implements GameStateTracker{
     private ArrayList<Card> deck = new ArrayList<>();
     private ArrayList<Card> p1_cards = new ArrayList<>();   // TODO: REMOVE
-    private ArrayList<Card> playedCards = new ArrayList<>();    // array list of the cards played
+    private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
+    private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
     private int playedType = 0;     // integer indicating if the cards played are singles, doubles or triples
+    private boolean allFourSameCards = false;
 
     public DummyTracker(){
 
@@ -66,9 +68,16 @@ public class DummyTracker implements GameStateTracker{
     }
 
     @Override
+    public boolean getIsMyTurn() {
+        return false;
+    }
+
+    @Override
     public boolean playCards(ArrayList<Card> pC) {
         playedType = pC.size();
-        this.playedCards.addAll(pC);
+        this.lastPlayedCards.removeAll(lastPlayedCards);
+        this.lastPlayedCards.addAll(pC);
+        this.allCardsInRound.addAll(pC);
         return true;
     }
 
@@ -79,7 +88,29 @@ public class DummyTracker implements GameStateTracker{
     }
 
     @Override
+    public boolean isNewTrick() {
+        return false;
+    }
+
+    @Override
     public ArrayList<Card> getLastPlayedCards() {
-        return playedCards;
+        return lastPlayedCards;
+    }
+
+    @Override
+    public ArrayList<Card> getRoundCards() {
+        return allCardsInRound;
+    }
+
+    @Override
+    public void resetRound() {
+        allCardsInRound.removeAll(allCardsInRound);
+        lastPlayedCards.removeAll(lastPlayedCards);
+        playedType = 0;
+    }
+
+    @Override
+    public void setAllFourSameCards() {
+        allFourSameCards = true;
     }
 }
