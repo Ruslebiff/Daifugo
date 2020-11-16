@@ -46,6 +46,13 @@ public class GameLobby extends JFrame {
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
     private ScheduledExecutorService heartbeatExecutor;
 
+    /* panels */
+    JPanel newGamePanel = new JPanel();
+    JPanel statusBar = new JPanel();
+    JPanel settingsPanel = new JPanel();
+    JPanel controlPanel = new JPanel();
+    JScrollPane sp = new JScrollPane(gamesTable);
+
     public GameLobby() {
 
         try {
@@ -87,7 +94,6 @@ public class GameLobby extends JFrame {
 
 
         /* New game view */
-        JPanel newGamePanel = new JPanel();
         newGamePanel.setSize(window_width,window_height);
         newGamePanel.setVisible(false);
         newGamePanel.setLayout(new GridBagLayout());
@@ -124,7 +130,7 @@ public class GameLobby extends JFrame {
 
 
         /* Settings view */
-        JPanel settingsPanel = new JPanel();
+
         settingsPanel.setSize(window_width,window_height);
         settingsPanel.setVisible(false);
         settingsPanel.setLayout(null);
@@ -159,7 +165,7 @@ public class GameLobby extends JFrame {
         settingsPanel.add(settingsConfirmButton, gbc);
 
         /* Control bar */
-        JPanel controlPanel = new JPanel();
+
         controlPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         controlPanel.setBackground(Color.lightGray);
@@ -207,7 +213,6 @@ public class GameLobby extends JFrame {
         controlPanel.add(settingsButton, c);
 
         /* Status bar */
-        JPanel statusBar = new JPanel();
         statusBar.setBackground(Color.lightGray);
         statusBar.setLayout(new BorderLayout());
 
@@ -251,7 +256,7 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
-        JScrollPane sp = new JScrollPane(gamesTable);
+
 
         /* Button action listeners*/
         newGamePrivateCheckbox.addActionListener(e -> {
@@ -267,9 +272,7 @@ public class GameLobby extends JFrame {
                 pw = null;
             }
             createNewGame(newGameName.getText(), pw);
-            controlPanel.setVisible(true);
-            sp.setVisible(true);
-            newGamePanel.setVisible(false);
+            sp.setVisible(false);
         });
 
         settingsConfirmButton.addActionListener(e -> {
@@ -416,6 +419,7 @@ public class GameLobby extends JFrame {
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.PAGE_END);
         setVisible(true);
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -510,17 +514,22 @@ public class GameLobby extends JFrame {
                     tmp.getState()
             );
 
-            try {
-                new GameWindow(tracker);
-            } catch (UserSessionError userSessionError) {
-                userSessionError.printStackTrace();
-            }
+            sp.setVisible(false);
+            statusBar.setVisible(false);
+            newGamePanel.setVisible(false);
+            settingsPanel.setVisible(false);
+            controlPanel.setVisible(false);
+            setTitle("Daifugo - " + gameName);
+
+            Table table = new Table(window_width, window_height, tracker);
+            table.setBounds(0,0, getWidth(), getHeight());
+            table.setVisible(true);
+            table.setBounds(0,0,window_width,window_height);
+            add(table);
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-        refreshGamesList(); // refresh table
     }
 
     /**
