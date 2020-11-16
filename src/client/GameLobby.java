@@ -3,6 +3,8 @@ package client;
 import client.networking.ClientConnection;
 import common.GameListing;
 import protocol.*;
+import server.exceptions.UserSessionError;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -42,6 +44,7 @@ public class GameLobby extends JFrame {
     private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
     private volatile boolean connectionOK = false;
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
+    private ScheduledExecutorService heartbeatExecutor;
 
     public GameLobby() {
 
@@ -213,7 +216,7 @@ public class GameLobby extends JFrame {
             latency = getLatency();
             latencyLabel.setText("Latency: " + latency + "  ");
         };
-        ScheduledExecutorService heartbeatExecutor = Executors.newScheduledThreadPool(1);
+        heartbeatExecutor = Executors.newScheduledThreadPool(1);
         heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
 
 
@@ -496,6 +499,20 @@ public class GameLobby extends JFrame {
             if (response.isError()){
                 System.out.println("ERROR: " + response.getErrorMessage());
                 return;
+            }
+
+
+            heartbeatExecutor.shutdown();
+            GameStateResponse tmp = (GameStateResponse) response;
+            GameStateTracker tracker = new ServerTracker(
+                    conn,
+                    tmp.getState()
+            );
+
+            try {
+                new GameWindow(tracker);
+            } catch (UserSessionError userSessionError) {
+                userSessionError.printStackTrace();
             }
 
         } catch (IOException | ClassNotFoundException e) {
