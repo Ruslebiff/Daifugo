@@ -11,7 +11,7 @@ public class PlayerData {
     private boolean passed;
     private boolean outOfRound;
     private int outCount;
-    private List<Role> previousRoles;
+    private final List<Role> previousRoles;
 
     public PlayerData(
             String nick,

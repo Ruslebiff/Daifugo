@@ -5,10 +5,18 @@ import common.PlayerData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ServerTracker implements GameStateTracker {
 
     private final ClientConnection connection;
+    private Callable<Void> guiCallback;
+
+    public void registerCallback(Callable<Void> func) {
+        guiCallback = func;
+    }
+
+
 
     public ServerTracker(ClientConnection connection) {
         this.connection = connection;

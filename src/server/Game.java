@@ -66,6 +66,7 @@ public class Game {
     private final Map<UUID, List<CardData>> hands;
     private boolean cancelled;
     private List<UUID> turnSequence;
+    private int goneOut;        // increments for each player who goes out, resets each round
 
 
     /**
@@ -221,6 +222,14 @@ public class Game {
         }
     }
 
+    public void playCards(UUID player, List<CardData> cards) {
+        // TODO: if cards not allowed to be played, throw exception
+        // TODO: else, put cards on top of table, and remove them from players hand
+    }
+     public void pass(UUID player) {
+        // TODO
+     }
+
     public void newRound() {
         synchronized (this) {
             assignRoles();
@@ -272,10 +281,35 @@ public class Game {
         }
     }
 
-    private void nextPlayer() {
-        //TODO: make loop-around code -- also, players may go out
-        // TODO: throw roundOver exception if only one hand remains?
-        currentPlayer++;
+
+    private void nextPlayer() throws RoundOver {
+
+        // only one player left -- round is over
+        if (goneOut == players.size()-1) {
+
+            // find the last remaining player, and set outcount
+            for (UUID id : hands.keySet()) {
+                if (hands.get(id).isEmpty()) {
+                    players.get(id).getGameData().setOutCount(players.size());
+                    break;
+                }
+            }
+
+            throw new RoundOver();
+        }
+
+        // find the next player in turn order who hasn't passed or gone out
+        PlayerData pd;
+        do {
+            pd = players.get(turnSequence.get(++currentPlayer)).getGameData();
+        } while (pd.hasPassed() || pd.isOutOfRound());
+
+    }
+
+    private void newTrick() {
+        for (PlayerObject po : players.values()) {
+            po.getGameData().setPassed(false);
+        }
     }
 
     private void resetRound() {
