@@ -79,6 +79,8 @@ public class GameState implements Serializable {
         return started;
     }
 
+    public List<CardData> getHand() { return hand; }
+
     public ArrayList<PlayerData> getPlayers() {
         return players;
     }

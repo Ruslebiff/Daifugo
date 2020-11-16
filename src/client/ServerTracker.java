@@ -168,7 +168,9 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public void setNextTurn() {
-
+        synchronized (this) {
+            state
+        }
     }
 
     @Override

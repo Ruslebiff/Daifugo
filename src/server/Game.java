@@ -244,10 +244,12 @@ public class Game {
     public void start() {
         // TODO: check if enough players
         synchronized (this) {
-            started = true;
-            shufflePlayerOrder();
-            findStartingPlayer(dealCards());
-            propagateChange();
+            if (players.size() > 2) {
+                started = true;
+                shufflePlayerOrder();
+                findStartingPlayer(dealCards());
+                propagateChange();
+            }
         }
     }
 
@@ -371,7 +373,9 @@ public class Game {
         // find the next player in turn order who hasn't passed or gone out
         PlayerData pd;
         do {
-            pd = players.get(turnSequence.get(++currentPlayer)).getGameData();
+            if (++currentPlayer == players.size())
+                currentPlayer = 0;
+            pd = players.get(turnSequence.get(currentPlayer)).getGameData();
         } while (pd.hasPassed() || pd.isOutOfRound());
 
     }
@@ -413,6 +417,8 @@ public class Game {
             hands.remove(hand);
             hands.put(hand, new ArrayList<>());
         }
+
+
 
         // deals new cards
         for (CardData card : prepareDeck()) {

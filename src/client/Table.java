@@ -85,8 +85,7 @@ public class Table extends JPanel {
     }
 
     public void startGame() {
-        ArrayList<PlayerData> playerDataList = (ArrayList<PlayerData>) stateTracker.getPlayerList();
-        int noOfHands = deckSize/playerDataList.size();
+//        stateTracker
     }
 
     @Override
