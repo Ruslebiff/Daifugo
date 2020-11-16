@@ -38,6 +38,9 @@ public class Table extends JPanel {
         setLayout(null);
 
 
+        stateTracker.registerCallback(this::updateGUI);
+
+
         // TODO: REMOVE LATER
         Player[] players = new Player[1];
         players[0] = new Player("Mohammed Lee", 0, stateTracker.getHand("temp"), TABLE_WIDTH/2, stateTracker);
