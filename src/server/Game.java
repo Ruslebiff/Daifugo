@@ -151,13 +151,13 @@ public class Game {
      * @return
      */
     private List<CardData> _getTopCards() {
-        int counter = 3;
-        while (cardsOnTable.size() < counter)   // Make sure that
-            counter--;
+        if (cardsOnTable.size() == 0) {
+            return new ArrayList<>();
+        }
 
         List<CardData> tail;
         tail = cardsOnTable.subList(
-                Math.max(cardsOnTable.size() - counter, 0), cardsOnTable.size()
+                Math.max(cardsOnTable.size() - 3, 0), cardsOnTable.size()
         );
         return tail;
     }
