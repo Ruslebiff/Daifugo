@@ -146,13 +146,24 @@ public class Game {
         return noOfCardsInTrick;
     }
 
+    /**
+     * Internal non-synchronized method for getting top 4 cards
+     * @return
+     */
+    private List<CardData> _getTopCards() {
+        List<CardData> tail = cardsOnTable.subList(
+                Math.max(cardsOnTable.size() - 4, 0), cardsOnTable.size()
+        );
+        return tail;
+    }
+
     public List<CardData> getTopCards() {
+        List<CardData> tmp;
         synchronized (this) {
-            List<CardData> tail = cardsOnTable.subList(
-                    Math.max(cardsOnTable.size() - 3, 0), cardsOnTable.size()
-            );
-            return tail;
+            tmp = _getTopCards();
         }
+        tmp.remove(0);  // only return top 3 to clients
+        return tmp;
     }
 
     public String getOwnerNick() throws UserSessionError {
@@ -249,14 +260,39 @@ public class Game {
 
     public void playCards(UUID player, List<CardData> cards) {
         // TODO: if cards not allowed to be played, throw exception
-        // TODO: else, put cards on top of table, and remove them from players hand
-        synchronized (this) {
-            cardsOnTable.addAll(cards);
-        }
+        try {
+            synchronized (this) {
+                cardsOnTable.addAll(cards);
+                hands.get(player).removeAll(cards);
 
+                // check if there is a new trick from playing
+                List<CardData> topCards = _getTopCards();
+                if (cards.get(0).getValue() == 16) {
+                    newTrick();
+                    return;
+                } else if (topCards.size() == 4
+                        && topCards.get(1) == topCards.get(0)
+                        && topCards.get(2) == topCards.get(0)
+                        && topCards.get(3) == topCards.get(0)
+                ) {
+                    // all 4 topcards the same, start new trick
+                    newTrick();
+                    return;
+                }
+                    noOfCardsInTrick = cards.size(); // TODO: should add some verification here
+                    nextPlayer();
+                    propagateChange();
+            }
+        } catch (RoundOver roundOver) {
+            newRound();
+        }
     }
-     public void pass(UUID player) {
-        // TODO
+    public void pass(UUID player) throws RoundOver {
+        synchronized (this) {
+            players.get(player).getGameData().setPassed(true);
+            nextPlayer();
+            propagateChange();
+        }
      }
 
     public void newRound() {
