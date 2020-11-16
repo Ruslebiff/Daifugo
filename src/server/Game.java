@@ -319,7 +319,7 @@ public class Game {
     // TODO: game rounds
     // TODO: game turns
     // TODO: round end
-        // TODO: will players continue?
+        // new rounds automatically start
 
 
     /**

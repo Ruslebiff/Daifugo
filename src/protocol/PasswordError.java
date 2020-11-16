@@ -5,5 +5,3 @@ public class PasswordError extends Message {
         super(MessageType.PASSWORD_ERROR);
     }
 }
-
-//TODO: send this if joining with incorrect password
