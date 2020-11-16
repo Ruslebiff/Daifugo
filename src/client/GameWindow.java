@@ -7,12 +7,11 @@ public class GameWindow extends JFrame {
     private final int FRAME_HEIGHT = 1000;
     private final int FRAME_WIDTH = 1000;
 
-
-
-    public GameWindow(String gameName) {
+    public GameWindow() {
         setSize(FRAME_WIDTH,FRAME_HEIGHT);
         setLayout(null);
-        setTitle(gameName);
+        setLocationRelativeTo(null);
+        setTitle("gameName");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         Table table = new Table(FRAME_WIDTH, FRAME_HEIGHT);

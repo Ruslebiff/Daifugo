@@ -16,7 +16,9 @@ public class Message implements Serializable {
     }
 
     public boolean isError() {
-       return msgType == MessageType.ERROR || msgType == MessageType.PASSWORD_ERROR;
+       return msgType == MessageType.ERROR
+               || msgType == MessageType.PASSWORD_ERROR
+               || msgType == MessageType.CANCEL_GAME_ERROR;
     }
 
     public String getErrorMessage() {

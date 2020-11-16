@@ -1,10 +1,8 @@
 package server;
 
-import server.exceptions.GameException;
-import server.exceptions.UserSessionError;
+import server.exceptions.*;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 import java.util.*;
 
 public class UserSession implements Serializable {
@@ -100,7 +98,8 @@ public class UserSession implements Serializable {
     }
 
     public void leaveCurrentGame() {
-        // TODO
+            currentGame.leaveGame(getID());
+            currentGame = null;
     }
 
     /**

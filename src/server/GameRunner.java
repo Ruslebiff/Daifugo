@@ -1,13 +1,9 @@
 package server;
 
 import protocol.*;
-import server.exceptions.GameDisconnect;
-import server.exceptions.UserSessionError;
+import server.exceptions.*;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.logging.*;
@@ -25,6 +21,7 @@ public class GameRunner {
     private final UserSession userSession;
     private final String logPrefix;
     private final Logger LOGGER;
+    private boolean running;
 
     public GameRunner(
             UserSession userSession,
@@ -47,13 +44,75 @@ public class GameRunner {
         );
     }
 
+    private void sendHeartbeatResponse(HeartbeatMessage request) throws IOException {
 
-    private void sendHeartbeatResponse() throws IOException {
-        //TODO: check if game state is updated
-        long receiveTime = Instant.now().toEpochMilli();
-        out.writeObject(
-                new HeartbeatMessage(receiveTime)
-        );
+        // if state hasn't been updated, simply heartbeat back
+        PlayerObject po = game.getPlayers().get(userSession.getID());
+        if (!po.isStateUpdated()) {
+            long receiveTime = Instant.now().toEpochMilli();
+            out.writeObject(
+                    new HeartbeatMessage(receiveTime)
+            );
+
+            po.getGameData().setLatency(receiveTime - request.getTime());
+            //game.registerGameStateChange();     //TODO: maybe overkill, needs live testing
+            return;
+        }
+
+        // leave game if cancelled, and inform client
+        if (game.isCancelled()) {
+            game.leaveGame(userSession.getID());
+            out.writeObject(new CancelledGameError());
+            running = false;
+            return;
+        }
+
+
+
+        // returning game state response
+        try {
+            out.writeObject(new GameStateResponse(game, userSession));
+        } catch (UserSessionError userSessionError) {
+            out.writeObject(new ErrorMessage(userSessionError.getMessage()));
+        }
+
+
+    }
+
+    private boolean userNotOwner() throws IOException {
+        try {
+            if (!game.getOwnerNick().equals(userSession.getNick())) {
+                out.writeObject(new ErrorMessage("Not allowed"));
+                return true;
+            }
+        } catch (UserSessionError userSessionError) {
+            out.writeObject(new ErrorMessage(userSessionError.getMessage()));
+            return true;
+        }
+
+        return false;
+    }
+
+    private void validateCancellation() throws IOException, LeftGame {
+
+        if (userNotOwner())
+            return;
+
+        game.cancelGame();
+        throw new LeftGame();
+    }
+
+    private void validateGameStart() throws IOException {
+        if (userNotOwner())
+            return;
+
+        game.start();
+
+    }
+
+    private void playerDisconnect() throws GameDisconnect {
+        userSession.leaveCurrentGame();
+        throw new GameDisconnect();
     }
 
     public void run() throws GameDisconnect, IOException {
@@ -66,13 +125,13 @@ public class GameRunner {
         } catch (UserSessionError | IOException userSessionError) {
             out.writeObject(new ErrorMessage(userSessionError.toString()));
         }
-
-        while (true) {
+        running = true;
+        while (running) {
             try {
 
                 Message request;
                 try {
-                    request = (Message) in.readObject(); // EOF
+                    request = (Message) in.readObject();
                 } catch (SocketTimeoutException e) {
                     LOGGER.info("socket exception, breaking runloop");
                     break;
@@ -90,8 +149,11 @@ public class GameRunner {
                             if (!handleReconnection(request))
                                 break runLoop;
                         }*/
-                    case HEARTBEAT -> sendHeartbeatResponse();
-                    case DISCONNECT -> throw new GameDisconnect();
+                    case START_GAME -> validateGameStart();
+                    case LEAVE_GAME -> userSession.leaveCurrentGame();
+                    case CANCEL_GAME -> validateCancellation();
+                    case HEARTBEAT -> sendHeartbeatResponse((HeartbeatMessage) request);
+                    case DISCONNECT -> playerDisconnect();
                     default -> out.writeObject(new ErrorMessage("Invalid game request"));
                 }
 
@@ -103,6 +165,9 @@ public class GameRunner {
                 LOGGER.info(logPrefix + "disconnected during game");
                 out.writeObject(new Message(OK));
                 throw new GameDisconnect();
+            } catch (LeftGame ignored) {
+                LOGGER.info(logPrefix + "left game: " + game.getID().toString());
+                break;
             }
         }
     }

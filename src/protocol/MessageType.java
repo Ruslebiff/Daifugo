@@ -16,7 +16,11 @@ public enum MessageType {
     JOIN_GAME,
     JOIN_GAME_RESPONSE,
     GAME_STATE,
-    START_GAME,
+    CANCEL_GAME,    // owner ends game
+    CANCEL_GAME_ERROR,      // propagated to players if a game is cancelled
+    LEAVE_GAME,     // a player leaving a game that may or may not be started
+    START_GAME,     // owner starts game
     PLAY_CARDS,
     PASS_TURN,
+    GIVE_CARDS,     // trade cards between presidents and bums
 }
