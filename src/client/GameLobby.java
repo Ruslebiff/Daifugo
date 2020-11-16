@@ -364,6 +364,7 @@ public class GameLobby extends JFrame {
                             gameID = gameList.get(gameNumber-1).getID();
                             System.out.println("Entering game with ID: " + gameID);
 
+                            // TODO: Joining game does not launch game view
                             response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));
                             if (response.isError()){
                                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
