@@ -46,6 +46,8 @@ public class GameRunner {
 
     private void sendHeartbeatResponse(HeartbeatMessage request) throws IOException {
 
+        LOGGER.info(logPrefix + "got heartbeat");
+
         // if state hasn't been updated, simply heartbeat back
         PlayerObject po = game.getPlayers().get(userSession.getID());
         if (!po.isStateUpdated()) {
