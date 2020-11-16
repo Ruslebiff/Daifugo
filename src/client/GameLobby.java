@@ -13,11 +13,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 // TODO: a filter box to search through available games
-// TODO: an option for using a non-default server address is available
 
 public class GameLobby extends JFrame {
     private final String[] columnNames = {
