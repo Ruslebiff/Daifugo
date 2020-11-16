@@ -12,15 +12,8 @@ import java.io.IOException;
 public class Table extends JPanel {
 
     private BufferedImage image;
-    private final String filePath;
-    private final int pInfoWidth = 200;
-    private final int pInfoHeight = 100;
-    private int TABLE_HEIGHT;
-    private int TABLE_WIDTH;
-    private PlayersInformation playersInformation;
+    private final PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
-    private GameStateTracker stateTracker;
-    private JButton startBtn;
 
     private Void updateGUI() {
         playersInformation.indicateTurn();
@@ -28,11 +21,8 @@ public class Table extends JPanel {
         return null;
     }
 
-    public Table(int f_width, int f_height, GameStateTracker sT) {
-        this.TABLE_WIDTH = f_width;
-        this.TABLE_HEIGHT = f_height;
-        this.filePath = "./resources/green_fabric.jpg"; // Filepath
-        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
+    public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
+        String filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
         } catch (IOException ex) {
@@ -45,45 +35,52 @@ public class Table extends JPanel {
         players[0] = new Player(
                 "Mohammed Lee",
                 "0",
-                stateTracker.getHand("temp"),
-                TABLE_WIDTH/2,
-                stateTracker
+                sT.getHand("temp"),
+                f_width /2,
+                sT
         );
 
         players[0].setBounds(
-                (TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
-                (TABLE_HEIGHT/2) + 100,
-                TABLE_WIDTH/2,
-                (TABLE_HEIGHT/8) + 100
+                (f_width /2) - ((f_width /2)/2) - 25,
+                (f_height /2) + 100,
+                f_width /2,
+                (f_height /8) + 100
         );
         add(players[0]);
 
-        playersInformation = new PlayersInformation(players, stateTracker);
+        playersInformation = new PlayersInformation(players, sT);
+        int pInfoWidth = 200;
+        int pInfoHeight = 100;
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
+        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, sT);
         cardsOnTable.setBounds(
-                (TABLE_WIDTH/2) - (cardsOnTableWidth/2),
-                (TABLE_HEIGHT/3) - (cardsOnTableHeight/2),
+                (f_width /2) - (cardsOnTableWidth/2),
+                (f_height /3) - (cardsOnTableHeight/2),
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
 
 
-        stateTracker.registerCallback(this::updateGUI);
+        sT.registerCallback(this::updateGUI);
 
-        startBtn = new JButton("Start");
+        JButton startBtn = new JButton("Start");
         startBtn.setBounds(50,200, 100,50);
         add(startBtn);
+        startBtn.addActionListener(e -> {
 
-        startBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
         });
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.setBounds(50, 150, 100, 50);
+        add(exitButton);
+        exitButton.addActionListener(l -> {
+            this.setVisible(false);
+            gL.showLobby(true);
+        });
+
     }
 
     @Override

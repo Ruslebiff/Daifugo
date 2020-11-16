@@ -93,7 +93,9 @@ public class GameLobby extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
-        /* New game view */
+        /**
+         *  New game view
+         ************************/
         newGamePanel.setSize(window_width,window_height);
         newGamePanel.setVisible(false);
         newGamePanel.setLayout(new GridBagLayout());
@@ -129,8 +131,9 @@ public class GameLobby extends JFrame {
         newGamePanel.add(newGameConfirmButton, gbc);
 
 
-        /* Settings view */
-
+        /**
+         *  Settings view
+         ************************/
         settingsPanel.setSize(window_width,window_height);
         settingsPanel.setVisible(false);
         settingsPanel.setLayout(null);
@@ -164,7 +167,9 @@ public class GameLobby extends JFrame {
         settingsPanel.add(newServerAddressTextField, gbc);
         settingsPanel.add(settingsConfirmButton, gbc);
 
-        /* Control bar */
+        /**
+         *  Control bar
+         ************************/
 
         controlPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -212,7 +217,9 @@ public class GameLobby extends JFrame {
         c.ipadx = 0;
         controlPanel.add(settingsButton, c);
 
-        /* Status bar */
+        /**
+         *  Status bar
+         ************************/
         statusBar.setBackground(Color.lightGray);
         statusBar.setLayout(new BorderLayout());
 
@@ -227,8 +234,12 @@ public class GameLobby extends JFrame {
 
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
+        /***********************/
 
-        /* Get Games List */
+
+        /**
+         *  Table
+         ************************/
         getGamesList();
 
         gamesTable.setModel(tableModel);
@@ -258,7 +269,9 @@ public class GameLobby extends JFrame {
 
 
 
-        /* Button action listeners*/
+        /**
+         *  Button action listeners
+         ************************/
         newGamePrivateCheckbox.addActionListener(e -> {
             newGamePassword.setEnabled(newGamePrivateCheckbox.isSelected());
 
@@ -406,14 +419,15 @@ public class GameLobby extends JFrame {
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
+                System.exit(0);
             }
         });
 
-        add(newGamePanel);
-        add(settingsPanel);
-        add(controlPanel, BorderLayout.PAGE_START);
-        add(sp, BorderLayout.CENTER);
-        add(statusBar, BorderLayout.PAGE_END);
+        add(newGamePanel, 0);
+        add(settingsPanel, 0);
+        add(controlPanel, BorderLayout.PAGE_START, 0);
+        add(sp, BorderLayout.CENTER, 0);
+        add(statusBar, BorderLayout.PAGE_END, 0);
         setVisible(true);
         setLocationRelativeTo(null);
     }
@@ -513,11 +527,17 @@ public class GameLobby extends JFrame {
             showLobby(false);
             setTitle("Daifugo - " + gameName);
 
-            Table table = new Table(window_width, window_height, tracker);
-            table.setBounds(0,0, getWidth(), getHeight());
-            table.setVisible(true);
-            table.setBounds(0,0,window_width,window_height);
-            add(table);
+            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable.setBounds(0,0, getWidth(), getHeight());
+            playTable.setVisible(true);
+            playTable.setBounds(0,0,window_width,window_height);
+            add(playTable, 1);
+            playTable.repaint();
+            playTable.revalidate();
+
+
+
+
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
