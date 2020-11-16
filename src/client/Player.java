@@ -284,20 +284,25 @@ public class Player extends JPanel{
     }
 
     public Boolean checkIfPlayable() {
-        ArrayList<Card> lastPlayed = stateTracker.getLastPlayedCards(); // Last played cards
+        if(cardsToPlay.size() != 0) {   // If the player has selected cards
+            ArrayList<Card> lastPlayed = stateTracker.getLastPlayedCards(); // Last played cards
 
-        // If player played 3 of clubs
-        if(cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16)
-            return true;
+            if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
+                return true;
 
-        // Check that their size is the same
-        if(cardsToPlay.size() == lastPlayed.size()) {
-            boolean allSame = false;
-            for (int i = 0; i < cardsToPlay.size(); i++) {
-                if(cardsToPlay.get(i) == cardsToPlay.get(0))    // Checks if all the cards to play are the same
-                    allSame = true;
+            // Check that the amount of selected cards is the same as the last played cards
+            if (cardsToPlay.size() == lastPlayed.size()) {
+                boolean allSame = false;
+                for (Card card : cardsToPlay) {
+                    if (card == cardsToPlay.get(0))    // Checks if all the cards to play are the same
+                        allSame = true;
+                    else {
+                        allSame = false;
+                        break;
+                    }
+                }
+                return cardsToPlay.get(0).getValue() >= lastPlayed.get(0).getValue() && allSame;
             }
-            return cardsToPlay.get(0).getValue() >= lastPlayed.get(0).getValue() && allSame;
         }
         return false;
     }
@@ -307,7 +312,6 @@ public class Player extends JPanel{
         // Next turn
         cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
-        toggleAllButtons();
     }
 
     // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
@@ -357,13 +361,6 @@ public class Player extends JPanel{
      * - Etter at roller deles ut, start et nytt spill
      * - Del ut kort
      */
-
-    // Enables/disables all the buttons based on what they previously were
-    public void toggleAllButtons() {
-        playCardsBtn.setEnabled(!playCardsBtn.isEnabled());
-        passTurnBtn.setEnabled(!passTurnBtn.isEnabled());
-        cancelBtn.setEnabled(!cancelBtn.isEnabled());
-    }
 
     public void setHand(ArrayList<Card> dealtCards) {
         this.hand = dealtCards;

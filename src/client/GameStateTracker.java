@@ -5,6 +5,7 @@ import common.PlayerData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public interface GameStateTracker {
     /** forslag */
@@ -12,6 +13,8 @@ public interface GameStateTracker {
     List<PlayerData> getPlayerList();   // liste over spillere, i turn order
     int getActivePlayerIndex();         // aktiv spillers index i liste
                                         //   erstatter getActivePlayerID
+
+    void registerCallback(Callable<Void> callback);
     String getActivePlayerID();
     ArrayList<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple

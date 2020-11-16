@@ -17,6 +17,7 @@ public class Table extends JPanel {
     private int TABLE_WIDTH;
     private PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
+    private GameStateTracker stateTracker;
 
     private Void updateGUI() {
         playersInformation.indicateTurn();
@@ -24,17 +25,18 @@ public class Table extends JPanel {
         return null;
     }
 
-    public Table(int f_width, int f_height) {
+    public Table(int f_width, int f_height, GameStateTracker sT) {
         this.TABLE_WIDTH = f_width;
         this.TABLE_HEIGHT = f_height;
         this.filePath = "./resources/green_fabric.jpg"; // Filepath
+        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         setLayout(null);
-        GameStateTracker stateTracker = new DummyTracker(); // TODO: Bytt ut med ordentlig tracker
+
 
         // TODO: REMOVE LATER
         Player[] players = new Player[1];
