@@ -22,9 +22,8 @@ public class Table extends JPanel {
     }
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
-        String filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
