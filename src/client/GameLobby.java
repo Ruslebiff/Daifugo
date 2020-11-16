@@ -44,6 +44,7 @@ public class GameLobby extends JFrame {
     private int latency = 0;
     private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
     private volatile boolean connectionOK = false;
+    private JTextField newServerAddressTextField = new JTextField(serverAddress);
 
     public GameLobby() {
 
@@ -126,27 +127,35 @@ public class GameLobby extends JFrame {
         JPanel settingsPanel = new JPanel();
         settingsPanel.setSize(window_width,window_height);
         settingsPanel.setVisible(false);
-        settingsPanel.setLayout(new GridBagLayout());
+        settingsPanel.setLayout(null);
 
 
-        // TODO: newNickNameLabel is placed on top of newNickName text field
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        JTextField newNickName = new JTextField(playerName);
+        newNickNameLabel.setBounds(100, 20, 100,20);
+
+        JTextField newNickNameTextField = new JTextField(playerName);
+        newNickNameTextField.setBounds(200, 20, 150,20);
+
+        JLabel newServerAddressLabel = new JLabel("Server address: ");
+        newServerAddressLabel.setBounds(100, 50, 100,20);
+
+        newServerAddressTextField.setBounds(200, 50, 150,20);
+
+        JLabel settingsConnectionFailedMessage = new JLabel("Connection failed");
+        settingsConnectionFailedMessage.setForeground(new Color(255, 0, 0));
+        settingsConnectionFailedMessage.setBounds(400, 50, 150,20);
+        settingsConnectionFailedMessage.setVisible(false);
+
+
         JButton settingsConfirmButton = new JButton("Confirm");
+        settingsConfirmButton.setBounds(getWidth()/2 - 75, getHeight() - 100, 150,40);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0.1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+
+
         settingsPanel.add(newNickNameLabel, gbc);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1;
-        settingsPanel.add(newNickName, gbc);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridwidth = 2;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
+        settingsPanel.add(newNickNameTextField, gbc);
+        settingsPanel.add(newServerAddressLabel, gbc);
+        settingsPanel.add(newServerAddressTextField, gbc);
         settingsPanel.add(settingsConfirmButton, gbc);
 
         /* Control bar */
@@ -264,28 +273,48 @@ public class GameLobby extends JFrame {
         });
 
         settingsConfirmButton.addActionListener(e -> {
-            try {
-                Message response = conn.sendMessage(
-                        new Message(MessageType.CONNECT)
-                );
-                IdentityResponse identityResponse = (IdentityResponse) response;
-                response = conn.sendMessage(
-                        new UpdateNickMessage(identityResponse.getToken(), newNickName.getText())
-                );
-                if (response.isError()){
-                    JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
-                    return;
+            boolean allSettingsOK;
+            if (!newServerAddressTextField.getText().equals(serverAddress)) {
+                serverAddress = newServerAddressTextField.getText();
+                connectionOK = false;
+                try {
+                    conn = new ClientConnection(serverAddress);
+                    connectionOK = true;
+                } catch (IOException a) {
+                    System.out.println("ERROR: Failed to connect!");
+                    connectToServerFrame();
                 }
-                IdentityResponse updatedNickResponse = (IdentityResponse) response;
-                playerName = updatedNickResponse.getNick();
-                nickText.setText(playerName);
-            } catch (IOException | ClassNotFoundException ioException) {
-                ioException.printStackTrace();
+            }
+            allSettingsOK = connectionOK;
+
+            if (!newNickNameTextField.getText().equals(playerName)){
+                try {
+                    Message response = conn.sendMessage(
+                            new Message(MessageType.CONNECT)
+                    );
+                    IdentityResponse identityResponse = (IdentityResponse) response;
+                    response = conn.sendMessage(
+                            new UpdateNickMessage(identityResponse.getToken(), newNickNameTextField.getText())
+                    );
+                    if (response.isError()){
+                        JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
+                        allSettingsOK = false;
+                        return;
+                    }
+                    IdentityResponse updatedNickResponse = (IdentityResponse) response;
+                    playerName = updatedNickResponse.getNick();
+                    nickText.setText(playerName);
+                } catch (IOException | ClassNotFoundException ioException) {
+                    ioException.printStackTrace();
+                }
             }
 
-            controlPanel.setVisible(true);
-            sp.setVisible(true);
-            settingsPanel.setVisible(false);
+            if (allSettingsOK){ // settings ok, exit settings view
+                controlPanel.setVisible(true);
+                sp.setVisible(true);
+                settingsPanel.setVisible(false);
+            }
+
         });
 
         newGameButton.addActionListener(e -> {
@@ -543,6 +572,7 @@ public class GameLobby extends JFrame {
                     System.out.println("ERROR: " + response.getErrorMessage());
                 } else {
                     connectionOK = true;
+                    newServerAddressTextField.setText(serverAddress);
                     connectionFrame.dispose(); // destroy frame
                 }
             } catch (IOException | ClassNotFoundException e) {
