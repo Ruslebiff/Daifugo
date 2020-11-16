@@ -34,9 +34,9 @@ public class GameLobby extends JFrame {
         }
     };
     private final JTable gamesTable = new JTable(tableModel);
-    private int window_height = 1000;
-    private int window_width = 1000;
-    private int MAX_PLAYERS = 8;
+    private final int window_height = 1000;
+    private final int window_width = 1000;
+    private final int MAX_PLAYERS = 8;
     private String playerName;
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
@@ -46,7 +46,7 @@ public class GameLobby extends JFrame {
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
     private ScheduledExecutorService heartbeatExecutor;
 
-    /* panels */
+    /* Lobby Panels */
     JPanel newGamePanel = new JPanel();
     JPanel statusBar = new JPanel();
     JPanel settingsPanel = new JPanel();
@@ -313,22 +313,18 @@ public class GameLobby extends JFrame {
             }
 
             if (allSettingsOK){ // settings ok, exit settings view
-                controlPanel.setVisible(true);
-                sp.setVisible(true);
-                settingsPanel.setVisible(false);
+                showLobby(true);
             }
 
         });
 
         newGameButton.addActionListener(e -> {
-            controlPanel.setVisible(false);
-            sp.setVisible(false);
+            showLobby(false);
             newGamePanel.setVisible(true);
         });
 
         settingsButton.addActionListener(e -> {
-            controlPanel.setVisible(false);
-            sp.setVisible(false);
+            showLobby(false);
             settingsPanel.setVisible(true);
         });
 
@@ -514,11 +510,7 @@ public class GameLobby extends JFrame {
                     tmp.getState()
             );
 
-            sp.setVisible(false);
-            statusBar.setVisible(false);
-            newGamePanel.setVisible(false);
-            settingsPanel.setVisible(false);
-            controlPanel.setVisible(false);
+            showLobby(false);
             setTitle("Daifugo - " + gameName);
 
             Table table = new Table(window_width, window_height, tracker);
@@ -621,6 +613,27 @@ public class GameLobby extends JFrame {
         connectionFrame.setLocationRelativeTo(null);
         connectionFrame.setVisible(true);
 
+    }
+
+    /**
+     * Resets lobby view to default view if true.
+     * Hides all lobby elements if false.
+     * @param b reset lobby view if true, hide all lobby elements if false
+     */
+    public void showLobby(boolean b){
+        if (b){
+            sp.setVisible(true);
+            statusBar.setVisible(true);
+            newGamePanel.setVisible(false);
+            settingsPanel.setVisible(false);
+            controlPanel.setVisible(true);
+        } else {
+            sp.setVisible(false);
+            statusBar.setVisible(false);
+            newGamePanel.setVisible(false);
+            settingsPanel.setVisible(false);
+            controlPanel.setVisible(false);
+        }
     }
 }
 
