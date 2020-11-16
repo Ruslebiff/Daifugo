@@ -15,7 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 // TODO: a filter box to search through available games
-// TODO: list of games can be sorted in different ways
 // TODO: an option for using a non-default server address is available
 
 public class GameLobby extends JFrame {
