@@ -111,7 +111,7 @@ public class Player extends JPanel{
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
-                if (myTurn && cardsClickable) {
+                if (stateTracker.getIsMyTurn() && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
@@ -122,9 +122,11 @@ public class Player extends JPanel{
                         cardsToPlay.remove(c);
 
                     if (!giveCards)
-                        playCardsBtn.setEnabled(checkIfPlayable() && myTurn);
+                        playCardsBtn.setEnabled(checkIfPlayable());
                     else // If the round has just started and you have to relinquish cards
                         giveUpCards();  // Function checks role and cards you have to give based on role
+
+                    playCardsBtn.setEnabled(checkIfPlayable());
                 }
             }
 
@@ -230,8 +232,37 @@ public class Player extends JPanel{
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         if(!giveCards) {   // If it is a normal round, play the cards
-            if(stateTracker.playCards(cardsToPlay))
+            ArrayList<Card> playedInRound = stateTracker.getRoundCards();
+            ArrayList<Card> lastCards = new ArrayList<>();
+            if(cardsToPlay.size() < 3 && playedInRound.size() >= 2) {
+                // If the cards played potentially removes the played cards total by the four equal cards rule
+                for (int i = playedInRound.size() - 1; i > playedInRound.size() - 4 + cardsToPlay.size() - 1; i--) {
+                    lastCards.add(playedInRound.get(i));
+                }
+                // Check if the last cards plus cards to play are all equal cards and are four total
+                int counter = 0;
+                if(cardsToPlay.size() == 1) {
+                    counter = 1;
+                    for (Card c : lastCards) {  // If the value is the same, increment the counter
+                        if(c.getValue() == cardsToPlay.get(0).getValue())
+                            counter++;
+                    }
+                } else if(cardsToPlay.size() == 2) {
+                    counter = 2;
+                    for (Card c : lastCards) {
+                        if(c.getValue() == cardsToPlay.get(0).getValue())
+                            counter++;
+                    }
+                }
+                if(counter == 4) {
+                    // TODO: Implement action that resets the cards
+                }
+            }
+
+            if(stateTracker.playCards(cardsToPlay)) {
                 stateTracker.setNextTurn();
+            }
+
         } else {            // If it is at the beginning of the round
             playCardsBtn.setText("Play Cards");
             giveCards = false;
@@ -253,27 +284,26 @@ public class Player extends JPanel{
     }
 
     public Boolean checkIfPlayable() {
-        int nCards = cardsToPlay.size();  // Amount of cards played
-        ArrayList<Card> lastFourCards = new ArrayList<>();
-        ArrayList<Card> tableCards = stateTracker.getLastPlayedCards();
-//        for (int i = 1; i <= tableCards.size(); i++)
-//            lastFourCards.add(tableCards.get(tableCards.size() - i));
+        if(cardsToPlay.size() != 0) {   // If the player has selected cards
+            ArrayList<Card> lastPlayed = stateTracker.getLastPlayedCards(); // Last played cards
 
-//        // Check if player has selected cards to play, and if they match the types on the table, i.e. singles, doubles
-//        // or triples, alternatively that the card played is clover 3
-//        if (nCards != 0 && ((nCards == stateTracker.getLastPlayedType()) || (cardsToPlay.get(nCards - 1).getValue() == 16))) {
-//            // Check if the card on top of the deck is higher or equal to the player's card
-//            boolean valid = true;
-//            for (Card c : cardsToPlay)     // Check that all selected cards are playable
-//                if (c.getValue() < lastThreeCards[2]) { // TODO: CHANGE lastThreeCards to the servers cards
-//                    valid = false;  // If a card is not playable, set valid to false
-//                    break;
-//                }
-//            if (!allTheSameCards())  // If the selected cards vary in value, validity is false
-//                valid = false;
-//
-//            return valid;
-//        }
+            if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
+                return true;
+
+            // Check that the amount of selected cards is the same as the last played cards
+            if (cardsToPlay.size() == lastPlayed.size()) {
+                boolean allSame = false;
+                for (Card card : cardsToPlay) {
+                    if (card == cardsToPlay.get(0))    // Checks if all the cards to play are the same
+                        allSame = true;
+                    else {
+                        allSame = false;
+                        break;
+                    }
+                }
+                return cardsToPlay.get(0).getValue() >= lastPlayed.get(0).getValue() && allSame;
+            }
+        }
         return false;
     }
 
@@ -282,7 +312,6 @@ public class Player extends JPanel{
         // Next turn
         cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
-        toggleAllButtons();
     }
 
     // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
@@ -333,22 +362,11 @@ public class Player extends JPanel{
      * - Del ut kort
      */
 
-    // Enables/disables all the buttons based on what they previously were
-    public void toggleAllButtons() {
-        playCardsBtn.setEnabled(!playCardsBtn.isEnabled());
-        passTurnBtn.setEnabled(!passTurnBtn.isEnabled());
-        cancelBtn.setEnabled(!cancelBtn.isEnabled());
-    }
-
     public void setHand(ArrayList<Card> dealtCards) {
         this.hand = dealtCards;
     }
 
     public void setRole(int role) {
         this.role = role;
-    }
-
-    public void setMyTurn() {
-        this.myTurn = true;
     }
 }

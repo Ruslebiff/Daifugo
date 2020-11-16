@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 
 public class Table extends JPanel {
 
@@ -16,22 +15,30 @@ public class Table extends JPanel {
     private final int pInfoHeight = 100;
     private int TABLE_HEIGHT;
     private int TABLE_WIDTH;
+    private PlayersInformation playersInformation;
+    private CardsOnTable cardsOnTable;
+    private GameStateTracker stateTracker;
 
-    public Table(int f_width, int f_height) {
+    private Void updateGUI() {
+        playersInformation.indicateTurn();
+        cardsOnTable.updateCardsOnTable();
+        return null;
+    }
+
+    public Table(int f_width, int f_height, GameStateTracker sT) {
         this.TABLE_WIDTH = f_width;
         this.TABLE_HEIGHT = f_height;
         this.filePath = "./resources/green_fabric.jpg"; // Filepath
+        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
         try {
             image = ImageIO.read(new File(filePath));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         setLayout(null);
-        GameStateTracker stateTracker = new DummyTracker(); // TODO: Bytt ut med ordentlig tracker
 
-        /**
-         * REMOVE LATER
-         */
+
+        // TODO: REMOVE LATER
         Player[] players = new Player[1];
         players[0] = new Player("Mohammed Lee", 0, stateTracker.getHand("temp"), TABLE_WIDTH/2, stateTracker);
         players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,(TABLE_HEIGHT/2) + 100,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 100);

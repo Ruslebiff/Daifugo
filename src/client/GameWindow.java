@@ -14,7 +14,9 @@ public class GameWindow extends JFrame {
         setTitle("gameName");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        Table table = new Table(FRAME_WIDTH, FRAME_HEIGHT);
+        GameStateTracker stateTracker = new DummyTracker();
+
+        Table table = new Table(FRAME_WIDTH, FRAME_HEIGHT, stateTracker);
         table.setBounds(0,0, getWidth(), getHeight());
         add(table);
 
