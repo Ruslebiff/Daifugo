@@ -3,10 +3,7 @@ package client;
 import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
-import protocol.GameStateResponse;
-import protocol.HeartbeatMessage;
-import protocol.Message;
-import protocol.MessageType;
+import protocol.*;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -87,6 +84,10 @@ public class ServerTracker implements GameStateTracker {
         }
 
     }
+
+
+
+
 
 
 
@@ -181,10 +182,18 @@ public class ServerTracker implements GameStateTracker {
     @Override
     public boolean playCards(ArrayList<Card> playedCards) {
         synchronized (this) {
-            playedType = playedCards.size();
-            this.lastPlayedCards.removeAll(lastPlayedCards);
-            this.lastPlayedCards.addAll(playedCards);
-            this.allCardsInRound.addAll(playedCards);
+            Message response = null;
+            try {
+                response = connection.sendMessage(new PlayCardsRequest(playedCards));
+                if (response.isError())
+                    return false;
+
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+            } catch (Exception e) {
+                return false;
+            }
             return true;
         }
     }
