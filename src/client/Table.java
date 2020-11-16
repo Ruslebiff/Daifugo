@@ -37,26 +37,39 @@ public class Table extends JPanel {
         }
         setLayout(null);
 
-
-        stateTracker.registerCallback(this::updateGUI);
-
-
         // TODO: REMOVE LATER
         Player[] players = new Player[1];
-        players[0] = new Player("Mohammed Lee", 0, stateTracker.getHand("temp"), TABLE_WIDTH/2, stateTracker);
-        players[0].setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,(TABLE_HEIGHT/2) + 100,TABLE_WIDTH/2,(TABLE_HEIGHT/8) + 100);
+        players[0] = new Player(
+                "Mohammed Lee",
+                0,
+                stateTracker.getHand("temp"),
+                TABLE_WIDTH/2,
+                stateTracker
+        );
+
+        players[0].setBounds(
+                (TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                (TABLE_HEIGHT/2) + 100,
+                TABLE_WIDTH/2,
+                (TABLE_HEIGHT/8) + 100
+        );
         add(players[0]);
 
-
-        PlayersInformation playersInformation = new PlayersInformation(players, stateTracker);
+        playersInformation = new PlayersInformation(players, stateTracker);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        CardsOnTable cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
-        cardsOnTable.setBounds((TABLE_WIDTH/2) - (cardsOnTableWidth/2), (TABLE_HEIGHT/3) - (cardsOnTableHeight/2),
-                                cardsOnTableWidth, cardsOnTableHeight);
+        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
+        cardsOnTable.setBounds(
+                (TABLE_WIDTH/2) - (cardsOnTableWidth/2),
+                (TABLE_HEIGHT/3) - (cardsOnTableHeight/2),
+                   cardsOnTableWidth, cardsOnTableHeight
+        );
         add(cardsOnTable);
+
+
+        stateTracker.registerCallback(this::updateGUI);
     }
 
     @Override

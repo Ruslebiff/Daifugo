@@ -117,8 +117,4 @@ public class DummyTracker implements GameStateTracker{
         playedType = 0;
     }
 
-    @Override
-    public void setAllFourSameCards() {
-        allFourSameCards = true;
-    }
 }

@@ -26,5 +26,4 @@ public interface GameStateTracker {
     ArrayList<Card> getLastPlayedCards();
     ArrayList<Card> getRoundCards();
     void resetRound();
-    void setAllFourSameCards();
 }
