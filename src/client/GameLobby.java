@@ -226,8 +226,6 @@ public class GameLobby extends JFrame {
 
 
         startHeartbeat();
-
-
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
         /***********************/
@@ -656,7 +654,6 @@ public class GameLobby extends JFrame {
         Runnable latencyRunnable = () -> {
             latency = getLatency();
             latencyLabel.setText("Latency: " + latency + "  ");
-            System.out.println("latency: " + latency);
         };
         heartbeatExecutor = Executors.newScheduledThreadPool(1);
         heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
