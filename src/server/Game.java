@@ -151,8 +151,13 @@ public class Game {
      * @return
      */
     private List<CardData> _getTopCards() {
-        List<CardData> tail = cardsOnTable.subList(
-                Math.max(cardsOnTable.size() - 4, 0), cardsOnTable.size()
+        int counter = 3;
+        while (cardsOnTable.size() < counter)   // Make sure that
+            counter--;
+
+        List<CardData> tail;
+        tail = cardsOnTable.subList(
+                Math.max(cardsOnTable.size() - counter, 0), cardsOnTable.size()
         );
         return tail;
     }
@@ -162,7 +167,6 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
-        tmp.remove(0);  // only return top 3 to clients
         return tmp;
     }
 

@@ -106,8 +106,6 @@ public class Player extends JPanel{
         removeCard.addActionListener(e -> {
             removeCardFromDisplay();
         });
-
-//        giveUpCards();  // TODO: FJERN
     }
 
     public void addListener(Card c) {
