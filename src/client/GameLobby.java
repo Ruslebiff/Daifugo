@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 // TODO: a filter box to search through available games
 // TODO: an option for using a non-default server address is available
@@ -40,14 +42,28 @@ public class GameLobby extends JFrame {
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
     private int latency = 0;
+    private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
+    private volatile boolean connectionOK = false;
 
     public GameLobby() {
+
         try {
-            conn = new ClientConnection("localhost");
+            conn = new ClientConnection(serverAddress);
+            connectionOK = true;
         } catch (IOException e) {
             System.out.println("ERROR: Failed to connect!");
-            e.printStackTrace();
+            connectToServerFrame();
         }
+
+        while(!connectionOK){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("Connected to server " + serverAddress);
 
         try {
             Message response = conn.sendMessage(new Message(MessageType.CONNECT));
@@ -490,6 +506,61 @@ public class GameLobby extends JFrame {
             e.printStackTrace();
         }
         return l;
+    }
+
+    public void connectToServerFrame() {
+        JFrame connectionFrame = new JFrame();
+        connectionFrame.setLayout(null);
+        connectionFrame.setSize(400,200);
+
+        JLabel connectionFailedMessage = new JLabel("Connection failed");
+        connectionFailedMessage.setForeground(new Color(255, 0, 0));
+        connectionFailedMessage.setBounds(connectionFrame.getWidth()/2 - 50, 0, 100, 50);
+
+        JLabel enterServerAddressMessage = new JLabel("Please enter a valid server address");
+        enterServerAddressMessage.setBounds(connectionFrame.getWidth()/2 - 102, 20, 300, 50);
+
+
+        JTextField addressTextArea = new JTextField(serverAddress);
+        addressTextArea.setEditable(true);
+        addressTextArea.setBounds( connectionFrame.getWidth()/2 - 100, connectionFrame.getHeight()/3, 200,20);
+
+
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.setBounds(connectionFrame.getWidth()/2 - 50, connectionFrame.getHeight()/2, 100, 40);
+        confirmButton.addActionListener(a -> {
+            serverAddress = addressTextArea.getText();
+            try {
+                conn = new ClientConnection(serverAddress);
+                Message response;
+                response = conn.sendMessage(new Message(MessageType.CONNECT));
+                if (response.isError()){
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                } else {
+                    connectionOK = true;
+                    connectionFrame.dispose(); // destroy frame
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                connectionFrame.dispose(); // destroy frame
+                connectToServerFrame();   // make new frame, try again
+            }
+        });
+
+        /* Handle close button */
+        connectionFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+
+        connectionFrame.add(connectionFailedMessage);
+        connectionFrame.add(enterServerAddressMessage);
+        connectionFrame.add(addressTextArea);
+        connectionFrame.add(confirmButton);
+        connectionFrame.setLocationRelativeTo(null);
+        connectionFrame.setVisible(true);
+
     }
 }
 
