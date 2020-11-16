@@ -17,6 +17,9 @@ public class GameState implements Serializable {
     private String gameTitle;
     private String ownerNick;
     private String playerNick;
+    private int cardsInTrick;
+    private int faceDownCards;
+    private List<CardData> topCards;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -24,6 +27,8 @@ public class GameState implements Serializable {
         this.playerNick = session.getNick();
         this.ownerNick = game.getOwnerNick();
         this.gameTitle = game.getTitle();
+        this.cardsInTrick = game.getNoOfCardsInTrick();
+        this.topCards = game.getTopCards();
         gameID = game.getID();
 
         if (!game.hasStarted())
@@ -40,6 +45,18 @@ public class GameState implements Serializable {
         }
 
         started = game.hasStarted();
+    }
+
+    public List<CardData> getTopCards() {
+        return topCards;
+    }
+
+    public int getCardsInTrick() {
+        return cardsInTrick;
+    }
+
+    public int getFaceDownCards() {
+        return faceDownCards;
     }
 
     public boolean isMyTurn() {

@@ -64,6 +64,9 @@ public class Game {
     private int currentPlayer;
     private boolean started;
     private final Map<UUID, List<CardData>> hands;
+    private List<CardData> cardsOnTable;
+    private int noOfCardsFaceDown;  // number of cards removed with previous tricks
+    private int noOfCardsInTrick;   // number of cards being played
     private boolean cancelled;
     private List<UUID> turnSequence;
     private int goneOut;        // increments for each player who goes out, resets each round
@@ -94,6 +97,9 @@ public class Game {
         cancelled = false;
         players = new HashMap<>();
         hands = new HashMap<>();
+        cardsOnTable = new ArrayList<>();
+        noOfCardsFaceDown = 0;
+        noOfCardsInTrick = 0;
         turnSequence = new ArrayList<>();
         started = false;
 
@@ -127,6 +133,25 @@ public class Game {
     public boolean hasStarted() {
         synchronized (this) {
             return started;
+        }
+    }
+
+    public int getNoOfCardsFaceDown() {
+        synchronized (this) {
+            return noOfCardsFaceDown;
+        }
+    }
+
+    public int getNoOfCardsInTrick() {
+        return noOfCardsInTrick;
+    }
+
+    public List<CardData> getTopCards() {
+        synchronized (this) {
+            List<CardData> tail = cardsOnTable.subList(
+                    Math.max(cardsOnTable.size() - 3, 0), cardsOnTable.size()
+            );
+            return tail;
         }
     }
 
@@ -225,6 +250,10 @@ public class Game {
     public void playCards(UUID player, List<CardData> cards) {
         // TODO: if cards not allowed to be played, throw exception
         // TODO: else, put cards on top of table, and remove them from players hand
+        synchronized (this) {
+            cardsOnTable.addAll(cards);
+        }
+
     }
      public void pass(UUID player) {
         // TODO
