@@ -508,6 +508,11 @@ public class GameLobby extends JFrame {
         return l;
     }
 
+    /**
+     * A popup frame that informs that the connection has failed, and provides a text field to enter a new address.
+     * When clicking the confirm button, a new connection to the server is established. If this fails, the frame re-appears
+     * for another try until a connection is successful.
+     */
     public void connectToServerFrame() {
         JFrame connectionFrame = new JFrame();
         connectionFrame.setLayout(null);
