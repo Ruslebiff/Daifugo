@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.*;
 
 public class GameState implements Serializable {
-    private List<PlayerData> players;
+    private ArrayList<PlayerData> players;
     private List<CardData> hand;
 
     // replication of general game data
@@ -79,7 +79,7 @@ public class GameState implements Serializable {
         return started;
     }
 
-    public List<PlayerData> getPlayers() {
+    public ArrayList<PlayerData> getPlayers() {
         return players;
     }
 

@@ -13,16 +13,15 @@ import java.util.ArrayList;
 // Class for GUI of the cards played on the table
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
-    private final String filePath;  // Path to image of green felt
     private ArrayList<Card> lastFourCards = new ArrayList<>();   // The last three cards played
     private GameStateTracker stateTracker;
 
     public CardsOnTable(int widht, int height, GameStateTracker sT) {
         stateTracker = sT;
         // Renders the green filt
-        this.filePath = "./resources/green_fabric.jpg"; // Filepath
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -34,8 +33,12 @@ public class CardsOnTable extends JPanel{
         int cardWidth = 80, cardHeight = 120;
         lastFourCards = stateTracker.getLastPlayedCards();
         lastFourCards.forEach(c -> {
-            c.setBounds((this.getWidth()/2) - (cardWidth/2), (this.getHeight()/2) - (cardHeight/2),
-                        cardWidth, cardHeight);
+            c.setBounds(
+                    (this.getWidth()/2) - (cardWidth/2),
+                    (this.getHeight()/2) - (cardHeight/2),
+                    cardWidth,
+                    cardHeight
+            );
             this.add(c);
         });
     }

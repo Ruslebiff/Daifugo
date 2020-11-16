@@ -8,7 +8,6 @@ import protocol.HeartbeatMessage;
 import protocol.Message;
 import protocol.MessageType;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +19,7 @@ public class ServerTracker implements GameStateTracker {
     private final ClientConnection connection;
     private Callable<Void> guiCallback;
     private GameState state;
-    private final long hearbeatInterval = 300;
+    private final long heartbeatInterval = 300;
 
     private boolean runHeartbeat;
     private HeartbeatThread backgroundThread;
@@ -75,7 +74,7 @@ public class ServerTracker implements GameStateTracker {
                             guiCallback.call();
                         }
 
-                        Thread.sleep(hearbeatInterval);
+                        Thread.sleep(heartbeatInterval);
 
                     } catch (Exception e) {
                         e.printStackTrace();        // TODO: change to logging
@@ -87,9 +86,6 @@ public class ServerTracker implements GameStateTracker {
         }
 
     }
-
-
-
 
 
     public ServerTracker(ClientConnection connection, GameState state) {
@@ -136,7 +132,9 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public List<PlayerData> getPlayerList() {
-        return null;
+        synchronized (this) {
+            return state.getPlayers();
+        }
     }
 
     @Override

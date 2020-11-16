@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -61,9 +60,10 @@ public class Player extends JPanel{
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
 
         // Renders the green filt unto the player-section
-        this.filePath = "./resources/green_fabric.jpg"; // Filepath
+        this.filePath = "/green_fabric.jpg"; // Filepath
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(
+                    ClientMain.class.getResourceAsStream(filePath));        // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }

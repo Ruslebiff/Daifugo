@@ -1,5 +1,7 @@
 package client;
 
+import common.PlayerData;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -8,15 +10,16 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Table extends JPanel {
 
     private BufferedImage image;
-    private final String filePath;
     private final int pInfoWidth = 200;
     private final int pInfoHeight = 100;
     private int TABLE_HEIGHT;
     private int TABLE_WIDTH;
+    private final int deckSize = 52;
     private PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
@@ -31,10 +34,10 @@ public class Table extends JPanel {
     public Table(int f_width, int f_height, GameStateTracker sT) {
         this.TABLE_WIDTH = f_width;
         this.TABLE_HEIGHT = f_height;
-        this.filePath = "./resources/green_fabric.jpg"; // Filepath
         this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -78,12 +81,12 @@ public class Table extends JPanel {
         startBtn.setBounds(50,200, 100,50);
         add(startBtn);
 
-        startBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        startBtn.addActionListener(e -> startGame());
+    }
 
-            }
-        });
+    public void startGame() {
+        ArrayList<PlayerData> playerDataList = (ArrayList<PlayerData>) stateTracker.getPlayerList();
+        int noOfHands = deckSize/playerDataList.size();
     }
 
     @Override
