@@ -3,6 +3,8 @@ package client;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class Table extends JPanel {
     private PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
+    private JButton startBtn;
 
     private Void updateGUI() {
         playersInformation.indicateTurn();
@@ -41,7 +44,7 @@ public class Table extends JPanel {
         Player[] players = new Player[1];
         players[0] = new Player(
                 "Mohammed Lee",
-                0,
+                "0",
                 stateTracker.getHand("temp"),
                 TABLE_WIDTH/2,
                 stateTracker
@@ -70,6 +73,17 @@ public class Table extends JPanel {
 
 
         stateTracker.registerCallback(this::updateGUI);
+
+        startBtn = new JButton("Start");
+        startBtn.setBounds(50,200, 100,50);
+        add(startBtn);
+
+        startBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
     }
 
     @Override

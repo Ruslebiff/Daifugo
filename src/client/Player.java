@@ -19,7 +19,7 @@ public class Player extends JPanel{
     private BufferedImage image;    // Image of green felt
     private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
-    private final int playerID;     // Id
+    private final String playerID;     // Id
     private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private ArrayList<Card> hand; // The cards dealt to the player
     private final ArrayList<Card> cardsToPlay = new ArrayList<>();
@@ -42,16 +42,20 @@ public class Player extends JPanel{
     private ClientConnection conn = null;
 
 
-    public Player(String name, int playerID, ArrayList<Card> cards, int width, GameStateTracker sT) {
+    public Player(String name, String playerID, ArrayList<Card> cards, int width, GameStateTracker sT) {
         this.stateTracker = sT;
         this.name = name;
         this.playerID = playerID;
-        this.role = 2; // Upon creation of a player, the player will be set to neutral, as the game has just begun
-        this.hand = cards;
-        this.widthOfComponent = width;
-//        if(role != 0)       // TODO: Server should set this value on new round
-//            giveCards = true;
+        this.role = 0; // Upon creation of a player, the player will be set to neutral, as the game has just begun
+        this.hand = stateTracker.getHand(playerID);
+//        this.hand = cards;
         sortHand(); // Sorts the players hand with respect to the card values
+        if(role != 0)       // TODO: Server should set this value on new round
+            giveCards = true;
+
+
+
+        widthOfComponent = width;
         setLayout(null);
         setOpaque(true);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
@@ -102,8 +106,6 @@ public class Player extends JPanel{
         removeCard.addActionListener(e -> {
             removeCardFromDisplay();
         });
-
-//        giveUpCards();  // TODO: FJERN
     }
 
     public void addListener(Card c) {
@@ -234,28 +236,30 @@ public class Player extends JPanel{
         if(!giveCards) {   // If it is a normal round, play the cards
             ArrayList<Card> playedInRound = stateTracker.getRoundCards();
             ArrayList<Card> lastCards = new ArrayList<>();
-            if(cardsToPlay.size() < 3 && playedInRound.size() >= 2) {
-                // If the cards played potentially removes the played cards total by the four equal cards rule
-                for (int i = playedInRound.size() - 1; i > playedInRound.size() - 4 + cardsToPlay.size() - 1; i--) {
-                    lastCards.add(playedInRound.get(i));
-                }
-                // Check if the last cards plus cards to play are all equal cards and are four total
-                int counter = 0;
-                if(cardsToPlay.size() == 1) {
-                    counter = 1;
-                    for (Card c : lastCards) {  // If the value is the same, increment the counter
-                        if(c.getValue() == cardsToPlay.get(0).getValue())
-                            counter++;
+            if(playedInRound.size() != 0) {       // If there are no cards in current rotation, player can play w/e
+                if (cardsToPlay.size() < 3 && playedInRound.size() >= 2) {
+                    // If the cards played potentially removes the played cards total by the four equal cards rule
+                    for (int i = playedInRound.size() - 1; i > playedInRound.size() - 4 + cardsToPlay.size() - 1; i--) {
+                        lastCards.add(playedInRound.get(i));
                     }
-                } else if(cardsToPlay.size() == 2) {
-                    counter = 2;
-                    for (Card c : lastCards) {
-                        if(c.getValue() == cardsToPlay.get(0).getValue())
-                            counter++;
+                    // Check if the last cards plus cards to play are all equal cards and are four total
+                    int counter = 0;
+                    if (cardsToPlay.size() == 1) {
+                        counter = 1;
+                        for (Card c : lastCards) {  // If the value is the same, increment the counter
+                            if (c.getValue() == cardsToPlay.get(0).getValue())
+                                counter++;
+                        }
+                    } else if (cardsToPlay.size() == 2) {
+                        counter = 2;
+                        for (Card c : lastCards) {
+                            if (c.getValue() == cardsToPlay.get(0).getValue())
+                                counter++;
+                        }
                     }
-                }
-                if(counter == 4) {
-                    // TODO: Implement action that resets the cards
+                    if (counter == 4) {
+                        // TODO: Implement action that resets the cards
+                    }
                 }
             }
 
@@ -306,7 +310,6 @@ public class Player extends JPanel{
         }
         return false;
     }
-
 
     public void relinquishTurn() {
         // Next turn
@@ -369,4 +372,5 @@ public class Player extends JPanel{
     public void setRole(int role) {
         this.role = role;
     }
+
 }
