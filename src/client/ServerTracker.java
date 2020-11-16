@@ -129,7 +129,9 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public boolean isMyTurn() {
-        return false;
+        synchronized (this) {
+            return false;
+        }
     }
 
     @Override
@@ -149,6 +151,10 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public ArrayList<Card> getHand(String token) {
+//        synchronized (this) {
+//
+//        }
+
         return p1_cards;
     }
 
@@ -207,8 +213,10 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public void resetRound() {
-        allCardsInRound.removeAll(allCardsInRound);
-        lastPlayedCards.removeAll(lastPlayedCards);
-        playedType = 0;
+        synchronized (this) {
+            allCardsInRound.removeAll(allCardsInRound);
+            lastPlayedCards.removeAll(lastPlayedCards);
+            playedType = 0;
+        }
     }
 }

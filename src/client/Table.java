@@ -41,7 +41,7 @@ public class Table extends JPanel {
         Player[] players = new Player[1];
         players[0] = new Player(
                 "Mohammed Lee",
-                0,
+                "0",
                 stateTracker.getHand("temp"),
                 TABLE_WIDTH/2,
                 stateTracker
