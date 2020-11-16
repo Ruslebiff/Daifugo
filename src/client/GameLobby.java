@@ -46,6 +46,8 @@ public class GameLobby extends JFrame {
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
     private ScheduledExecutorService heartbeatExecutor;
     private JLabel latencyLabel = new JLabel();
+    private JButton joinGameButton = new JButton();
+    private JFrame pwFrame = new JFrame("Join game");
 
     /* Lobby Panels */
     JPanel newGamePanel = new JPanel();
@@ -90,7 +92,7 @@ public class GameLobby extends JFrame {
         /* Create window */
         setSize(window_width,window_height);
         setLayout(new BorderLayout());
-        setTitle("Daifugo - Lobby");
+        setTitle("Daifugo");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
@@ -241,7 +243,7 @@ public class GameLobby extends JFrame {
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
         gamesTable.setAutoCreateRowSorter(true);
 
-        JButton joinGameButton = new JButton();
+
 
         /* add join buttons to table rows */
         gamesTable.getColumn("").setCellRenderer(new ButtonRenderer());
@@ -339,10 +341,12 @@ public class GameLobby extends JFrame {
             int gameNumber = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
             int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
+            String gameID;
+            gameID = gameList.get(gameNumber-1).getID();
+
             if (playerCount < 8){
                 if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private // TODO: can we use the hasPassword() instead?
                     // show window for entering password
-                    JFrame pwFrame = new JFrame("Join game");
                     pwFrame.setLayout(null);
                     pwFrame.setSize(300,150);
                     pwFrame.setVisible(true);
@@ -356,41 +360,14 @@ public class GameLobby extends JFrame {
                     pwEnterGameButton.setBounds(100, 75, 95, 20);
 
                     pwEnterGameButton.addActionListener(e1 -> {
-
-                        try {
-                            Message response = conn.sendMessage(
-                                    new Message(MessageType.CONNECT)
-                            );
-                            if (response.isError()){
-                                System.out.println("ERROR: " + response.getErrorMessage());
-                                return;
-                            }
-
-                            String gameID;
-                            gameID = gameList.get(gameNumber-1).getID();
-                            System.out.println("Entering game with ID: " + gameID);
-
-                            // TODO: Joining game does not launch game view
-                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));
-                            if (response.isError()){
-                                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
-                                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
-                                }
-                                System.out.println("ERROR: " + response.getErrorMessage());
-                            }
-
-                        } catch (IOException | ClassNotFoundException ioException) {
-                            ioException.printStackTrace();
-                        }
-
-
+                        joinGame(gameID, pwToJoinField.getPassword());
                     });
 
                     pwFrame.add(pwToJoinLabel);
                     pwFrame.add(pwToJoinField);
                     pwFrame.add(pwEnterGameButton);
                 } else { // game is not private
-                    System.out.println("joining game " + gameNumber);
+                        joinGame(gameID, null);
                 }
 
             } else {
@@ -519,7 +496,6 @@ public class GameLobby extends JFrame {
             );
 
             showLobby(false);
-            setTitle("Daifugo - " + gameName);
 
             Table playTable = new Table(window_width, window_height, tracker, this);
             playTable.setBounds(0,0, getWidth(), getHeight());
@@ -657,6 +633,56 @@ public class GameLobby extends JFrame {
         };
         heartbeatExecutor = Executors.newScheduledThreadPool(1);
         heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
+    }
+
+
+    /**
+     * Connects to a game on server, hides lobby view and shows game view
+     * @param gameID Game UID to connect to
+     * @param password Password for the game. Use null if it isn't password protected
+     */
+    public void joinGame(String gameID, char[] password){
+        try {
+            Message response = conn.sendMessage(
+                    new Message(MessageType.CONNECT)
+            );
+            if (response.isError()){
+                System.out.println("ERROR: " + response.getErrorMessage());
+                return;
+            }
+
+
+
+            response = conn.sendMessage(new JoinGameRequest(gameID, password));
+            if (response.isError()){
+                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
+                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+                }
+                System.out.println("ERROR: " + response.getErrorMessage());
+            }
+
+
+            heartbeatExecutor.shutdown();
+            GameStateResponse tmp = (GameStateResponse) response;
+            GameStateTracker tracker = new ServerTracker(
+                    conn,
+                    tmp.getState()
+            );
+
+            showLobby(false);
+            pwFrame.setVisible(false);
+
+            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable.setBounds(0,0, getWidth(), getHeight());
+            playTable.setVisible(true);
+            playTable.setBounds(0,0,window_width,window_height);
+            add(playTable, 1);
+            playTable.repaint();
+            playTable.revalidate();
+
+        } catch (IOException | ClassNotFoundException ioException) {
+            ioException.printStackTrace();
+        }
     }
 }
 
