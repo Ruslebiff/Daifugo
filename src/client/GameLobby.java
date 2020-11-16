@@ -45,6 +45,7 @@ public class GameLobby extends JFrame {
     private volatile boolean connectionOK = false;
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
     private ScheduledExecutorService heartbeatExecutor;
+    private JLabel latencyLabel = new JLabel();
 
     /* Lobby Panels */
     JPanel newGamePanel = new JPanel();
@@ -223,13 +224,8 @@ public class GameLobby extends JFrame {
         statusBar.setBackground(Color.lightGray);
         statusBar.setLayout(new BorderLayout());
 
-        JLabel latencyLabel = new JLabel();
-        Runnable latencyRunnable = () -> {
-            latency = getLatency();
-            latencyLabel.setText("Latency: " + latency + "  ");
-        };
-        heartbeatExecutor = Executors.newScheduledThreadPool(1);
-        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
+
+        startHeartbeat();
 
 
         latencyLabel.setText("Latency: " + latency + "  ");
@@ -654,6 +650,16 @@ public class GameLobby extends JFrame {
             settingsPanel.setVisible(false);
             controlPanel.setVisible(false);
         }
+    }
+
+    public void startHeartbeat(){
+        Runnable latencyRunnable = () -> {
+            latency = getLatency();
+            latencyLabel.setText("Latency: " + latency + "  ");
+            System.out.println("latency: " + latency);
+        };
+        heartbeatExecutor = Executors.newScheduledThreadPool(1);
+        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
     }
 }
 
