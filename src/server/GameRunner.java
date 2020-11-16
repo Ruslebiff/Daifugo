@@ -117,6 +117,26 @@ public class GameRunner {
         throw new GameDisconnect();
     }
 
+    private void handlePlayCards(PlayCardsRequest request) throws IOException {
+        game.playCards(userSession.getID(), request.getCards());
+        try {
+            out.writeObject(new GameStateResponse(game, userSession));
+        } catch (UserSessionError userSessionError) {
+            out.writeObject(new ErrorMessage(userSessionError.getMessage()));
+        }
+    }
+
+    private void handlePass() throws IOException {
+        try {
+            game.pass(userSession.getID());
+            out.writeObject(new GameStateResponse(game, userSession));
+        } catch (RoundOver ignore) {
+            // a round cannot end by passing alone
+        } catch (UserSessionError userSessionError) {
+            out.writeObject(new ErrorMessage(userSessionError.getMessage()));
+        }
+    }
+
     public void run() throws GameDisconnect, IOException {
 
         LOGGER.info("Entered game mode");
@@ -151,6 +171,8 @@ public class GameRunner {
                             if (!handleReconnection(request))
                                 break runLoop;
                         }*/
+                    case PLAY_CARDS -> handlePlayCards((PlayCardsRequest) request);
+                    case PASS_TURN -> handlePass();
                     case START_GAME -> validateGameStart();
                     case LEAVE_GAME -> userSession.leaveCurrentGame();
                     case CANCEL_GAME -> validateCancellation();
@@ -161,7 +183,7 @@ public class GameRunner {
 
 
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                LOGGER.warning(logPrefix + "got exception: " + e.getMessage());
                 break;
             } catch (GameDisconnect ignored) {
                 LOGGER.info(logPrefix + "disconnected during game");
