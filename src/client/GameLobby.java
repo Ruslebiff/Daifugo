@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+// TODO: a filter box to search through available games
 
 public class GameLobby extends JFrame {
     private final String[] columnNames = {
@@ -33,19 +38,33 @@ public class GameLobby extends JFrame {
     private String playerName;
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
+    private int latency = 0;
+    private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
+    private volatile boolean connectionOK = false;
+    private JTextField newServerAddressTextField = new JTextField(serverAddress);
 
     public GameLobby() {
-        try {
-            conn = new ClientConnection("localhost");
-        } catch (IOException e) {
-            System.out.println("ERROR: Failed to connect!");
-            e.printStackTrace();
-        }
 
         try {
-            Message response = conn.sendMessage(
-                    new Message(MessageType.CONNECT)
-            );
+            conn = new ClientConnection(serverAddress);
+            connectionOK = true;
+        } catch (IOException e) {
+            System.out.println("ERROR: Failed to connect!");
+            connectToServerFrame();
+        }
+
+        while(!connectionOK){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("Connected to server " + serverAddress);
+
+        try {
+            Message response = conn.sendMessage(new Message(MessageType.CONNECT));
             IdentityResponse identityResponse = (IdentityResponse) response;
             if (response.isError()){
                 System.out.println(response.getErrorMessage());
@@ -62,21 +81,7 @@ public class GameLobby extends JFrame {
         setLayout(new BorderLayout());
         setTitle("Daifugo - Lobby");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                // TODO: does disconnect message work?
-                try {
-                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
-                    if (response.isError()){
-                        System.out.println(response.getErrorMessage());
-                    }
 
-                } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         /* New game view */
         JPanel newGamePanel = new JPanel();
@@ -119,27 +124,35 @@ public class GameLobby extends JFrame {
         JPanel settingsPanel = new JPanel();
         settingsPanel.setSize(window_width,window_height);
         settingsPanel.setVisible(false);
-        settingsPanel.setLayout(new GridBagLayout());
+        settingsPanel.setLayout(null);
 
 
-        // TODO: newNickNameLabel is placed on top of newNickName text field
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        JTextField newNickName = new JTextField(playerName);
+        newNickNameLabel.setBounds(100, 20, 100,20);
+
+        JTextField newNickNameTextField = new JTextField(playerName);
+        newNickNameTextField.setBounds(200, 20, 150,20);
+
+        JLabel newServerAddressLabel = new JLabel("Server address: ");
+        newServerAddressLabel.setBounds(100, 50, 100,20);
+
+        newServerAddressTextField.setBounds(200, 50, 150,20);
+
+        JLabel settingsConnectionFailedMessage = new JLabel("Connection failed");
+        settingsConnectionFailedMessage.setForeground(new Color(255, 0, 0));
+        settingsConnectionFailedMessage.setBounds(400, 50, 150,20);
+        settingsConnectionFailedMessage.setVisible(false);
+
+
         JButton settingsConfirmButton = new JButton("Confirm");
+        settingsConfirmButton.setBounds(getWidth()/2 - 75, getHeight() - 100, 150,40);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0.1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+
+
         settingsPanel.add(newNickNameLabel, gbc);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1;
-        settingsPanel.add(newNickName, gbc);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridwidth = 2;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
+        settingsPanel.add(newNickNameTextField, gbc);
+        settingsPanel.add(newServerAddressLabel, gbc);
+        settingsPanel.add(newServerAddressTextField, gbc);
         settingsPanel.add(settingsConfirmButton, gbc);
 
         /* Control bar */
@@ -196,7 +209,14 @@ public class GameLobby extends JFrame {
         statusBar.setLayout(new BorderLayout());
 
         JLabel latencyLabel = new JLabel();
-        int latency = getLatency();         // TODO: get new latency every second(?)
+        Runnable latencyRunnable = () -> {
+            latency = getLatency();
+            latencyLabel.setText("Latency: " + latency + "  ");
+        };
+        ScheduledExecutorService heartbeatExecutor = Executors.newScheduledThreadPool(1);
+        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
+
+
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
 
@@ -206,6 +226,7 @@ public class GameLobby extends JFrame {
         gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
+        gamesTable.setAutoCreateRowSorter(true);
 
         JButton joinGameButton = new JButton();
 
@@ -237,10 +258,10 @@ public class GameLobby extends JFrame {
 
         newGameConfirmButton.addActionListener(e -> {
             char[] pw;
-            if (newGamePrivateCheckbox.isSelected()){
+            if (newGamePrivateCheckbox.isSelected() && newGamePassword.getPassword().length > 0){
                 pw = newGamePassword.getPassword();
             } else {
-                pw = new char[0];
+                pw = null;
             }
             createNewGame(newGameName.getText(), pw);
             controlPanel.setVisible(true);
@@ -249,28 +270,48 @@ public class GameLobby extends JFrame {
         });
 
         settingsConfirmButton.addActionListener(e -> {
-            try {
-                Message response = conn.sendMessage(
-                        new Message(MessageType.CONNECT)
-                );
-                IdentityResponse identityResponse = (IdentityResponse) response;
-                response = conn.sendMessage(
-                        new UpdateNickMessage(identityResponse.getToken(), newNickName.getText())
-                );
-                if (response.isError()){
-                    JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
-                    return;
+            boolean allSettingsOK;
+            if (!newServerAddressTextField.getText().equals(serverAddress)) {
+                serverAddress = newServerAddressTextField.getText();
+                connectionOK = false;
+                try {
+                    conn = new ClientConnection(serverAddress);
+                    connectionOK = true;
+                } catch (IOException a) {
+                    System.out.println("ERROR: Failed to connect!");
+                    connectToServerFrame();
                 }
-                IdentityResponse updatedNickResponse = (IdentityResponse) response;
-                playerName = updatedNickResponse.getNick();
-                nickText.setText(playerName);
-            } catch (IOException | ClassNotFoundException ioException) {
-                ioException.printStackTrace();
+            }
+            allSettingsOK = connectionOK;
+
+            if (!newNickNameTextField.getText().equals(playerName)){
+                try {
+                    Message response = conn.sendMessage(
+                            new Message(MessageType.CONNECT)
+                    );
+                    IdentityResponse identityResponse = (IdentityResponse) response;
+                    response = conn.sendMessage(
+                            new UpdateNickMessage(identityResponse.getToken(), newNickNameTextField.getText())
+                    );
+                    if (response.isError()){
+                        JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
+                        allSettingsOK = false;
+                        return;
+                    }
+                    IdentityResponse updatedNickResponse = (IdentityResponse) response;
+                    playerName = updatedNickResponse.getNick();
+                    nickText.setText(playerName);
+                } catch (IOException | ClassNotFoundException ioException) {
+                    ioException.printStackTrace();
+                }
             }
 
-            controlPanel.setVisible(true);
-            sp.setVisible(true);
-            settingsPanel.setVisible(false);
+            if (allSettingsOK){ // settings ok, exit settings view
+                controlPanel.setVisible(true);
+                sp.setVisible(true);
+                settingsPanel.setVisible(false);
+            }
+
         });
 
         newGameButton.addActionListener(e -> {
@@ -312,24 +353,23 @@ public class GameLobby extends JFrame {
                                     new Message(MessageType.CONNECT)
                             );
                             if (response.isError()){
-                                System.out.println(response.getErrorMessage());
+                                System.out.println("ERROR: " + response.getErrorMessage());
                                 return;
                             }
 
                             String gameID;
                             gameID = gameList.get(gameNumber-1).getID();
-                            System.out.println("GAME ID " + gameID);
+                            System.out.println("Entering game with ID: " + gameID);
 
-                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));  // TODO: This throws EOFException now
+                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));
                             if (response.isError()){
                                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
                                     JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
                                 }
-                                System.out.println(response.getErrorMessage());
+                                System.out.println("ERROR: " + response.getErrorMessage());
                             }
 
                         } catch (IOException | ClassNotFoundException ioException) {
-                            System.out.println("EOFEOFEOF");
                             ioException.printStackTrace();
                         }
 
@@ -346,6 +386,23 @@ public class GameLobby extends JFrame {
             } else {
                 System.out.println("game full!");
                 JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
+            }
+        });
+
+        /* Handle close window */
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                heartbeatExecutor.shutdown();    // kill latency thread
+                try {
+                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+                    if (response.isError()){
+                        System.out.println("ERROR: " + response.getErrorMessage());
+                    }
+
+                } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -370,7 +427,6 @@ public class GameLobby extends JFrame {
         gameList.removeAll(gameList); // Clear gameList
         // Fill table again
         getGamesList();
-        System.out.println(gameList.size());
     }
 
     /**
@@ -382,26 +438,26 @@ public class GameLobby extends JFrame {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             GameListResponse listResponse = (GameListResponse) response;
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
             for (GameListing listing : gamesFromServer) {
-//                System.out.printf(
-//                        "%s, %s, %s, %d, %b\n",
-//                        listing.getID(),
-//                        listing.getTitle(),
-//                        listing.getOwner(),
-//                        listing.getNumberOfPlayers(),
-//                        listing.hasPassword() // TODO: this is always true :(
-//                );
+                System.out.printf(
+                        "%s, %s, %s, %d, %b\n",
+                        listing.getID(),
+                        listing.getTitle(),
+                        listing.getOwner(),
+                        listing.getNumberOfPlayers(),
+                        listing.hasPassword()
+                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
@@ -419,16 +475,17 @@ public class GameLobby extends JFrame {
     }
 
     /**
-     * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when refreshed.
+     * Creates an instance of a new game, adds it to the server. The new game will be shown in the table when
+     * refreshed.
      * @param gameName The name of the game that should be created.
-     * @param gamePassword The password for the game that should be created. Leave empty char[] if it shouldn't have any password.
+     * @param gamePassword The password for the game that should be created. Use null if it shouldn't have any password.
      */
     public void createNewGame(String gameName, char[] gamePassword) {
         try {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
             response = conn.sendMessage(new NewGameMessage(
@@ -437,7 +494,7 @@ public class GameLobby extends JFrame {
             ));
 
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return;
             }
 
@@ -448,36 +505,95 @@ public class GameLobby extends JFrame {
         refreshGamesList(); // refresh table
     }
 
+    /**
+     * Sends a HeartbeatMessage to the server and calculates the time it took.
+     * @return the time between your heartbeat request was sent from you and received by the server.
+     */
     public int getLatency(){
-        int latency = 0;
+        int l = 0;
         long timestampBefore = Instant.now().toEpochMilli();
 
         try {
             Message response;
             response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return 0;
             }
             HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
                     new HeartbeatMessage(timestampBefore)
             );
-
             if (heartbeatResponse.isError()){
-                System.out.println(response.getErrorMessage());
+                System.out.println("ERROR: " + response.getErrorMessage());
                 return 0;
             }
 
-            latency = (int) (heartbeatResponse.getTime() - timestampBefore);
-
-
+            l = (int) (heartbeatResponse.getTime() - timestampBefore);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+        return l;
+    }
+
+    /**
+     * A popup frame that informs that the connection has failed, and provides a text field to enter a new address.
+     * When clicking the confirm button, a new connection to the server is established. If this fails, the frame re-appears
+     * for another try until a connection is successful.
+     */
+    public void connectToServerFrame() {
+        JFrame connectionFrame = new JFrame();
+        connectionFrame.setLayout(null);
+        connectionFrame.setSize(400,200);
+
+        JLabel connectionFailedMessage = new JLabel("Connection failed");
+        connectionFailedMessage.setForeground(new Color(255, 0, 0));
+        connectionFailedMessage.setBounds(connectionFrame.getWidth()/2 - 50, 0, 100, 50);
+
+        JLabel enterServerAddressMessage = new JLabel("Please enter a valid server address");
+        enterServerAddressMessage.setBounds(connectionFrame.getWidth()/2 - 102, 20, 300, 50);
 
 
+        JTextField addressTextArea = new JTextField(serverAddress);
+        addressTextArea.setEditable(true);
+        addressTextArea.setBounds( connectionFrame.getWidth()/2 - 100, connectionFrame.getHeight()/3, 200,20);
 
-        return latency;
+
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.setBounds(connectionFrame.getWidth()/2 - 50, connectionFrame.getHeight()/2, 100, 40);
+        confirmButton.addActionListener(a -> {
+            serverAddress = addressTextArea.getText();
+            try {
+                conn = new ClientConnection(serverAddress);
+                Message response;
+                response = conn.sendMessage(new Message(MessageType.CONNECT));
+                if (response.isError()){
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                } else {
+                    connectionOK = true;
+                    newServerAddressTextField.setText(serverAddress);
+                    connectionFrame.dispose(); // destroy frame
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                connectionFrame.dispose(); // destroy frame
+                connectToServerFrame();   // make new frame, try again
+            }
+        });
+
+        /* Handle close button */
+        connectionFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+
+        connectionFrame.add(connectionFailedMessage);
+        connectionFrame.add(enterServerAddressMessage);
+        connectionFrame.add(addressTextArea);
+        connectionFrame.add(confirmButton);
+        connectionFrame.setLocationRelativeTo(null);
+        connectionFrame.setVisible(true);
+
     }
 }
 
