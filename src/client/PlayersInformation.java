@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
 public class PlayersInformation extends JPanel {
@@ -22,6 +23,8 @@ public class PlayersInformation extends JPanel {
         int HEIGHT = 50;
         int PANEL_HEIGHT = players.length * HEIGHT;
         playerInfo = new JLabel[players.length];
+
+
 
         roleIdentifier = new HashMap<Integer, String>();
         roleIdentifier.put(-2, "Bum");
@@ -47,7 +50,6 @@ public class PlayersInformation extends JPanel {
             playerInfo[i].setOpaque(true);
             add(playerInfo[i]);
         }
-        indicateTurn();
     }
 
     // Change color to the current player and turn the others gray
