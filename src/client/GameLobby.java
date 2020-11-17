@@ -372,6 +372,8 @@ public class GameLobby extends JFrame {
                                 System.out.println("ERROR: " + response.getErrorMessage());
                             }
 
+
+
                         } catch (IOException | ClassNotFoundException ioException) {
                             ioException.printStackTrace();
                         }
@@ -384,6 +386,7 @@ public class GameLobby extends JFrame {
                     pwFrame.add(pwEnterGameButton);
                 } else { // game is not private
                     System.out.println("joining game " + gameNumber);
+
                 }
 
             } else {

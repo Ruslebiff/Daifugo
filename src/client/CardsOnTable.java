@@ -14,13 +14,12 @@ import java.util.ArrayList;
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
     private ArrayList<Card> lastFourCards = new ArrayList<>();   // The last three cards played
-    private GameStateTracker stateTracker;
+    private final GameStateTracker stateTracker;
 
     public CardsOnTable(int widht, int height, GameStateTracker sT) {
         stateTracker = sT;
-        // Renders the green filt
         try {
-            image = ImageIO.read(
+            image = ImageIO.read(  // Renders the green filt
                     ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();

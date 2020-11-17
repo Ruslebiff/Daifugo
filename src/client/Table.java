@@ -61,7 +61,7 @@ public class Table extends JPanel {
         );
         add(players[0]);
 
-        playersInformation = new PlayersInformation(players, stateTracker);
+        playersInformation = new PlayersInformation(stateTracker);
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
 
