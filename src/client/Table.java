@@ -76,6 +76,7 @@ public class Table extends JPanel {
         exitButton.setBounds(50, 150, 100, 50);
         add(exitButton);
         exitButton.addActionListener(l -> {
+            
             this.setVisible(false);
             gL.showLobby(true);
             gL.startHeartbeat();
