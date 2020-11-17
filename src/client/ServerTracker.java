@@ -144,9 +144,7 @@ public class ServerTracker implements GameStateTracker {
     public void leaveGame() {
         try {
             Message response = connection.sendMessage(MessageType.LEAVE_GAME);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -164,9 +162,6 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public ArrayList<Card> getHand(String token) {
-//        synchronized (this) {
-//
-//        }
 
         return p1_cards;
     }

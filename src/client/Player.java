@@ -157,6 +157,7 @@ public class Player extends JPanel{
 
     // TODO: Y-coordinate must be further down
 
+    // TODO: når eier trykker startGame, bruk funksjon
     public void viewDealtHand() {
         space = space + ((maxCards - hand.size()) / 2);
         boundsX = (widthOfComponent / 2) - (cardWidth / 2) + (((hand.size() - 1) / 2) * space);
@@ -218,34 +219,36 @@ public class Player extends JPanel{
         if(!giveCards) {   // If it is a normal round, play the cards
             ArrayList<Card> playedInRound = stateTracker.getRoundCards();
             ArrayList<Card> lastCards = new ArrayList<>();
-            if(playedInRound.size() != 0) {       // If there are no cards in current rotation, player can play w/e
+
+            if(playedInRound.size() != 0) {       // If there are no cards in current round, player can play w/e
                 if (cardsToPlay.size() < 3 && playedInRound.size() >= 2) {
                     // If the cards played potentially removes the played cards total by the four equal cards rule
                     for (int i = playedInRound.size() - 1; i > playedInRound.size() - 4 + cardsToPlay.size() - 1; i--) {
                         lastCards.add(playedInRound.get(i));
                     }
                     // Check if the last cards plus cards to play are all equal cards and are four total
-                    int counter = 0;
+                    int sameCards = 0;
                     if (cardsToPlay.size() == 1) {
-                        counter = 1;
+                        sameCards = 1;
                         for (Card c : lastCards) {  // If the value is the same, increment the counter
                             if (c.getValue() == cardsToPlay.get(0).getValue())
-                                counter++;
+                                sameCards++;
                         }
                     } else if (cardsToPlay.size() == 2) {
-                        counter = 2;
+                        sameCards = 2;
                         for (Card c : lastCards) {
                             if (c.getValue() == cardsToPlay.get(0).getValue())
-                                counter++;
+                                sameCards++;
                         }
                     }
-                    if (counter == 4) {
-                        // TODO: Implement action that resets the cards
+                    if (sameCards == 4) {
+                        // TODO: Implement action that resets the round
+                        stateTracker.isNewTrick();
                     }
                 }
             }
 
-            if(stateTracker.playCards(cardsToPlay)) {
+            if(stateTracker.playCards(cardsToPlay)) {       // Play the cards
                 stateTracker.setNextTurn();
             }
 
@@ -253,7 +256,7 @@ public class Player extends JPanel{
             playCardsBtn.setText("Play Cards");
             giveCards = false;
             cardsClickable = true;
-            if(stateTracker.giveCards(cardsToPlay, role))
+            if(stateTracker.giveCards(cardsToPlay, role))   // Give cards to player with negative value of own role
                 stateTracker.setNextTurn();
         }
 
@@ -265,7 +268,7 @@ public class Player extends JPanel{
         if (hand.size() != 0) {   // If player has more cards left
             sortHand();             // Sort hand accordingly
             rearrangeCardsOnDisplay(); // Display properly
-        } // else Server.endGameForPlayer, assign role accordingly
+        }
         cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
     }
 
@@ -306,14 +309,14 @@ public class Player extends JPanel{
     // Whenever the round starts, the server should run each player's giveUpCards()
     public void giveUpCards() {
         if (role != 0) {
-            passTurnBtn.setEnabled(false);  // TODO: Når server indikerer at det er "min" tur, pass knapp og cancel knapp true
+            passTurnBtn.setEnabled(false);  // TODO: sett til true etter at kort er gitt
             int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished
             if (role < 0) {
                 cancelBtn.setEnabled(false);
                 // Highest cards to be selected
-                for (int i = 0; i < amountOfCards; i++) {
+                for (int i = 0; i < amountOfCards; i++) {   // Loop from the highest valued cards
                     Card temp = hand.get(i);
-                    if (temp.getValue() != 16) {
+                    if (temp.getValue() != 16) {            // If it is 3 of clubs, skip it
                         temp.setSelected();
                         cardsToPlay.add(hand.get(i));
                     } else
