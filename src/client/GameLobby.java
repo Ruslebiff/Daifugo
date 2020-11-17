@@ -114,19 +114,8 @@ public class GameLobby extends JFrame {
             }
         }
 
-        LOGGER.warning("Connected to server " + serverAddress);
+        LOGGER.info("Connected to server " + serverAddress);
 
-        try {
-            Message response = conn.sendMessage(new Message(MessageType.CONNECT));
-            IdentityResponse identityResponse = (IdentityResponse) response;
-            if (response.isError()){
-                LOGGER.warning(response.getErrorMessage());
-                return;
-            }
-            playerName = identityResponse.getNick();
-        } catch (IOException | ClassNotFoundException ioException) {
-            ioException.printStackTrace();
-        }
 
 
         /* Create window */
