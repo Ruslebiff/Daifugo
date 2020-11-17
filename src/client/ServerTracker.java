@@ -53,7 +53,7 @@ public class ServerTracker implements GameStateTracker {
             while (running) {
                 synchronized (ServerTracker.this) {
                     try {
-                        LOGGER.info("Sending heartbeat");
+                        LOGGER.fine("Sending heartbeat");
                         long timestamp = Instant.now().toEpochMilli();
                         response = connection.sendMessage(
                                 new HeartbeatMessage(timestamp)
