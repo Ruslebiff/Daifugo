@@ -78,7 +78,6 @@ public class Table extends JPanel {
     }
 
     public void startGame() {
-        // TODO:
         stateTracker.startGame();
     }
 

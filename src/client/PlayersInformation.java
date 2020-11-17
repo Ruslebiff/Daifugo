@@ -58,6 +58,7 @@ public class PlayersInformation extends JPanel {
             playerInfo[i].setOpaque(true);
             add(playerInfo[i]);
         }
+        repaint();
     }
 
     //TODO : Trenger en måte å oppdatere seg når en ny spiller joiner spill
