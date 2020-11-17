@@ -265,7 +265,7 @@ public class Server {
 
                     } else {
                         if (currentSession != null)
-                            LOGGER.info("Awaiting request from: " + currentSession.getToken() + "|" + currentSession.getNick());
+                            LOGGER.fine("Awaiting request from: " + currentSession.getToken() + "|" + currentSession.getNick());
                         switch (request.getMessageType()) {
                             case CONNECT -> createNewSession();
 /*                            case RECONNECT -> { //TODO: timeout problem

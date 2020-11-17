@@ -99,6 +99,7 @@ public class GameLobby extends JFrame {
             } else {
                 IdentityResponse tmp = (IdentityResponse) response;
                 playerToken = tmp.getToken();
+                playerName = tmp.getNick();
                 connectionOK = true;
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -511,11 +512,6 @@ public class GameLobby extends JFrame {
         try {
             Message response;
             synchronized (this) {
-                response = conn.sendMessage(new Message(MessageType.CONNECT));
-                if (response.isError()) {
-                    LOGGER.warning("ERROR: " + response.getErrorMessage());
-                    return;
-                }
                 response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
                 if (response.isError()) {
                     LOGGER.warning("ERROR: " + response.getErrorMessage());
@@ -553,11 +549,6 @@ public class GameLobby extends JFrame {
         try {
             Message response;
             synchronized (this) {
-                response = conn.sendMessage(new Message(MessageType.CONNECT));
-                if (response.isError()) {
-                    LOGGER.warning("ERROR: " + response.getErrorMessage());
-                    return;
-                }
                 response = conn.sendMessage(new NewGameMessage(
                         gameName,
                         gamePassword
@@ -565,7 +556,7 @@ public class GameLobby extends JFrame {
             }
 
             if (response.isError()){
-                LOGGER.warning("ERROR: " + response.getErrorMessage());
+                LOGGER.warning(response.getErrorMessage());
                 return;
             }
 
@@ -611,18 +602,15 @@ public class GameLobby extends JFrame {
 
             try {
                 Message response;
-                response = conn.sendMessage(new Message(MessageType.CONNECT));
-                if (response.isError()){
-                    LOGGER.warning("ERROR: " + response.getErrorMessage());
-                    return 0;
-                }
-                HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
+                response = conn.sendMessage(
                         new HeartbeatMessage(timestampBefore)
                 );
-                if (heartbeatResponse.isError()){
-                    LOGGER.warning("ERROR: " + response.getErrorMessage());
+                if (response.isError()){
+                    LOGGER.warning(response.getErrorMessage());
                     return 0;
                 }
+
+                HeartbeatMessage heartbeatResponse = (HeartbeatMessage) response;
 
                 l = (int) (heartbeatResponse.getTime() - timestampBefore);
             } catch (IOException | ClassNotFoundException e) {
@@ -668,6 +656,7 @@ public class GameLobby extends JFrame {
                 } else {
                     IdentityResponse tmp = (IdentityResponse) response;
                     playerToken = tmp.getToken();
+                    playerName = tmp.getNick();
                     connectionOK = true;
                     newServerAddressTextField.setText(serverAddress);
                     connectionFrame.dispose(); // destroy frame

@@ -38,7 +38,7 @@ public class GameRunner {
         LOGGER = Logger.getLogger(GameRunner.class.getName() + "-" + userSession.getToken());
         LOGGER.addHandler(Server.CONSOLE_HANDLER);
         //LOGGER.addHandler(Server.FILE_HANDLER);
-        LOGGER.setLevel(Level.FINE);
+        LOGGER.setLevel(Level.INFO);
 
         LOGGER.info(
                 logPrefix() + "joined game: " + game.getTitle()
@@ -167,7 +167,7 @@ public class GameRunner {
         running = true;
         while (running) {
 
-            LOGGER.info("Awaiting request from: " + userSession.getToken() + "|" + userSession.getNick());
+            LOGGER.fine("Awaiting request from: " + userSession.getToken() + "|" + userSession.getNick());
             try {
 
                 Message request;
