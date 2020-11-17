@@ -76,6 +76,7 @@ public class GameRunner {
         // returning game state response
         try {
             out.writeObject(new GameStateResponse(game, userSession));
+            po.stateHasBeenSent();
         } catch (UserSessionError userSessionError) {
             out.writeObject(new ErrorMessage(userSessionError.getMessage()));
         }
