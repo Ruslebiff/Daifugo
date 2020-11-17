@@ -63,6 +63,10 @@ public class GameState implements Serializable {
         return players.get(currentPlayer).getNick().equals(playerNick);
     }
 
+    public boolean iAmOwner() {
+        return ownerNick.equals(playerNick);
+    }
+
     public int getCurrentPlayer() {
         return currentPlayer;
     }
