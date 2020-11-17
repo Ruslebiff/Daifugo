@@ -16,11 +16,12 @@ public class CardsOnTable extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage faceDown;
 
-    public CardsOnTable(int widht, int height, GameStateTracker sT) {
+    public CardsOnTable(int width, int height, GameStateTracker sT) {
         stateTracker = sT;
         try {
             image = ImageIO.read(  // Renders the green filt
                     ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -6,6 +6,7 @@ import common.PlayerData;
 import protocol.*;
 
 import java.io.IOException;
+import java.io.StreamCorruptedException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,6 @@ public class ServerTracker implements GameStateTracker {
     private GameState state;
     private final long heartbeatInterval = 300;
 
-    private boolean runHeartbeat;
     private HeartbeatThread backgroundThread;
 
     private ArrayList<Card> deck = new ArrayList<>();
@@ -89,14 +89,13 @@ public class ServerTracker implements GameStateTracker {
     public ServerTracker(ClientConnection connection, GameState state) {
         this.connection = connection;
         this.state = state;
-        runHeartbeat = true;
         backgroundThread = new HeartbeatThread();
 
 
     }
 
     public void stopHeartbeatThread() throws InterruptedException {
-        runHeartbeat = false;
+        backgroundThread.sendStopSignal();
         backgroundThread.join();
     }
 

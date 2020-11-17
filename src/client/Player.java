@@ -61,10 +61,12 @@ public class Player extends JPanel{
         setOpaque(true);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
 
-        // Renders the green filt unto the player-section
+        // Renders the green felt unto the player-section
         try {
             image = ImageIO.read(
-                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));        // Read the image
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg")
+            );        // Read the image
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }

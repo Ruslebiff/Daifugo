@@ -6,8 +6,14 @@ import protocol.*;
 import server.exceptions.UserSessionError;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,15 +22,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-// TODO: a filter box to search through available games
-
 public class GameLobby extends JFrame {
     private final String[] columnNames = {
             "ID",
             "Game name",
             "Owner",
             "Players",
-            "Private",
+            "Access",
             ""
     };
     private final DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
@@ -34,9 +38,9 @@ public class GameLobby extends JFrame {
         }
     };
     private final JTable gamesTable = new JTable(tableModel);
-    private int window_height = 1000;
-    private int window_width = 1000;
-    private int MAX_PLAYERS = 8;
+    private final int window_height = 1000;
+    private final int window_width = 1000;
+    private final int MAX_PLAYERS = 8;
     private String playerName;
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
@@ -45,6 +49,16 @@ public class GameLobby extends JFrame {
     private volatile boolean connectionOK = false;
     private JTextField newServerAddressTextField = new JTextField(serverAddress);
     private ScheduledExecutorService heartbeatExecutor;
+    private JLabel latencyLabel = new JLabel();
+    private JButton joinGameButton = new JButton();
+    private JFrame pwFrame = new JFrame("Join game");
+
+    /* Lobby Panels */
+    JPanel newGamePanel = new JPanel();
+    JPanel statusBar = new JPanel();
+    JPanel settingsPanel = new JPanel();
+    JPanel controlPanel = new JPanel();
+    JScrollPane sp = new JScrollPane(gamesTable);
 
     public GameLobby() {
 
@@ -82,12 +96,13 @@ public class GameLobby extends JFrame {
         /* Create window */
         setSize(window_width,window_height);
         setLayout(new BorderLayout());
-        setTitle("Daifugo - Lobby");
+        setTitle("Daifugo");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
-        /* New game view */
-        JPanel newGamePanel = new JPanel();
+        /**
+         *  New game view
+         ************************/
         newGamePanel.setSize(window_width,window_height);
         newGamePanel.setVisible(false);
         newGamePanel.setLayout(new GridBagLayout());
@@ -123,8 +138,9 @@ public class GameLobby extends JFrame {
         newGamePanel.add(newGameConfirmButton, gbc);
 
 
-        /* Settings view */
-        JPanel settingsPanel = new JPanel();
+        /**
+         *  Settings view
+         ************************/
         settingsPanel.setSize(window_width,window_height);
         settingsPanel.setVisible(false);
         settingsPanel.setLayout(null);
@@ -158,8 +174,10 @@ public class GameLobby extends JFrame {
         settingsPanel.add(newServerAddressTextField, gbc);
         settingsPanel.add(settingsConfirmButton, gbc);
 
-        /* Control bar */
-        JPanel controlPanel = new JPanel();
+        /**
+         *  Control bar
+         ************************/
+
         controlPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         controlPanel.setBackground(Color.lightGray);
@@ -179,6 +197,11 @@ public class GameLobby extends JFrame {
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
+
+        JTextField searchField = new JTextField();
+        JLabel searchLabel = new JLabel("        Search:");
+
+
 
         c.fill = GridBagConstraints.LINE_START;
         c.weightx = 0.0;
@@ -206,32 +229,49 @@ public class GameLobby extends JFrame {
         c.ipadx = 0;
         controlPanel.add(settingsButton, c);
 
-        /* Status bar */
-        JPanel statusBar = new JPanel();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.0;
+        c.weighty = 0.1;
+        c.gridwidth = 3;
+        c.gridx = 1;
+        c.gridy = 1;
+        controlPanel.add(searchField, c);
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.0;
+        c.weighty = 0.1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        controlPanel.add(searchLabel, c);
+
+
+
+        /**
+         *  Status bar
+         ************************/
         statusBar.setBackground(Color.lightGray);
         statusBar.setLayout(new BorderLayout());
 
-        JLabel latencyLabel = new JLabel();
-        Runnable latencyRunnable = () -> {
-            latency = getLatency();
-            latencyLabel.setText("Latency: " + latency + "  ");
-        };
-        heartbeatExecutor = Executors.newScheduledThreadPool(1);
-        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
 
-
+        startHeartbeat();
         latencyLabel.setText("Latency: " + latency + "  ");
         statusBar.add(latencyLabel, BorderLayout.LINE_END);
+        /***********************/
 
-        /* Get Games List */
+
+        /**
+         *  Table
+         ************************/
         getGamesList();
 
         gamesTable.setModel(tableModel);
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
         gamesTable.setAutoCreateRowSorter(true);
+        TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(gamesTable.getModel());
+        gamesTable.setRowSorter(rowSorter);
 
-        JButton joinGameButton = new JButton();
 
         /* add join buttons to table rows */
         gamesTable.getColumn("").setCellRenderer(new ButtonRenderer());
@@ -251,9 +291,42 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
-        JScrollPane sp = new JScrollPane(gamesTable);
 
-        /* Button action listeners*/
+        /**
+         * Search bar functionality
+         *************************/
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+        });
+
+        /**
+         *  Button action listeners
+         ************************/
         newGamePrivateCheckbox.addActionListener(e -> {
             newGamePassword.setEnabled(newGamePrivateCheckbox.isSelected());
 
@@ -267,9 +340,7 @@ public class GameLobby extends JFrame {
                 pw = null;
             }
             createNewGame(newGameName.getText(), pw);
-            controlPanel.setVisible(true);
-            sp.setVisible(true);
-            newGamePanel.setVisible(false);
+            sp.setVisible(false);
         });
 
         settingsConfirmButton.addActionListener(e -> {
@@ -310,22 +381,18 @@ public class GameLobby extends JFrame {
             }
 
             if (allSettingsOK){ // settings ok, exit settings view
-                controlPanel.setVisible(true);
-                sp.setVisible(true);
-                settingsPanel.setVisible(false);
+                showLobby(true);
             }
 
         });
 
         newGameButton.addActionListener(e -> {
-            controlPanel.setVisible(false);
-            sp.setVisible(false);
+            showLobby(false);
             newGamePanel.setVisible(true);
         });
 
         settingsButton.addActionListener(e -> {
-            controlPanel.setVisible(false);
-            sp.setVisible(false);
+            showLobby(false);
             settingsPanel.setVisible(true);
         });
 
@@ -333,10 +400,12 @@ public class GameLobby extends JFrame {
             int gameNumber = Integer.parseInt(gamesTable.getValueAt(gamesTable.getSelectedRow(), 0).toString());
             int playerCount = Character.getNumericValue(gamesTable.getValueAt(gamesTable.getSelectedRow(), 3).toString().charAt(0));
 
+            String gameID;
+            gameID = gameList.get(gameNumber-1).getID();
+
             if (playerCount < 8){
-                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private // TODO: can we use the hasPassword() instead?
+                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Private")) { // game is private
                     // show window for entering password
-                    JFrame pwFrame = new JFrame("Join game");
                     pwFrame.setLayout(null);
                     pwFrame.setSize(300,150);
                     pwFrame.setVisible(true);
@@ -350,34 +419,7 @@ public class GameLobby extends JFrame {
                     pwEnterGameButton.setBounds(100, 75, 95, 20);
 
                     pwEnterGameButton.addActionListener(e1 -> {
-
-                        try {
-                            Message response = conn.sendMessage(
-                                    new Message(MessageType.CONNECT)
-                            );
-                            if (response.isError()){
-                                System.out.println("ERROR: " + response.getErrorMessage());
-                                return;
-                            }
-
-                            String gameID;
-                            gameID = gameList.get(gameNumber-1).getID();
-                            System.out.println("Entering game with ID: " + gameID);
-
-                            response = conn.sendMessage(new JoinGameRequest(gameID, pwToJoinField.getPassword()));
-                            if (response.isError()){
-                                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
-                                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
-                                }
-                                System.out.println("ERROR: " + response.getErrorMessage());
-                            }
-
-
-
-                        } catch (IOException | ClassNotFoundException ioException) {
-                            ioException.printStackTrace();
-                        }
-
+                        joinGame(gameID, pwToJoinField.getPassword());
 
                     });
 
@@ -385,7 +427,7 @@ public class GameLobby extends JFrame {
                     pwFrame.add(pwToJoinField);
                     pwFrame.add(pwEnterGameButton);
                 } else { // game is not private
-                    System.out.println("joining game " + gameNumber);
+                    joinGame(gameID, null);
 
                 }
 
@@ -409,15 +451,17 @@ public class GameLobby extends JFrame {
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
+                System.exit(0);
             }
         });
 
-        add(newGamePanel);
-        add(settingsPanel);
-        add(controlPanel, BorderLayout.PAGE_START);
-        add(sp, BorderLayout.CENTER);
-        add(statusBar, BorderLayout.PAGE_END);
+        add(newGamePanel, 0);
+        add(settingsPanel, 0);
+        add(controlPanel, BorderLayout.PAGE_START, 0);
+        add(sp, BorderLayout.CENTER, 0);
+        add(statusBar, BorderLayout.PAGE_END, 0);
         setVisible(true);
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -456,20 +500,12 @@ public class GameLobby extends JFrame {
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
             for (GameListing listing : gamesFromServer) {
-                System.out.printf(
-                        "%s, %s, %s, %d, %b\n",
-                        listing.getID(),
-                        listing.getTitle(),
-                        listing.getOwner(),
-                        listing.getNumberOfPlayers(),
-                        listing.hasPassword()
-                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
-                String p = "No";
+                String p = "Public";
                 if (listing.hasPassword()){
-                    p = "Yes";
+                    p = "Private";
                 }
                 Object[] gameToTable = {i,listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers() + " / " + MAX_PLAYERS, p, "Join"};
                 tableModel.addRow(gameToTable);
@@ -504,6 +540,7 @@ public class GameLobby extends JFrame {
                 return;
             }
 
+            setWaitingCursor(true);
 
             heartbeatExecutor.shutdown();
             GameStateResponse tmp = (GameStateResponse) response;
@@ -512,17 +549,23 @@ public class GameLobby extends JFrame {
                     tmp.getState()
             );
 
-            try {
-                new GameWindow(tracker);
-            } catch (UserSessionError userSessionError) {
-                userSessionError.printStackTrace();
-            }
+            showLobby(false);
+
+            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable.setBounds(0,0, getWidth(), getHeight());
+            playTable.setVisible(true);
+            playTable.setBounds(0,0,window_width,window_height);
+            add(playTable, 1);
+            playTable.repaint();
+            playTable.revalidate();
+
+
+
+
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-        refreshGamesList(); // refresh table
     }
 
     /**
@@ -613,6 +656,97 @@ public class GameLobby extends JFrame {
         connectionFrame.add(confirmButton);
         connectionFrame.setLocationRelativeTo(null);
         connectionFrame.setVisible(true);
+
+    }
+
+    /**
+     * Resets lobby view to default view if true.
+     * Hides all lobby elements if false.
+     * @param b reset lobby view if true, hide all lobby elements if false
+     */
+    public void showLobby(boolean b){
+        if (b){
+            sp.setVisible(true);
+            statusBar.setVisible(true);
+            newGamePanel.setVisible(false);
+            settingsPanel.setVisible(false);
+            controlPanel.setVisible(true);
+        } else {
+            sp.setVisible(false);
+            statusBar.setVisible(false);
+            newGamePanel.setVisible(false);
+            settingsPanel.setVisible(false);
+            controlPanel.setVisible(false);
+        }
+    }
+
+    public void startHeartbeat(){
+        Runnable latencyRunnable = () -> {
+            latency = getLatency();
+            latencyLabel.setText("Latency: " + latency + "  ");
+        };
+        heartbeatExecutor = Executors.newScheduledThreadPool(1);
+        heartbeatExecutor.scheduleAtFixedRate(latencyRunnable, 1, 1, TimeUnit.SECONDS);
+    }
+
+
+    /**
+     * Connects to a game on server, hides lobby view and shows game view
+     * @param gameID Game UID to connect to
+     * @param password Password for the game. Use null if it isn't password protected
+     */
+    public void joinGame(String gameID, char[] password){
+        try {
+            Message response = conn.sendMessage(
+                    new Message(MessageType.CONNECT)
+            );
+            if (response.isError()){
+                System.out.println("ERROR: " + response.getErrorMessage());
+                return;
+            }
+
+
+
+            response = conn.sendMessage(new JoinGameRequest(gameID, password));
+            if (response.isError()){
+                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
+                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+                }
+                System.out.println("ERROR: " + response.getErrorMessage());
+            }
+
+
+            heartbeatExecutor.shutdown();
+            GameStateResponse tmp = (GameStateResponse) response;
+            GameStateTracker tracker = new ServerTracker(
+                    conn,
+                    tmp.getState()
+            );
+
+            setWaitingCursor(true);
+
+            showLobby(false);
+            pwFrame.setVisible(false);
+
+            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable.setBounds(0,0, getWidth(), getHeight());
+            playTable.setVisible(true);
+            playTable.setBounds(0,0,window_width,window_height);
+            add(playTable, 1);
+            playTable.repaint();
+            playTable.revalidate();
+
+        } catch (IOException | ClassNotFoundException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    public void setWaitingCursor(boolean waiting) {
+        if (waiting){
+            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+        } else {
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
 
     }
 }
