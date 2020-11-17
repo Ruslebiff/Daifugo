@@ -233,7 +233,7 @@ public class Server {
                     } catch (EOFException e) {
                         LOGGER.warning(
                                 "Got EOF while reading request from client. Maybe you forgot to call disconnect()?"
-                                // TODO: maybe this happens because DISCONNECT not sent?
+                                //  maybe this happens because DISCONNECT not sent?
                                 // yup
                                 // no, it happens because unclean socket termination
                         );

@@ -105,10 +105,17 @@ public class GameRunner {
     }
 
     private void validateGameStart() throws IOException {
-        if (userNotOwner())
+        if (userNotOwner()) {
+            out.writeObject(new ErrorMessage("You are not the owner of this game"));
             return;
+        }
 
-        game.start();
+        try {
+            game.start();
+            out.writeObject(new Message(OK));
+        } catch (GameException e) {
+            out.writeObject(new ErrorMessage(e.getMessage()));
+        }
 
     }
 

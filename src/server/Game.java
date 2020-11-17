@@ -241,9 +241,11 @@ public class Game {
         // TODO: call resetRound() if the game is started.
     }
 
-    public void start() {
-        // TODO: check if enough players
+    public void start() throws GameException {
         synchronized (this) {
+            if (players.size() < 3)
+                throw new GameException("Not enough players");
+
             started = true;
             shufflePlayerOrder();
             findStartingPlayer(dealCards());
