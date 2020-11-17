@@ -19,9 +19,12 @@ public class GameRunner {
     private final ObjectOutputStream out;
     private final Game game;
     private final UserSession userSession;
-    private final String logPrefix;
     private final Logger LOGGER;
     private boolean running;
+
+    public String logPrefix() {
+        return userSession.getNick() + ": ";
+    }
 
     public GameRunner(
             UserSession userSession,
@@ -32,21 +35,20 @@ public class GameRunner {
         this.in = in;
         this.out = out;
         this.game = userSession.getGame();
-        this.logPrefix = userSession.getNick() + ": ";
         LOGGER = Logger.getLogger(GameRunner.class.getName());
         LOGGER.addHandler(Server.CONSOLE_HANDLER);
         //LOGGER.addHandler(Server.FILE_HANDLER);
         LOGGER.setLevel(Level.FINE);
 
         LOGGER.info(
-                logPrefix + "joined game: " + game.getTitle()
+                logPrefix() + "joined game: " + game.getTitle()
                         + " (" + game.getID() + ")"
         );
     }
 
     private void sendHeartbeatResponse(HeartbeatMessage request) throws IOException {
 
-        LOGGER.info(logPrefix + "got heartbeat");
+        LOGGER.info(logPrefix() + "got heartbeat");
 
         // if state hasn't been updated, simply heartbeat back
         PlayerObject po = game.getPlayers().get(userSession.getID());
@@ -198,14 +200,14 @@ public class GameRunner {
 
 
             } catch (IOException | ClassNotFoundException e) {
-                LOGGER.warning(logPrefix + "got exception: " + e.getMessage());
+                LOGGER.warning(logPrefix() + "got exception: " + e.getMessage());
                 break;
             } catch (GameDisconnect ignored) {
-                LOGGER.info(logPrefix + "disconnected during game");
+                LOGGER.info(logPrefix() + "disconnected during game");
                 out.writeObject(new Message(OK));
                 throw new GameDisconnect();
             } catch (LeftGame ignored) {
-                LOGGER.info(logPrefix + "left game: " + game.getID().toString());
+                LOGGER.info(logPrefix() + "left game: " + game.getID().toString());
                 break;
             }
         }

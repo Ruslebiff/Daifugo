@@ -23,7 +23,6 @@ public interface GameStateTracker {
     boolean playCards(List<Card> playedCards);
     boolean giveCards(List<Card> cards);
     boolean isNewTrick();
-    void resetRound();
     int getNumberOfFaceDownCards();
     List<Card> getCardsOnTable();
     boolean startGame();

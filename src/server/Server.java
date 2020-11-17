@@ -40,7 +40,7 @@ public class Server {
 
     private ServerSocket serverSocket;
     private static final Logger SERVER_LOGGER = Logger.getLogger(
-            ClientHandler.class.getName()
+            Server.class.getName()
     );
 
     public Server() {

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static client.GameLobby.LOGGER;
+
 public class ServerTracker implements GameStateTracker {
 
     private final ClientConnection connection;
@@ -22,11 +24,8 @@ public class ServerTracker implements GameStateTracker {
 
     private HeartbeatThread backgroundThread;
 
-    private ArrayList<Card> deck = new ArrayList<>();
-    private ArrayList<Card> p1_cards = new ArrayList<>();   // TODO: REMOVE
     private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
-    private int playedType = 0;     // integer indicating if the cards played are singles, doubles or triples
 
     // TODO: temporary list of cards, remove later
     ArrayList<Card> tmp = new ArrayList<>();
@@ -54,14 +53,14 @@ public class ServerTracker implements GameStateTracker {
             while (running) {
                 synchronized (ServerTracker.this) {
                     try {
+                        LOGGER.info("Sending heartbeat");
                         long timestamp = Instant.now().toEpochMilli();
                         response = connection.sendMessage(
                                 new HeartbeatMessage(timestamp)
                         );
 
                         if (response.isError()) {
-                            // TODO: change to logging
-                            System.out.println(
+                            LOGGER.warning(
                                     "Received error: " + response.getErrorMessage()
                             );
                             break;
@@ -168,7 +167,7 @@ public class ServerTracker implements GameStateTracker {
             try {
                 response = connection.sendMessage(new PassTurn());
                 if(response.isError())
-                    System.out.println(response.getErrorMessage());
+                    LOGGER.warning(response.getErrorMessage());
 
                 GameStateResponse tmp = (GameStateResponse) response;
                 state = tmp.getState();
@@ -261,14 +260,6 @@ public class ServerTracker implements GameStateTracker {
     }
 
 
-    @Override
-    public void resetRound() {
-        synchronized (this) {
-            allCardsInRound.removeAll(allCardsInRound);
-            lastPlayedCards.removeAll(lastPlayedCards);
-            playedType = 0;
-        }
-    }
 
     @Override
     public int getNumberOfFaceDownCards() {

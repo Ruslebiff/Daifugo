@@ -3,6 +3,7 @@ package client;
 import client.networking.ClientConnection;
 import common.GameListing;
 import protocol.*;
+import server.Server;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -18,8 +19,39 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.*;
 
 public class GameLobby extends JFrame {
+
+    public static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
+    public static FileHandler FILE_HANDLER = null;
+
+    static {
+        try {
+            FILE_HANDLER = new FileHandler(
+                    "%h/daifugo-server.log",
+                    true
+            );
+            System.setProperty(
+                    "java.util.logging.SimpleFormatter.format",
+                    "[%4$s] (%1$ta %1$tF %1$tT %1$tZ) - %3$s:  %5$s %n"
+            );
+            FILE_HANDLER.setFormatter(new SimpleFormatter());
+            CONSOLE_HANDLER.setFormatter(new SimpleFormatter());
+
+            // Setting default log level to finest, overridden by local LOGGER object
+            FILE_HANDLER.setLevel(Level.ALL);
+            CONSOLE_HANDLER.setLevel(Level.ALL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static final Logger LOGGER = Logger.getLogger(
+            "Client"
+    );
+
+
     private final String[] columnNames = {
             "ID",
             "Game name",
@@ -63,7 +95,7 @@ public class GameLobby extends JFrame {
             conn = new ClientConnection(serverAddress);
             connectionOK = true;
         } catch (IOException e) {
-            System.out.println("ERROR: Failed to connect!");
+            LOGGER.warning("ERROR: Failed to connect!");
             connectToServerFrame();
         }
 
@@ -75,13 +107,13 @@ public class GameLobby extends JFrame {
             }
         }
 
-        System.out.println("Connected to server " + serverAddress);
+        LOGGER.warning("Connected to server " + serverAddress);
 
         try {
             Message response = conn.sendMessage(new Message(MessageType.CONNECT));
             IdentityResponse identityResponse = (IdentityResponse) response;
             if (response.isError()){
-                System.out.println(response.getErrorMessage());
+                LOGGER.warning(response.getErrorMessage());
                 return;
             }
             playerName = identityResponse.getNick();
@@ -349,7 +381,7 @@ public class GameLobby extends JFrame {
                     conn = new ClientConnection(serverAddress);
                     connectionOK = true;
                 } catch (IOException a) {
-                    System.out.println("ERROR: Failed to connect!");
+                    LOGGER.warning("ERROR: Failed to connect!");
                     connectToServerFrame();
                 }
             }
@@ -432,7 +464,7 @@ public class GameLobby extends JFrame {
                 }
 
             } else {
-                System.out.println("game full!");
+                LOGGER.warning("game full!");
                 JOptionPane.showMessageDialog(joinGameButton, "Game is full!");
             }
         });
@@ -448,7 +480,7 @@ public class GameLobby extends JFrame {
                         response = conn.sendMessage(new Message(MessageType.DISCONNECT));
                     }
                     if (response.isError()){
-                        System.out.println("ERROR: " + response.getErrorMessage());
+                        LOGGER.warning("ERROR: " + response.getErrorMessage());
                     }
 
                 } catch (ClassNotFoundException | IOException e) {
@@ -486,18 +518,18 @@ public class GameLobby extends JFrame {
      * Fills the gamesList with the games from the server, adds them to the gamesTable
      */
     public void getGamesList(){
-        System.out.println("Updating games list ...");
+        LOGGER.info("Updating games list ...");
         try {
             Message response;
             synchronized (this) {
                 response = conn.sendMessage(new Message(MessageType.CONNECT));
                 if (response.isError()) {
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                     return;
                 }
                 response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
                 if (response.isError()) {
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                     return;
                 }
             }
@@ -534,7 +566,7 @@ public class GameLobby extends JFrame {
             synchronized (this) {
                 response = conn.sendMessage(new Message(MessageType.CONNECT));
                 if (response.isError()) {
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                     return;
                 }
                 response = conn.sendMessage(new NewGameMessage(
@@ -544,7 +576,7 @@ public class GameLobby extends JFrame {
             }
 
             if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
+                LOGGER.warning("ERROR: " + response.getErrorMessage());
                 return;
             }
 
@@ -592,14 +624,14 @@ public class GameLobby extends JFrame {
                 Message response;
                 response = conn.sendMessage(new Message(MessageType.CONNECT));
                 if (response.isError()){
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                     return 0;
                 }
                 HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
                         new HeartbeatMessage(timestampBefore)
                 );
                 if (heartbeatResponse.isError()){
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                     return 0;
                 }
 
@@ -643,7 +675,7 @@ public class GameLobby extends JFrame {
                 Message response;
                 response = conn.sendMessage(new Message(MessageType.CONNECT));
                 if (response.isError()){
-                    System.out.println("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                 } else {
                     connectionOK = true;
                     newServerAddressTextField.setText(serverAddress);
@@ -714,7 +746,7 @@ public class GameLobby extends JFrame {
                     new Message(MessageType.CONNECT)
             );
             if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
+                LOGGER.warning("ERROR: " + response.getErrorMessage());
                 return;
             }
 
@@ -725,7 +757,7 @@ public class GameLobby extends JFrame {
                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
                     JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
                 }
-                System.out.println("ERROR: " + response.getErrorMessage());
+                LOGGER.warning("ERROR: " + response.getErrorMessage());
             }
 
 
