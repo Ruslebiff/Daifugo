@@ -17,7 +17,7 @@ public interface GameStateTracker {
     String getActivePlayerID();
     ArrayList<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
-    void relinquishTurn();
+    void passTurn();
     void setNextTurn();
     boolean getIsMyTurn();
     boolean playCards(ArrayList<Card> playedCards);

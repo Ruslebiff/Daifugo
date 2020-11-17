@@ -4,7 +4,9 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import protocol.*;
+import server.Game;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,8 +160,22 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public void relinquishTurn() {
+    public void passTurn() {
+        synchronized (this) {
+            Message response = null;
+            try {
+                response = connection.sendMessage(new PassTurn());
+                if(response.isError())
+                    System.out.println(response.getErrorMessage());
 
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -195,7 +211,22 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public boolean giveCards(ArrayList<Card> cards, int role) {
-        return false;
+        synchronized (this) {
+            Message response = null;
+            try {
+                response = connection.sendMessage(new GiveCardsRequest(cards));
+                if(response.isError())
+                    return false;
+
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
     }
 
     @Override

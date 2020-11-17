@@ -66,7 +66,7 @@ public class DummyTracker implements GameStateTracker{
     }
 
     @Override
-    public void relinquishTurn() {
+    public void passTurn() {
 
     }
 
