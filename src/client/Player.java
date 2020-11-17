@@ -315,6 +315,7 @@ public class Player extends JPanel{
         // Next turn
         cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
+        stateTracker.passTurn();
     }
 
     // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
@@ -347,30 +348,4 @@ public class Player extends JPanel{
         } else
             cardsClickable = true;
     }
-
-    /**
-     * TODO: Server
-     * *Når en spiller er tom for kort, si i fra til server -> server legger til
-     * spillerID/uid i en List, sjekker størrelsen på den listen, hvis den
-     * lista er antallSpillere-1 så er spillet over, og roller deles ut
-     * - Må ta rede for at det kan være 3-8 spillere
-     * - Dersom det er 3 spillere, bare sett rollene på dem manuelt
-     * - Hvis det er flere:
-     * * fori-loop
-     * if(i == 0): player.assignRole(2)
-     * elif(i == 1): player.assignRole(1)
-     * elif(i == (antall.size() - 2): player.assignRole(-1)
-     * elif(i == (antall.size() - 1): player.assignRole(-2)
-     * - Etter at roller deles ut, start et nytt spill
-     * - Del ut kort
-     */
-
-    public void setHand(ArrayList<Card> dealtCards) {
-        this.hand = dealtCards;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
-    }
-
 }
