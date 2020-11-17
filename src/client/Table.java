@@ -14,6 +14,7 @@ public class Table extends JPanel {
     private BufferedImage image;
     private final PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
+    private GameStateTracker stateTracker;
 
     private Void updateGUI() {
         playersInformation.indicateTurn();
@@ -22,6 +23,7 @@ public class Table extends JPanel {
     }
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
+        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
@@ -34,9 +36,9 @@ public class Table extends JPanel {
         players[0] = new Player(
                 "Mohammed Lee",
                 "0",
-                sT.getHand("temp"),
+                stateTracker.getHand("temp"),
                 f_width /2,
-                sT
+                stateTracker
         );
 
         players[0].setBounds(
@@ -47,14 +49,14 @@ public class Table extends JPanel {
         );
         add(players[0]);
 
-        playersInformation = new PlayersInformation(players, sT);
+        playersInformation = new PlayersInformation(players, stateTracker);
         int pInfoWidth = 200;
         int pInfoHeight = 100;
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, sT);
+        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
         cardsOnTable.setBounds(
                 (f_width /2) - (cardsOnTableWidth/2),
                 (f_height /3) - (cardsOnTableHeight/2),
@@ -63,7 +65,7 @@ public class Table extends JPanel {
         add(cardsOnTable);
 
 
-        sT.registerCallback(this::updateGUI);
+        stateTracker.registerCallback(this::updateGUI);
 
         JButton startBtn = new JButton("Start");
         startBtn.setBounds(50,200, 100,50);
@@ -76,7 +78,7 @@ public class Table extends JPanel {
         exitButton.setBounds(50, 150, 100, 50);
         add(exitButton);
         exitButton.addActionListener(l -> {
-            
+            // TODO: Disconnect from game
             this.setVisible(false);
             gL.showLobby(true);
             gL.startHeartbeat();
