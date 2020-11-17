@@ -17,6 +17,7 @@ public class Table extends JPanel {
     private Void updateGUI() {
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();
+        System.out.println("Gui got updated");
         return null;
     }
 
