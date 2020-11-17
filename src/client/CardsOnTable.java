@@ -1,20 +1,20 @@
 package client;
 
-import server.Game;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 // Class for GUI of the cards played on the table
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
-    private ArrayList<Card> lastFourCards = new ArrayList<>();   // The last three cards played
+    private List<Card> lastFourCards = new ArrayList<>();   // The last three cards played
+    private int faceDownCards;
     private final GameStateTracker stateTracker;
+    private BufferedImage faceDown;
 
     public CardsOnTable(int widht, int height, GameStateTracker sT) {
         stateTracker = sT;
@@ -25,12 +25,19 @@ public class CardsOnTable extends JPanel{
             ex.printStackTrace();
         }
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        try {
+            faceDown = ImageIO.read(  // Renders the green filt
+                    ClientMain.class.getResourceAsStream("/cardimages/Daifugo_cardback_fade_blue_vertical.png"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     // Function shows the last cards played on the table
     public void updateCardsOnTable() {
         int cardWidth = 80, cardHeight = 120;
-        lastFourCards = stateTracker.getLastPlayedCards();
+        lastFourCards = stateTracker.getCardsOnTable();
         lastFourCards.forEach(c -> {
             c.setBounds(
                     (this.getWidth()/2) - (cardWidth/2),
@@ -40,6 +47,11 @@ public class CardsOnTable extends JPanel{
             );
             this.add(c);
         });
+
+        faceDownCards = stateTracker.getNumberOfFaceDownCards();
+//        for (int i = 0; i < faceDownCards; i++) {
+//
+//        }
     }
 
     @Override

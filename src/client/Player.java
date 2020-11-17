@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.round;
 
@@ -19,8 +20,8 @@ public class Player extends JPanel{
     private final String name;      // Name of player
     private final String playerID;     // Id
     private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
-    private ArrayList<Card> hand; // The cards dealt to the player
-    private final ArrayList<Card> cardsToPlay = new ArrayList<>();
+    private final List<Card> hand ; // The cards dealt to the player
+    private final List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
     // TODO: REMOVE ADD AND REMOVE BUTTONS
@@ -42,7 +43,7 @@ public class Player extends JPanel{
     private ClientConnection conn = null;
 
 
-    public Player(String name, String playerID, ArrayList<Card> cards, int width, GameStateTracker sT) {
+    public Player(String name, String playerID, List<Card> cards, int width, GameStateTracker sT) {
         this.stateTracker = sT;
         this.name = name;
         this.playerID = playerID;
@@ -107,7 +108,7 @@ public class Player extends JPanel{
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
-                if (stateTracker.getIsMyTurn() && cardsClickable) {
+                if (stateTracker.isMyTurn() && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
@@ -217,47 +218,15 @@ public class Player extends JPanel{
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         if(!giveCards) {   // If it is a normal round, play the cards
-            ArrayList<Card> playedInRound = stateTracker.getRoundCards();
-            ArrayList<Card> lastCards = new ArrayList<>();
-
-            if(playedInRound.size() != 0) {       // If there are no cards in current round, player can play w/e
-                if (cardsToPlay.size() < 3 && playedInRound.size() >= 2) {
-                    // If the cards played potentially removes the played cards total by the four equal cards rule
-                    for (int i = playedInRound.size() - 1; i > playedInRound.size() - 4 + cardsToPlay.size() - 1; i--) {
-                        lastCards.add(playedInRound.get(i));
-                    }
-                    // Check if the last cards plus cards to play are all equal cards and are four total
-                    int sameCards = 0;
-                    if (cardsToPlay.size() == 1) {
-                        sameCards = 1;
-                        for (Card c : lastCards) {  // If the value is the same, increment the counter
-                            if (c.getValue() == cardsToPlay.get(0).getValue())
-                                sameCards++;
-                        }
-                    } else if (cardsToPlay.size() == 2) {
-                        sameCards = 2;
-                        for (Card c : lastCards) {
-                            if (c.getValue() == cardsToPlay.get(0).getValue())
-                                sameCards++;
-                        }
-                    }
-                    if (sameCards == 4) {
-                        // TODO: Implement action that resets the round
-                        stateTracker.isNewTrick();
-                    }
-                }
-            }
-
-            if(stateTracker.playCards(cardsToPlay)) {       // Play the cards
-                stateTracker.setNextTurn();
-            }
-
+            boolean ok;
+            do {
+                ok = stateTracker.playCards(cardsToPlay);
+            } while (!ok);
         } else {            // If it is at the beginning of the round
             playCardsBtn.setText("Play Cards");
             giveCards = false;
             cardsClickable = true;
-            if(stateTracker.giveCards(cardsToPlay, role))   // Give cards to player with negative value of own role
-                stateTracker.setNextTurn();
+            stateTracker.giveCards(cardsToPlay);   // Give cards to player
         }
 
         // Clean up the buffer of cards to play
@@ -274,7 +243,7 @@ public class Player extends JPanel{
 
     public Boolean checkIfPlayable() {
         if(cardsToPlay.size() != 0) {   // If the player has selected cards
-            ArrayList<Card> lastPlayed = stateTracker.getLastPlayedCards(); // Last played cards
+            List<Card> lastPlayed = stateTracker.getCardsOnTable(); // Last played cards
 
             if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
                 return true;
@@ -283,14 +252,14 @@ public class Player extends JPanel{
             if (cardsToPlay.size() == lastPlayed.size()) {
                 boolean allSame = false;
                 for (Card card : cardsToPlay) {
-                    if (card == cardsToPlay.get(0))    // Checks if all the cards to play are the same
+                    if (card.getValue() == cardsToPlay.get(0).getValue())    // Checks if all the cards to play are the same
                         allSame = true;
                     else {
                         allSame = false;
                         break;
                     }
                 }
-                return cardsToPlay.get(0).getValue() >= lastPlayed.get(0).getValue() && allSame;
+                return cardsToPlay.get(0).getValue() >= lastPlayed.get(lastPlayed.size() - 1).getValue() && allSame;
             }
         }
         return false;

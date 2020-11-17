@@ -1,5 +1,6 @@
 package server;
 
+import client.Card;
 import common.*;
 import server.exceptions.*;
 
@@ -289,12 +290,24 @@ public class Game {
     public void playCards(UUID player, List<CardData> cards) throws GameException {
         try {
             synchronized (this) {
-                if (noOfCardsInTrick > 0 && noOfCardsInTrick != cards.size()) {
+                if (cards.get(0).getValue() != 16 && noOfCardsInTrick > 0 && noOfCardsInTrick != cards.size()) {
                     throw new GameException("Wrong number of cards");
                 }
 
-
                 // TODO: if cards not allowed to be played, throw exception
+                boolean allSame = true;
+                for (CardData card : cards)
+                    if (card.getValue() != cards.get(0).getValue()) {   // Checks if all the cards to play are the same
+                        allSame = false;
+                        break;
+                    }
+                if(!allSame)
+                    throw new GameException("All cards must have the same value");
+
+                List<CardData> tmp = _getTopCards();
+
+                if(tmp.get(tmp.size() - 1).getValue() > cards.get(0).getValue())
+                    throw new GameException("Cards must be higher or equal to those on table");
 
                 cardsOnTable.addAll(cards);
                 hands.get(player).removeAll(cards);

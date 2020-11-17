@@ -4,18 +4,16 @@ import common.PlayerData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
 public class PlayersInformation extends JPanel {
     private GameStateTracker stateTracker;
-    private final List<PlayerData> players;     // Array of the players in the game
+    private List<PlayerData> players;     // Array of the players in the game
     private JLabel[] playerInfo;        // Array of the labels representing the players
     private int previousTurn;           // ID of the player before you
-    private Color turnColor = new Color(135,206,250);
+    private Color activeColor = new Color(135,206,250);
     private Color neutralColor = new Color(119,136,153);
     private HashMap<Integer, String> roleIdentifier;
 
@@ -33,23 +31,23 @@ public class PlayersInformation extends JPanel {
         JLabel infoString = new JLabel("Players", SwingConstants.CENTER);
         infoString.setFont(new Font("sans serif", Font.BOLD, 20));
         add(infoString);
-
-        updateTable();
     }
 
     // Change color to the current player and turn the others gray
     public void indicateTurn() {
-        int pID = Integer.parseInt(stateTracker.getActivePlayerID());    // Get the ID of the active player
+        updateTable();
+        int playerIndex = stateTracker.getActivePlayerIndex();   // Get the ID of the active player
 
-        if(previousTurn != pID) {       // If the turn is supposed to go to the next player, else do nothing
+        if(previousTurn != playerIndex) {       // If the turn is supposed to go to the next player, else do nothing
             playerInfo[previousTurn].setBackground(neutralColor);
-            playerInfo[pID].setBackground(turnColor);
-            previousTurn = pID;
+            playerInfo[playerIndex].setBackground(activeColor);
+            previousTurn = playerIndex;
         }
     }
     
     // TODO: størrelse må være relativ til antall spillere med
     public void updateTable() {
+        players = stateTracker.getPlayerList();    // Update the list of players
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         for (int i = 0; i < players.size(); i++) {
             String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
@@ -61,5 +59,7 @@ public class PlayersInformation extends JPanel {
             add(playerInfo[i]);
         }
     }
+
+    //TODO : Trenger en måte å oppdatere seg når en ny spiller joiner spill
 
 }

@@ -4,14 +4,13 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import protocol.*;
-import server.Game;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 public class ServerTracker implements GameStateTracker {
 
@@ -93,22 +92,7 @@ public class ServerTracker implements GameStateTracker {
         runHeartbeat = true;
         backgroundThread = new HeartbeatThread();
 
-        /*** REMOVE LATER                           ***/
-        Card c1 = new Card(5, 'S');
-        Card c2 = new Card(6, 'S');
-        tmp.add(c1);
-        tmp.add(c2);
-        /**********************************************/
 
-        char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
-        for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
-            for (int number = 2; number < 15; number++)
-                deck.add(new Card(number, suits[suit]));    // Add the card to the cardList
-        Collections.shuffle(deck);          // Shuffle the cards
-
-        for (int i = 0; i < deck.size()/3; i++) {
-            p1_cards.add(deck.get(i));      // TODO: Change later
-        }
     }
 
     public void stopHeartbeatThread() throws InterruptedException {
@@ -125,7 +109,7 @@ public class ServerTracker implements GameStateTracker {
     @Override
     public boolean isMyTurn() {
         synchronized (this) {
-            return false;
+            return state.isMyTurn();
         }
     }
 
@@ -156,15 +140,14 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
-    @Override
-    public String getActivePlayerID() {
-        return "0";
-    } //TODO:
 
     @Override
-    public ArrayList<Card> getHand(String token) {
-
-        return p1_cards;
+    public List<Card> getHand(String token) {
+        synchronized (this) {
+            return state.getHand()
+                    .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
+                    .collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -199,12 +182,7 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean getIsMyTurn() {
-        return true;
-    }       // TODO:
-
-    @Override
-    public boolean playCards(ArrayList<Card> playedCards) {
+    public boolean playCards(List<Card> playedCards) {
         synchronized (this) {
             Message response = null;
             try {
@@ -223,7 +201,7 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean giveCards(ArrayList<Card> cards, int role) {
+    public boolean giveCards(List<Card> cards) {
         synchronized (this) {
             Message response = null;
             try {
@@ -248,16 +226,14 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public ArrayList<Card> getLastPlayedCards() {
-        // TODO:
-        return tmp;
+    public List<Card> getCardsOnTable() {
+        synchronized (this) {
+            return state.getTopCards()
+                    .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
+                    .collect(Collectors.toList());
+        }
     }
 
-    @Override
-    public ArrayList<Card> getRoundCards() {
-        //TODO:
-        return tmp;
-    }
 
     @Override
     public void resetRound() {
@@ -265,6 +241,13 @@ public class ServerTracker implements GameStateTracker {
             allCardsInRound.removeAll(allCardsInRound);
             lastPlayedCards.removeAll(lastPlayedCards);
             playedType = 0;
+        }
+    }
+
+    @Override
+    public int getNumberOfFaceDownCards() {
+        synchronized (this) {
+            return state.getFaceDownCards();
         }
     }
 }

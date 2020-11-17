@@ -15,16 +15,14 @@ public interface GameStateTracker {
 
     void leaveGame();
     void registerCallback(Callable<Void> callback);
-    String getActivePlayerID();
-    ArrayList<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
+    List<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
     int getLastPlayedType();   // Returns what was last played on the table, single, double or triple
     void passTurn();
     void setNextTurn();
-    boolean getIsMyTurn();
-    boolean playCards(ArrayList<Card> playedCards);
-    boolean giveCards(ArrayList<Card> cards, int role);
+    boolean playCards(List<Card> playedCards);
+    boolean giveCards(List<Card> cards);
     boolean isNewTrick();
-    ArrayList<Card> getLastPlayedCards();
-    ArrayList<Card> getRoundCards();
     void resetRound();
+    int getNumberOfFaceDownCards();
+    List<Card> getCardsOnTable();
 }

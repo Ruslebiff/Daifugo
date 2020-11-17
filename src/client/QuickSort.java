@@ -1,9 +1,10 @@
 package client;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class QuickSort {
-    static int partition(ArrayList<Card> arr, int low, int high)
+    static int partition(List<Card> arr, int low, int high)
     {
         int pivot = arr.get(high).getValue();
         int i = (low-1); // index of smaller element
@@ -34,7 +35,7 @@ public class QuickSort {
       arr[] --> Array to be sorted,
       low  --> Starting index,
       high  --> Ending index */
-    static void sort(ArrayList<Card> arr, int low, int high)
+    static void sort(List<Card> arr, int low, int high)
     {
         if (low < high)
         {
