@@ -14,16 +14,17 @@ import java.util.ArrayList;
 import static java.lang.Math.round;
 
 public class Player extends JPanel{
-    private GameStateTracker stateTracker;
+    private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
     private final String playerID;     // Id
     private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private ArrayList<Card> hand; // The cards dealt to the player
     private final ArrayList<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
-    private JButton addCard;
+
+    // TODO: REMOVE ADD AND REMOVE BUTTONS
+    private JButton addCard = new JButton("Add");
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
     private final PlayerButton cancelBtn;
     private final PlayerButton passTurnBtn;
@@ -60,10 +61,9 @@ public class Player extends JPanel{
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
 
         // Renders the green filt unto the player-section
-        this.filePath = "/green_fabric.jpg"; // Filepath
         try {
             image = ImageIO.read(
-                    ClientMain.class.getResourceAsStream(filePath));        // Read the image
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));        // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -92,20 +92,14 @@ public class Player extends JPanel{
         });
         add(playCardsBtn);
 
-        // TODO: REMOVE ADD AND REMOVE BUTTONS
-        addCard = new JButton("Add");
         addCard.setBounds(0, 175, buttonWidth, buttonHeight);
         add(addCard);
-        addCard.addActionListener(e -> {
-            viewDealtHand();
-        });
+        addCard.addActionListener(e -> viewDealtHand());
 
         removeCard = new JButton("Remove");
         removeCard.setBounds(100, 175, 100, 50);
         add(removeCard);
-        removeCard.addActionListener(e -> {
-            removeCardFromDisplay();
-        });
+        removeCard.addActionListener(e -> removeCardFromDisplay());
     }
 
     public void addListener(Card c) {
@@ -219,18 +213,6 @@ public class Player extends JPanel{
         });
     }
 
-    // Function checks if all the cards selected to play are the same value
-    public Boolean allTheSameCards() {
-        boolean equal = true;
-        int val = cardsToPlay.get(0).getValue();    // Get the value from one of the cards
-        for (Card c : cardsToPlay)                    // Go through each card
-            if (val != c.getValue()) {              // If the value is not the same, one of the cards is different
-                equal = false;
-                break;
-            }
-        return equal;
-    }
-
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         if(!giveCards) {   // If it is a normal round, play the cards
@@ -311,8 +293,8 @@ public class Player extends JPanel{
         return false;
     }
 
+    // Pass turn
     public void relinquishTurn() {
-        // Next turn
         cancel(); // Deselects any and all cards selected
         myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
         stateTracker.passTurn();

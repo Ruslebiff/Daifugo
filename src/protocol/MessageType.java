@@ -20,7 +20,7 @@ public enum MessageType {
     CANCEL_GAME_ERROR,      // propagated to players if a game is cancelled
     LEAVE_GAME,     // a player leaving a game that may or may not be started
     START_GAME,     // owner starts game
-    PLAY_CARDS,
-    PASS_TURN,
+    PLAY_CARDS,     // plays cards the user has selected
+    PASS_TURN,      // Passes the turn
     GIVE_CARDS,     // trade cards between presidents and bums
 }
