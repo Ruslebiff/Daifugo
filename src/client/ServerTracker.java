@@ -106,6 +106,13 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public boolean isOwner() {
+        synchronized (this) {
+           return state.iAmOwner();
+        }
+    }
+
+    @Override
     public boolean isMyTurn() {
         synchronized (this) {
             return state.isMyTurn();
@@ -230,6 +237,26 @@ public class ServerTracker implements GameStateTracker {
             return state.getTopCards()
                     .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
                     .collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public boolean startGame() {
+        synchronized (this) {
+            Message response = null;
+            try {
+                response = connection.sendMessage(MessageType.START_GAME);
+                if(response.isError())
+                    return false;
+
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         }
     }
 

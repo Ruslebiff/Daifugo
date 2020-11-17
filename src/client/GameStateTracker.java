@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public interface GameStateTracker {
+    boolean isOwner();
     boolean isMyTurn();                 // er det min tur?
     List<PlayerData> getPlayerList();   // liste over spillere, i turn order
     int getActivePlayerIndex();         // aktiv spillers index i liste
@@ -25,4 +26,5 @@ public interface GameStateTracker {
     void resetRound();
     int getNumberOfFaceDownCards();
     List<Card> getCardsOnTable();
+    boolean startGame();
 }

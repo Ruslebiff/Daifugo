@@ -91,9 +91,9 @@ public class Table extends JPanel {
         gL.setWaitingCursor(false);
     }
 
-
     public void startGame() {
         // TODO:
+        stateTracker.startGame();
     }
 
     @Override
