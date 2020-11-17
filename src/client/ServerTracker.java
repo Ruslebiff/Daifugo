@@ -33,6 +33,7 @@ public class ServerTracker implements GameStateTracker {
 
 
 
+    //TODO: trading cards from round 2
 
     private class HeartbeatThread extends Thread {
 

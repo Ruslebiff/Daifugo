@@ -100,6 +100,7 @@ public class Game {
         cardsOnTable = new ArrayList<>();
         noOfCardsFaceDown = 0;
         noOfCardsInTrick = 0;
+        goneOut = 0;
         turnSequence = new ArrayList<>();
         started = false;
 
@@ -238,7 +239,10 @@ public class Game {
                removeFromList();
             }
         }
-        // TODO: call resetRound() if the game is started.
+
+        if (started) {
+            resetRound();
+        }
     }
 
     public void start() throws GameException {
@@ -246,9 +250,20 @@ public class Game {
             if (players.size() < 3)
                 throw new GameException("Not enough players");
 
+            for (PlayerObject po : players.values()) {
+                po.getGameData().reset();
+            }
+
             started = true;
             shufflePlayerOrder();
             findStartingPlayer(dealCards());
+            propagateChange();
+        }
+    }
+
+    private void stop() {
+        synchronized (this) {
+            started = false;
             propagateChange();
         }
     }
@@ -265,12 +280,22 @@ public class Game {
         }
     }
 
-    public void playCards(UUID player, List<CardData> cards) {
-        // TODO: if cards not allowed to be played, throw exception
+    public void playCards(UUID player, List<CardData> cards) throws GameException {
         try {
             synchronized (this) {
+                if (noOfCardsInTrick > 0 && noOfCardsInTrick != cards.size()) {
+                    throw new GameException("Wrong number of cards");
+                }
+
+
+                // TODO: if cards not allowed to be played, throw exception
+
                 cardsOnTable.addAll(cards);
                 hands.get(player).removeAll(cards);
+
+                // setting new hand count
+                PlayerData pd = players.get(player).getGameData();
+                pd.setNumberOfCards(hands.get(player).size());
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
@@ -282,13 +307,21 @@ public class Game {
                         && topCards.get(2) == topCards.get(0)
                         && topCards.get(3) == topCards.get(0)
                 ) {
-                    // all 4 topcards the same, start new trick
+                    // all 4 top cards the same, start new trick
                     newTrick();
                     return;
                 }
-                    noOfCardsInTrick = cards.size(); // TODO: should add some verification here
-                    nextPlayer();
-                    propagateChange();
+
+
+
+                // if hand is empty, go out of round
+                if (hands.get(player).isEmpty())
+                    pd.setOutCount(++goneOut);
+
+                if (noOfCardsInTrick == 0)
+                    noOfCardsInTrick = cards.size();
+                nextPlayer();
+                propagateChange();
             }
         } catch (RoundOver roundOver) {
             newRound();
@@ -303,7 +336,13 @@ public class Game {
      }
 
     public void newRound() {
+
+
         synchronized (this) {
+            goneOut = 0;
+            newTrick();
+            noOfCardsFaceDown = 0;
+
             assignRoles();
             findStartingPlayer(dealCards());
             propagateChange();
@@ -316,12 +355,6 @@ public class Game {
         }
     }
 
-
-    // TODO: game start
-    // TODO: game rounds
-    // TODO: game turns
-    // TODO: round end
-        // new rounds automatically start
 
 
     /**
@@ -382,12 +415,32 @@ public class Game {
         for (PlayerObject po : players.values()) {
             po.getGameData().setPassed(false);
         }
+        noOfCardsFaceDown += cardsOnTable.size();
+        cardsOnTable = new ArrayList<>();
+        noOfCardsInTrick = 0;
     }
 
+    /**
+     * Resets round if enough players remain, if not, stops the game and
+     * reopens for joining players.
+     */
     private void resetRound() {
-        // TODO: this function is called when a player has left, so resetting round
-        // sets all roles back to neutral, and starts a new round with remaining
-        // players, if enough.
+
+        if (players.size() >= 3) {
+            synchronized (this) {
+                for (PlayerObject po : players.values()) {
+                    PlayerData pd = po.getGameData();
+
+                    pd.setOutCount(0);
+                    pd.setRole(Role.NEUTRAL);
+                }
+            }
+
+            newRound();
+        } else {
+            stop();
+        }
+
     }
 
 
@@ -431,6 +484,12 @@ public class Game {
             ) {
                 playerWithThreeOfDiamonds = tmp;
             }
+        }
+
+
+        // Counts all hands
+        for (UUID hand : hands.keySet()) {
+            players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
         }
 
         return playerWithThreeOfDiamonds;

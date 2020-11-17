@@ -125,12 +125,14 @@ public class GameRunner {
     }
 
     private void handlePlayCards(PlayCardsRequest request) throws IOException {
-        game.playCards(userSession.getID(), request.getCards());
         try {
+            game.playCards(userSession.getID(), request.getCards());
             out.writeObject(new GameStateResponse(game, userSession));
-        } catch (UserSessionError userSessionError) {
-            out.writeObject(new ErrorMessage(userSessionError.getMessage()));
+        } catch (UserSessionError | GameException e) {
+            out.writeObject(new ErrorMessage(e.getMessage()));
         }
+
+
     }
 
     private void handlePass() throws IOException {
