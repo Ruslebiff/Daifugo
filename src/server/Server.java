@@ -47,6 +47,7 @@ public class Server {
         SERVER_LOGGER.setLevel(Level.INFO);
         SERVER_LOGGER.addHandler(CONSOLE_HANDLER);
         SERVER_LOGGER.addHandler(FILE_HANDLER);
+        SERVER_LOGGER.setUseParentHandlers(false);
     }
 
     public void start(int port) throws IOException {
@@ -142,6 +143,7 @@ public class Server {
             LOGGER.setLevel(Level.INFO);
             // TODO: add file logging:
             //LOGGER.addHandler(FILE_HANDLER);
+            LOGGER.setUseParentHandlers(false);
         }
 
         private void updateNick(UpdateNickMessage request) throws IOException {

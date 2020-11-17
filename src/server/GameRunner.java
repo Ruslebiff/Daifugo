@@ -38,6 +38,7 @@ public class GameRunner {
         LOGGER = Logger.getLogger(GameRunner.class.getName() + "-" + userSession.getToken());
         LOGGER.addHandler(Server.CONSOLE_HANDLER);
         //LOGGER.addHandler(Server.FILE_HANDLER);
+        LOGGER.setUseParentHandlers(false);
         LOGGER.setLevel(Level.INFO);
 
         LOGGER.info(
@@ -59,7 +60,6 @@ public class GameRunner {
             );
 
             po.getGameData().setLatency(receiveTime - request.getTime());
-            //game.registerGameStateChange();     //TODO: maybe overkill, needs live testing
             return;
         }
 
