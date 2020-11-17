@@ -6,8 +6,10 @@ import server.exceptions.*;
 import java.io.Serializable;
 import java.util.*;
 
+import static server.Server.SERVER_LOGGER;
+
 public class GameState implements Serializable {
-    private ArrayList<PlayerData> players;
+    private List<PlayerData> players;
     private List<CardData> hand;
 
     // replication of general game data
@@ -41,6 +43,7 @@ public class GameState implements Serializable {
         Map<UUID, PlayerObject> playerMap = game.getPlayers();
         players = new ArrayList<>();
         for (UUID id : game.getTurnSequence()) {
+            SERVER_LOGGER.fine("adding player to state");
             players.add(playerMap.get(id).getGameData());
         }
 
@@ -85,7 +88,7 @@ public class GameState implements Serializable {
 
     public List<CardData> getHand() { return hand; }
 
-    public ArrayList<PlayerData> getPlayers() {
+    public List<PlayerData> getPlayers() {
         return players;
     }
 

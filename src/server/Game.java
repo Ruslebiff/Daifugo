@@ -6,6 +6,9 @@ import server.exceptions.*;
 
 import java.util.*;
 
+import static server.Server.SERVER_LOGGER;
+
+
 public class Game {
 
     /**
@@ -22,18 +25,22 @@ public class Game {
 
             List<GameListing> list = new ArrayList<>();
 
-            for (UUID id : games.keySet()) {
-                Game game = games.get(id);
-                list.add(
-                        new GameListing(
-                                id.toString(),
-                                game.title,
-                                game.getOwnerNick(),
-                                game.players.size(),
-                                game.password != null,
-                                game.started
-                        )
-                );
+            try {
+                for (UUID id : games.keySet()) {
+                    Game game = games.get(id);
+                    list.add(
+                            new GameListing(
+                                    id.toString(),
+                                    game.title,
+                                    game.getOwnerNick(),
+                                    game.players.size(),
+                                    game.password != null,
+                                    game.started
+                            )
+                    );
+                }
+            } catch (Exception e) {
+                SERVER_LOGGER.info("error inside getGameList: " + e.getMessage());
             }
 
             return list;
@@ -102,7 +109,6 @@ public class Game {
         noOfCardsFaceDown = 0;
         noOfCardsInTrick = 0;
         goneOut = 0;
-        turnSequence = new ArrayList<>();
         started = false;
 
         synchronized (Game.class) {
@@ -113,7 +119,7 @@ public class Game {
         try {
             joinGame(ownerSession, password);
         } catch (WrongPassword wrongPassword) {
-            wrongPassword.printStackTrace();
+            SERVER_LOGGER.warning("Owner got wrong password when joining own game");
         }
     }
 
@@ -199,6 +205,8 @@ public class Game {
         synchronized (this) {
             players.put(user.getID(), new PlayerObject(user, data));
             user.joinGame(ID);
+            shufflePlayerOrder();
+            propagateChange();
         }
     }
 
@@ -239,6 +247,7 @@ public class Game {
             if (players.size() == 0) {
                removeFromList();
             }
+            propagateChange();
         }
 
         if (started) {
@@ -522,6 +531,7 @@ public class Game {
         turnSequence = new ArrayList<>();
         turnSequence.addAll(players.keySet());
         Collections.shuffle(turnSequence);
+        SERVER_LOGGER.info("Shuffling player order, new sequence size: " + turnSequence.size());
     }
 
     /**

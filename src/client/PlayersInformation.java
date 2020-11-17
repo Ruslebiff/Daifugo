@@ -7,6 +7,8 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 
+import static client.GameLobby.LOGGER;
+
 // Class shows the players in the current game, their respective roles and whose turn it is.
 public class PlayersInformation extends JPanel {
     private GameStateTracker stateTracker;
@@ -16,21 +18,30 @@ public class PlayersInformation extends JPanel {
     private Color activeColor = new Color(135,206,250);
     private Color neutralColor = new Color(119,136,153);
     private HashMap<Integer, String> roleIdentifier;
+    private final int WIDTH;
+    private final int HEIGHT;
+    private JLabel infoString;
+
 
     public PlayersInformation(GameStateTracker stateTracker) {
         this.stateTracker = stateTracker;
         this.players = stateTracker.getPlayerList();
-        int WIDTH = 100;
-        int HEIGHT = 50;
-        int PANEL_HEIGHT = players.size() * HEIGHT;
+        WIDTH = 200;
+        HEIGHT = 50;
+        int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
 
         setLayout(new GridLayout(0,1));
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
 
 
-        JLabel infoString = new JLabel("Players", SwingConstants.CENTER);
-        infoString.setFont(new Font("sans serif", Font.BOLD, 20));
-        add(infoString);
+        infoString = new JLabel("Players", SwingConstants.CENTER);
+        infoString.setFont(new Font("sans serif", Font.BOLD, 18));
+        infoString.setBounds(0, 0, WIDTH, HEIGHT);
+    }
+
+    private void updatePanel() {
+        //setLayout(new GridLayout(players.size()+1,1));
+        setSize(new Dimension(WIDTH, (players.size()+1) * HEIGHT));
     }
 
     // Change color to the current player and turn the others gray
@@ -48,11 +59,21 @@ public class PlayersInformation extends JPanel {
     // TODO: størrelse må være relativ til antall spillere med
     public void updateTable() {
         players = stateTracker.getPlayerList();    // Update the list of players
+        LOGGER.info("updating table, " + players.size() + " players in game");
+        updatePanel();
+
+        remove(infoString);
+        if (playerInfo != null) {
+            for (JLabel pi : playerInfo) {
+                remove(pi);
+            }
+        }
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
+        add(infoString);
         for (int i = 0; i < players.size(); i++) {
             String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
-            playerInfo[i].setSize(new Dimension(WIDTH, HEIGHT));
+            playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
             playerInfo[i].setBackground(neutralColor);
             playerInfo[i].setOpaque(true);

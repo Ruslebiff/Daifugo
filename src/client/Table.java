@@ -30,7 +30,7 @@ public class Table extends JPanel {
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
 
         LOGGER = GameLobby.LOGGER;
-        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
+        this.stateTracker = sT;
 
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
@@ -58,12 +58,12 @@ public class Table extends JPanel {
         stateTracker.registerCallback(this::updateGUI);
 
         JButton startBtn = new JButton("Start");
-        startBtn.setBounds(50,200, 100,50);
+        startBtn.setBounds(f_width-150,50, 100,50);
         add(startBtn);
         startBtn.addActionListener(e -> startGame());
 
         JButton exitButton = new JButton("Exit");
-        exitButton.setBounds(50, 150, 100, 50);
+        exitButton.setBounds(f_width-150, 100, 100, 50);
         add(exitButton);
         exitButton.addActionListener(l -> {
             gL.setWaitingCursor(true);

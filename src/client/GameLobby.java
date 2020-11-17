@@ -514,7 +514,7 @@ public class GameLobby extends JFrame {
             synchronized (this) {
                 response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
                 if (response.isError()) {
-                    LOGGER.warning("ERROR: " + response.getErrorMessage());
+                    LOGGER.warning("Error getting game list: " + response.getErrorMessage());
                     return;
                 }
             }
@@ -581,10 +581,6 @@ public class GameLobby extends JFrame {
             add(playTable, 1);
             playTable.repaint();
             playTable.revalidate();
-
-
-
-
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();

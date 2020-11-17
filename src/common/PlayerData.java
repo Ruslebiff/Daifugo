@@ -1,8 +1,9 @@
 package common;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PlayerData {
+public class PlayerData implements Serializable {
     private String nick;
     private long latency;
     private int numberOfCards;
