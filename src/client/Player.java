@@ -17,7 +17,6 @@ import static java.lang.Math.round;
 public class Player extends JPanel{
     private GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private final String filePath;  // Path to image of green felt
     private final String name;      // Name of player
     private final String playerID;     // Id
     private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
@@ -60,10 +59,9 @@ public class Player extends JPanel{
         setOpaque(true);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
 
-        // Renders the green filt unto the player-section
-        this.filePath = "./resources/green_fabric.jpg"; // Filepath
+        // Renders the green felt unto the player-section
         try {
-            image = ImageIO.read(new File(filePath));       // Read the image
+            image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -137,9 +137,10 @@ public class GameRunner {
         }
     }
 
-    void leaveGameHandler() throws IOException {
+    void leaveGameHandler() throws IOException, LeftGame {
         userSession.leaveCurrentGame();
         out.writeObject(new Message(OK));
+        throw new LeftGame();
     }
 
     public void run() throws GameDisconnect, IOException {
