@@ -1,10 +1,14 @@
 package client;
 
+import server.Server;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.logging.*;
 
 
 public class Table extends JPanel {
@@ -13,16 +17,21 @@ public class Table extends JPanel {
     private final PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
+    private Logger LOGGER;
+
 
     private Void updateGUI() {
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();
-        System.out.println("Gui got updated");
+        LOGGER.info("Gui got updated");
         return null;
     }
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
-        this.stateTracker = sT;
+
+        LOGGER = GameLobby.LOGGER;
+        this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
+
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
