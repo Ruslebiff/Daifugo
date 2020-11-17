@@ -3,7 +3,6 @@ package client;
 import client.networking.ClientConnection;
 import common.GameListing;
 import protocol.*;
-import server.exceptions.UserSessionError;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -12,8 +11,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -360,13 +357,16 @@ public class GameLobby extends JFrame {
 
             if (!newNickNameTextField.getText().equals(playerName)){
                 try {
-                    Message response = conn.sendMessage(
-                            new Message(MessageType.CONNECT)
-                    );
-                    IdentityResponse identityResponse = (IdentityResponse) response;
-                    response = conn.sendMessage(
-                            new UpdateNickMessage(identityResponse.getToken(), newNickNameTextField.getText())
-                    );
+                    Message response;
+                    synchronized (this) {
+                        response = conn.sendMessage(
+                                new Message(MessageType.CONNECT)
+                        );
+                        IdentityResponse identityResponse = (IdentityResponse) response;
+                        response = conn.sendMessage(
+                                new UpdateNickMessage(identityResponse.getToken(), newNickNameTextField.getText())
+                        );
+                    }
                     if (response.isError()){
                         JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
                         allSettingsOK = false;
@@ -443,7 +443,10 @@ public class GameLobby extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 heartbeatExecutor.shutdown();    // kill latency thread
                 try {
-                    Message response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+                    Message response;
+                    synchronized (this) {
+                        response = conn.sendMessage(new Message(MessageType.DISCONNECT));
+                    }
                     if (response.isError()){
                         System.out.println("ERROR: " + response.getErrorMessage());
                     }
@@ -486,16 +489,19 @@ public class GameLobby extends JFrame {
         System.out.println("Updating games list ...");
         try {
             Message response;
-            response = conn.sendMessage(new Message(MessageType.CONNECT));
-            if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
-                return;
+            synchronized (this) {
+                response = conn.sendMessage(new Message(MessageType.CONNECT));
+                if (response.isError()) {
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                    return;
+                }
+                response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
+                if (response.isError()) {
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                    return;
+                }
             }
-            response = conn.sendMessage(new Message(MessageType.GET_GAME_LIST));
-            if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
-                return;
-            }
+
             GameListResponse listResponse = (GameListResponse) response;
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
@@ -525,15 +531,17 @@ public class GameLobby extends JFrame {
     public void createNewGame(String gameName, char[] gamePassword) {
         try {
             Message response;
-            response = conn.sendMessage(new Message(MessageType.CONNECT));
-            if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
-                return;
+            synchronized (this) {
+                response = conn.sendMessage(new Message(MessageType.CONNECT));
+                if (response.isError()) {
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                    return;
+                }
+                response = conn.sendMessage(new NewGameMessage(
+                        gameName,
+                        gamePassword
+                ));
             }
-            response = conn.sendMessage(new NewGameMessage(
-                    gameName,
-                    gamePassword
-            ));
 
             if (response.isError()){
                 System.out.println("ERROR: " + response.getErrorMessage());
@@ -544,10 +552,13 @@ public class GameLobby extends JFrame {
 
             heartbeatExecutor.shutdown();
             GameStateResponse tmp = (GameStateResponse) response;
-            GameStateTracker tracker = new ServerTracker(
-                    conn,
-                    tmp.getState()
-            );
+            GameStateTracker tracker;
+            synchronized (this) {
+                tracker = new ServerTracker(
+                        conn,
+                        tmp.getState()
+                );
+            }
 
             showLobby(false);
 
@@ -573,29 +584,31 @@ public class GameLobby extends JFrame {
      * @return the time between your heartbeat request was sent from you and received by the server.
      */
     public int getLatency(){
-        int l = 0;
-        long timestampBefore = Instant.now().toEpochMilli();
+        synchronized (this) {
+            int l = 0;
+            long timestampBefore = Instant.now().toEpochMilli();
 
-        try {
-            Message response;
-            response = conn.sendMessage(new Message(MessageType.CONNECT));
-            if (response.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
-                return 0;
-            }
-            HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
-                    new HeartbeatMessage(timestampBefore)
-            );
-            if (heartbeatResponse.isError()){
-                System.out.println("ERROR: " + response.getErrorMessage());
-                return 0;
-            }
+            try {
+                Message response;
+                response = conn.sendMessage(new Message(MessageType.CONNECT));
+                if (response.isError()){
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                    return 0;
+                }
+                HeartbeatMessage heartbeatResponse = (HeartbeatMessage) conn.sendMessage(
+                        new HeartbeatMessage(timestampBefore)
+                );
+                if (heartbeatResponse.isError()){
+                    System.out.println("ERROR: " + response.getErrorMessage());
+                    return 0;
+                }
 
-            l = (int) (heartbeatResponse.getTime() - timestampBefore);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+                l = (int) (heartbeatResponse.getTime() - timestampBefore);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return l;
         }
-        return l;
     }
 
     /**
