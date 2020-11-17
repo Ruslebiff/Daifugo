@@ -6,8 +6,14 @@ import protocol.*;
 import server.exceptions.UserSessionError;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,7 +30,7 @@ public class GameLobby extends JFrame {
             "Game name",
             "Owner",
             "Players",
-            "Private",
+            "Access",
             ""
     };
     private final DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
@@ -195,6 +201,8 @@ public class GameLobby extends JFrame {
         settingsButton.setText("Settings");
 
         JTextField searchField = new JTextField();
+        JLabel searchLabel = new JLabel("Search :");
+
 
 
         c.fill = GridBagConstraints.LINE_START;
@@ -226,10 +234,20 @@ public class GameLobby extends JFrame {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 0.0;
         c.weighty = 0.1;
-        c.gridwidth = 4;
-        c.gridx = 0;
+        c.gridwidth = 3;
+        c.gridx = 1;
         c.gridy = 1;
         controlPanel.add(searchField, c);
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.0;
+        c.weighty = 0.1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        controlPanel.add(searchLabel, c);
+
+
 
         /**
          *  Status bar
@@ -253,7 +271,8 @@ public class GameLobby extends JFrame {
         TableRowColorRenderer colorRenderer = new TableRowColorRenderer();
         gamesTable.setDefaultRenderer(Object.class, colorRenderer);
         gamesTable.setAutoCreateRowSorter(true);
-
+        TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(gamesTable.getModel());
+        gamesTable.setRowSorter(rowSorter);
 
 
         /* add join buttons to table rows */
@@ -275,6 +294,37 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
 
 
+        /**
+         * Search bar functionality
+         *************************/
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+        });
 
         /**
          *  Button action listeners
@@ -356,7 +406,7 @@ public class GameLobby extends JFrame {
             gameID = gameList.get(gameNumber-1).getID();
 
             if (playerCount < 8){
-                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private
+                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Private")) { // game is private
                     // show window for entering password
                     pwFrame.setLayout(null);
                     pwFrame.setSize(300,150);
@@ -450,20 +500,12 @@ public class GameLobby extends JFrame {
             List<GameListing> gamesFromServer = listResponse.getGameList();
             int i = 1;
             for (GameListing listing : gamesFromServer) {
-                System.out.printf(
-                        "%s, %s, %s, %d, %b\n",
-                        listing.getID(),
-                        listing.getTitle(),
-                        listing.getOwner(),
-                        listing.getNumberOfPlayers(),
-                        listing.hasPassword()
-                );
                 GameListing game = new GameListing(listing.getID(), listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers(), listing.hasPassword(), listing.hasStarted());
                 gameList.add(game);
 
-                String p = "No";
+                String p = "Public";
                 if (listing.hasPassword()){
-                    p = "Yes";
+                    p = "Private";
                 }
                 Object[] gameToTable = {i,listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers() + " / " + MAX_PLAYERS, p, "Join"};
                 tableModel.addRow(gameToTable);
