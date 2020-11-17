@@ -345,7 +345,7 @@ public class GameLobby extends JFrame {
             gameID = gameList.get(gameNumber-1).getID();
 
             if (playerCount < 8){
-                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private // TODO: can we use the hasPassword() instead?
+                if (gamesTable.getValueAt(gamesTable.getSelectedRow(), 4).toString().equals("Yes")) { // game is private
                     // show window for entering password
                     pwFrame.setLayout(null);
                     pwFrame.setSize(300,150);
