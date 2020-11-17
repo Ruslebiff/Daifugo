@@ -137,6 +137,11 @@ public class GameRunner {
         }
     }
 
+    void leaveGameHandler() throws IOException {
+        userSession.leaveCurrentGame();
+        out.writeObject(new Message(OK));
+    }
+
     public void run() throws GameDisconnect, IOException {
 
         LOGGER.info("Entered game mode");
@@ -174,7 +179,7 @@ public class GameRunner {
                     case PLAY_CARDS -> handlePlayCards((PlayCardsRequest) request);
                     case PASS_TURN -> handlePass();
                     case START_GAME -> validateGameStart();
-                    case LEAVE_GAME -> userSession.leaveCurrentGame();
+                    case LEAVE_GAME -> leaveGameHandler();
                     case CANCEL_GAME -> validateCancellation();
                     case HEARTBEAT -> sendHeartbeatResponse((HeartbeatMessage) request);
                     case DISCONNECT -> playerDisconnect();

@@ -13,6 +13,7 @@ public interface GameStateTracker {
     int getActivePlayerIndex();         // aktiv spillers index i liste
                                         //   erstatter getActivePlayerID
 
+    void leaveGame();
     void registerCallback(Callable<Void> callback);
     String getActivePlayerID();
     ArrayList<Card> getHand(String token);   // Returns an arraylist to the player with the respective token
