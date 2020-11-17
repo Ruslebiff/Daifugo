@@ -194,6 +194,9 @@ public class GameLobby extends JFrame {
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
 
+        JTextField searchField = new JTextField();
+
+
         c.fill = GridBagConstraints.LINE_START;
         c.weightx = 0.0;
         c.gridx = 0;
@@ -219,6 +222,14 @@ public class GameLobby extends JFrame {
         c.gridy = 0;
         c.ipadx = 0;
         controlPanel.add(settingsButton, c);
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.0;
+        c.weighty = 0.1;
+        c.gridwidth = 4;
+        c.gridx = 0;
+        c.gridy = 1;
+        controlPanel.add(searchField, c);
 
         /**
          *  Status bar
