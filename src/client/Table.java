@@ -28,8 +28,10 @@ public class Table extends JPanel {
     }
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
+
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT; // TODO: Bytt ut med ordentlig tracker
+
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
@@ -76,7 +78,6 @@ public class Table extends JPanel {
     }
 
     public void startGame() {
-        // TODO:
         stateTracker.startGame();
     }
 
