@@ -141,6 +141,23 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public void leaveGame() {
+        try {
+            Message response = connection.sendMessage(MessageType.LEAVE_GAME);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stopHeartbeatThread();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public String getActivePlayerID() {
         return "0";
     } //TODO:
