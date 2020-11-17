@@ -722,16 +722,8 @@ public class GameLobby extends JFrame {
      */
     public void joinGame(String gameID, char[] password){
         try {
-            Message response = conn.sendMessage(
-                    new Message(MessageType.CONNECT)
-            );
-            if (response.isError()){
-                LOGGER.warning("ERROR: " + response.getErrorMessage());
-                return;
-            }
 
-
-
+            Message response;
             response = conn.sendMessage(new JoinGameRequest(gameID, password));
             if (response.isError()){
                 if(response.getMessageType() == MessageType.PASSWORD_ERROR){
