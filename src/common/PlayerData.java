@@ -11,7 +11,7 @@ public class PlayerData {
     private boolean passed;
     private boolean outOfRound;
     private int outCount;
-    private final List<Role> previousRoles;
+    private List<Role> previousRoles;
 
     public PlayerData(
             String nick,
@@ -32,6 +32,14 @@ public class PlayerData {
 
        // negative latency value is lost connection
        connectionLost = latency < 0;
+    }
+
+    public void reset() {
+        role = Role.NEUTRAL;
+        previousRoles = new ArrayList<>();
+        passed = false;
+        outOfRound = false;
+        outCount = 0;
     }
 
     public String getNick() {
@@ -81,15 +89,13 @@ public class PlayerData {
 
     public void setOutCount(int outCount) {
         this.outCount = outCount;
+        outOfRound = true;
     }
 
     public int getOutCount() {
         return outCount;
     }
 
-    public void setOutOfRound(boolean outOfRound) {
-        this.outOfRound = outOfRound;
-    }
 
     public boolean isOutOfRound() {
         return outOfRound;
