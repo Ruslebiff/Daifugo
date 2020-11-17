@@ -22,8 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-// TODO: a filter box to search through available games
-
 public class GameLobby extends JFrame {
     private final String[] columnNames = {
             "ID",
@@ -201,7 +199,7 @@ public class GameLobby extends JFrame {
         settingsButton.setText("Settings");
 
         JTextField searchField = new JTextField();
-        JLabel searchLabel = new JLabel("Search :");
+        JLabel searchLabel = new JLabel("        Search:");
 
 
 
