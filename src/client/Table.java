@@ -1,14 +1,9 @@
 package client;
 
-import common.PlayerData;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 
@@ -33,25 +28,6 @@ public class Table extends JPanel {
             ex.printStackTrace();
         }
         setLayout(null);
-
-        // TODO: REMOVE LATER
-        Player[] players = new Player[1];
-        players[0] = new Player(
-                "Mohammed Lee",
-                "0",
-                stateTracker.getHand("temp"),
-                f_width /2,
-                stateTracker
-        );
-
-        players[0].setBounds(
-                (f_width /2) - ((f_width /2)/2) - 25,
-                (f_height /2) + 100,
-                f_width /2,
-                (f_height /8) + 100
-        );
-        add(players[0]);
-
 
         playersInformation = new PlayersInformation(stateTracker);
         int pInfoWidth = 200;
