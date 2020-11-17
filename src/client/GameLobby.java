@@ -3,7 +3,6 @@ package client;
 import client.networking.ClientConnection;
 import common.GameListing;
 import protocol.*;
-import server.Server;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -81,6 +80,7 @@ public class GameLobby extends JFrame {
     private JLabel latencyLabel = new JLabel();
     private JButton joinGameButton = new JButton();
     private JFrame pwFrame = new JFrame("Join game");
+    private String playerToken;
 
     /* Lobby Panels */
     JPanel newGamePanel = new JPanel();
@@ -93,8 +93,15 @@ public class GameLobby extends JFrame {
 
         try {
             conn = new ClientConnection(serverAddress);
-            connectionOK = true;
-        } catch (IOException e) {
+            Message response = conn.sendMessage(new Message(MessageType.CONNECT));
+            if (response.isError()) {
+                LOGGER.warning("Failed to connect with session: " + response.getErrorMessage());
+            } else {
+                IdentityResponse tmp = (IdentityResponse) response;
+                playerToken = tmp.getToken();
+                connectionOK = true;
+            }
+        } catch (IOException | ClassNotFoundException e) {
             LOGGER.warning("ERROR: Failed to connect!");
             connectToServerFrame();
         }
@@ -389,14 +396,11 @@ public class GameLobby extends JFrame {
 
             if (!newNickNameTextField.getText().equals(playerName)){
                 try {
+                    String newNick = newNickNameTextField.getText();
                     Message response;
                     synchronized (this) {
                         response = conn.sendMessage(
-                                new Message(MessageType.CONNECT)
-                        );
-                        IdentityResponse identityResponse = (IdentityResponse) response;
-                        response = conn.sendMessage(
-                                new UpdateNickMessage(identityResponse.getToken(), newNickNameTextField.getText())
+                                new UpdateNickMessage(playerToken, newNick)
                         );
                     }
                     if (response.isError()){
@@ -475,16 +479,12 @@ public class GameLobby extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 heartbeatExecutor.shutdown();    // kill latency thread
                 try {
-                    Message response;
                     synchronized (this) {
-                        response = conn.sendMessage(new Message(MessageType.DISCONNECT));
-                    }
-                    if (response.isError()){
-                        LOGGER.warning("ERROR: " + response.getErrorMessage());
+                        conn.disconnect();
                     }
 
                 } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
+                    LOGGER.warning(e.getMessage());
                 }
                 System.exit(0);
             }
@@ -677,6 +677,8 @@ public class GameLobby extends JFrame {
                 if (response.isError()){
                     LOGGER.warning("ERROR: " + response.getErrorMessage());
                 } else {
+                    IdentityResponse tmp = (IdentityResponse) response;
+                    playerToken = tmp.getToken();
                     connectionOK = true;
                     newServerAddressTextField.setText(serverAddress);
                     connectionFrame.dispose(); // destroy frame

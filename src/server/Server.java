@@ -39,12 +39,12 @@ public class Server {
     }
 
     private ServerSocket serverSocket;
-    private static final Logger SERVER_LOGGER = Logger.getLogger(
+    public static final Logger SERVER_LOGGER = Logger.getLogger(
             Server.class.getName()
     );
 
     public Server() {
-        SERVER_LOGGER.setLevel(Level.ALL);
+        SERVER_LOGGER.setLevel(Level.INFO);
         SERVER_LOGGER.addHandler(CONSOLE_HANDLER);
         SERVER_LOGGER.addHandler(FILE_HANDLER);
     }
@@ -72,9 +72,7 @@ public class Server {
     }
 
     private static class ClientHandler extends Thread {
-        private static final Logger LOGGER = Logger.getLogger(
-                ClientHandler.class.getName()
-        );
+        private static Logger LOGGER;
         private final Socket clientSocket;
         private ObjectOutputStream out;
         private ObjectInputStream in;
@@ -83,10 +81,8 @@ public class Server {
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
             clientSocket.setSoTimeout(Protocol.SOCKET_TIMEOUT);
-            LOGGER.addHandler(CONSOLE_HANDLER);
-            LOGGER.setLevel(Level.INFO);
-            // TODO: add file logging:
-            //LOGGER.addHandler(FILE_HANDLER);
+            LOGGER = SERVER_LOGGER;
+            LOGGER.info("New connection from: " + clientSocket.getInetAddress().toString());
         }
 
         private void sendInvalidRequest() throws IOException {
@@ -126,17 +122,32 @@ public class Server {
         }*/
 
         private void createNewSession() throws IOException {
+            if (currentSession != null) {
+                out.writeObject(new ErrorMessage("Already connected"));
+                return;
+            }
+
             currentSession = new UserSession();
             out.writeObject(
                     new IdentityResponse(
-                            currentSession.getToken(),
+                        currentSession.getToken(),
                         currentSession.getNick()
                     )
             );
+
+            LOGGER = Logger.getLogger(
+                    "User: " + currentSession.getToken() + clientSocket.getInetAddress().toString()
+            );
+            LOGGER.addHandler(CONSOLE_HANDLER);
+            LOGGER.setLevel(Level.INFO);
+            // TODO: add file logging:
+            //LOGGER.addHandler(FILE_HANDLER);
         }
 
         private void updateNick(UpdateNickMessage request) throws IOException {
+            LOGGER.info("Received request to change nick form " + currentSession.getNick());
             try {
+                String tmp = currentSession.getNick();
                 currentSession.setNick(request.getNick());
                 out.writeObject(
                         new IdentityResponse(
@@ -144,6 +155,7 @@ public class Server {
                                 currentSession.getNick()
                         )
                 );
+                LOGGER.info("Successfully changed nick from " + tmp + " to " + currentSession.getNick());
             }
             catch (UserSessionError e) {
                 out.writeObject(
@@ -176,7 +188,7 @@ public class Server {
                         request.getTitle(),
                         request.getPassword()
                 );
-                LOGGER.info("Game created: " + game.getID().toString());
+                LOGGER.info(currentSession.getNick() + " created game: " + game.getTitle() + " " + game.getID().toString());
             } catch (UserSessionError | GameException e) {
                 out.writeObject(new ErrorMessage(e.toString()));
                 return;
@@ -252,6 +264,8 @@ public class Server {
                         sendInvalidRequest();
 
                     } else {
+                        if (currentSession != null)
+                            LOGGER.info("Awaiting request from: " + currentSession.getToken() + "|" + currentSession.getNick());
                         switch (request.getMessageType()) {
                             case CONNECT -> createNewSession();
 /*                            case RECONNECT -> { //TODO: timeout problem

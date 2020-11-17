@@ -15,10 +15,9 @@ public class UserSession implements Serializable {
     private Game currentGame;
 
     public UserSession() {
-        token = UUID.randomUUID();
-        currentGame = null;
-
         synchronized (UserSession.class) {
+            token = UUID.randomUUID();
+            currentGame = null;
             sessions.put(token, this);
             userCount++;
             nick = "User" + userCount;
@@ -55,7 +54,9 @@ public class UserSession implements Serializable {
     }
 
     public String getToken() {
-        return token.toString();
+        synchronized (this) {
+            return token.toString();
+        }
     }
 
     public UUID getID() {
@@ -63,7 +64,9 @@ public class UserSession implements Serializable {
     }
 
     public String getNick() {
-        return nick;
+        synchronized (this) {
+            return nick;
+        }
     }
 
     public void setNick(String nick) throws UserSessionError {
@@ -75,7 +78,9 @@ public class UserSession implements Serializable {
             nickList.remove(this.nick);
             nickList.add(nick);
         }
-        this.nick = nick;
+        synchronized (this) {
+            this.nick = nick;
+        }
     }
 
     public void endSession() {

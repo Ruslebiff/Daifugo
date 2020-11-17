@@ -35,7 +35,7 @@ public class GameRunner {
         this.in = in;
         this.out = out;
         this.game = userSession.getGame();
-        LOGGER = Logger.getLogger(GameRunner.class.getName());
+        LOGGER = Logger.getLogger(GameRunner.class.getName() + "-" + userSession.getToken());
         LOGGER.addHandler(Server.CONSOLE_HANDLER);
         //LOGGER.addHandler(Server.FILE_HANDLER);
         LOGGER.setLevel(Level.FINE);
@@ -166,6 +166,8 @@ public class GameRunner {
         }
         running = true;
         while (running) {
+
+            LOGGER.info("Awaiting request from: " + userSession.getToken() + "|" + userSession.getNick());
             try {
 
                 Message request;
@@ -181,7 +183,6 @@ public class GameRunner {
                     throw new GameDisconnect();
                 }
 
-                LOGGER.fine("past first try-catch");
 
                 switch (request.getMessageType()) {
 /*                            case RECONNECT -> { //TODO: timeout problem
