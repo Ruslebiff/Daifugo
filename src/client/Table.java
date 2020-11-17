@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
 
 public class Table extends JPanel {
 
@@ -78,11 +79,15 @@ public class Table extends JPanel {
         exitButton.setBounds(50, 150, 100, 50);
         add(exitButton);
         exitButton.addActionListener(l -> {
-            // TODO: Disconnect from game
+            gL.setWaitingCursor(true);
+            stateTracker.leaveGame();
             this.setVisible(false);
             gL.showLobby(true);
             gL.startHeartbeat();
+            gL.setWaitingCursor(false);
         });
+
+        gL.setWaitingCursor(false);
 
     }
 

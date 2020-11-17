@@ -487,6 +487,7 @@ public class GameLobby extends JFrame {
                 return;
             }
 
+            setWaitingCursor(true);
 
             heartbeatExecutor.shutdown();
             GameStateResponse tmp = (GameStateResponse) response;
@@ -669,6 +670,8 @@ public class GameLobby extends JFrame {
                     tmp.getState()
             );
 
+            setWaitingCursor(true);
+
             showLobby(false);
             pwFrame.setVisible(false);
 
@@ -683,6 +686,15 @@ public class GameLobby extends JFrame {
         } catch (IOException | ClassNotFoundException ioException) {
             ioException.printStackTrace();
         }
+    }
+
+    public void setWaitingCursor(boolean waiting) {
+        if (waiting){
+            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+        } else {
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+
     }
 }
 
