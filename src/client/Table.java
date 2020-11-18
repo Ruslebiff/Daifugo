@@ -5,6 +5,7 @@ import server.Server;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -60,7 +61,7 @@ public class Table extends JPanel {
         JButton startBtn = new JButton("Start");
         startBtn.setBounds(f_width-150,50, 100,50);
         add(startBtn);
-        startBtn.addActionListener(e -> startGame());
+        startBtn.addActionListener(e -> startGame(e));
 
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
@@ -77,7 +78,8 @@ public class Table extends JPanel {
         gL.setWaitingCursor(false);
     }
 
-    public void startGame() {
+    public void startGame(ActionEvent e) {
+        LOGGER.info("Entered buttonlistener");
         stateTracker.startGame();
     }
 

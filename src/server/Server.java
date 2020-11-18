@@ -46,7 +46,7 @@ public class Server {
     public Server() {
         SERVER_LOGGER.setLevel(Level.INFO);
         SERVER_LOGGER.addHandler(CONSOLE_HANDLER);
-        SERVER_LOGGER.addHandler(FILE_HANDLER);
+        //SERVER_LOGGER.addHandler(FILE_HANDLER);
         SERVER_LOGGER.setUseParentHandlers(false);
     }
 
