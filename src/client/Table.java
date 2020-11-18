@@ -1,14 +1,10 @@
 package client;
 
-import server.Server;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.logging.*;
 
 
@@ -19,6 +15,9 @@ public class Table extends JPanel {
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
     private Logger LOGGER;
+    private final JButton startBtn;
+    private final int TABLE_WIDTH;
+    private final int TABLE_HEIGHT;
 
 
     private Void updateGUI() {
@@ -32,7 +31,8 @@ public class Table extends JPanel {
 
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
-
+        TABLE_WIDTH = f_width;
+        TABLE_HEIGHT = f_height;
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
@@ -54,14 +54,12 @@ public class Table extends JPanel {
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
-
-
         stateTracker.registerCallback(this::updateGUI);
 
-        JButton startBtn = new JButton("Start");
+        startBtn = new JButton("Start");
         startBtn.setBounds(f_width-150,50, 100,50);
         add(startBtn);
-        startBtn.addActionListener(e -> startGame(e));
+        startBtn.addActionListener(e -> startGame());
 
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
@@ -78,9 +76,17 @@ public class Table extends JPanel {
         gL.setWaitingCursor(false);
     }
 
-    public void startGame(ActionEvent e) {
+    public void startGame() {
         LOGGER.info("Entered buttonlistener");
+        Player player = new Player(TABLE_WIDTH/2, stateTracker);
+        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                (TABLE_HEIGHT/2) + 100,
+                TABLE_WIDTH/2,
+                (TABLE_HEIGHT/8) + 100);
+        add(player);
+        repaint();
         stateTracker.startGame();
+        startBtn.setEnabled(false);
     }
 
     @Override
