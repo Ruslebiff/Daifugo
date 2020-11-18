@@ -29,6 +29,10 @@ public class GameLobby extends JFrame {
     private Info info = new Info();
     private JPanel outerPanel = new JPanel(new BorderLayout());
     private JPanel innerPanel = new JPanel(new BorderLayout());
+    private int maxPasswordLength = 30;
+    private int maxNickNameLength = 16;
+    private int maxGameNameLength = 16;
+    private int maxServerAddressLength = 36;
 
     static {
         try {
@@ -80,7 +84,7 @@ public class GameLobby extends JFrame {
     private int latency = 0;
     private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
     private volatile boolean connectionOK = false;
-    private JLimitedTextField newServerAddressTextField = new JLimitedTextField(serverAddress, 36);
+    private JLimitedTextField newServerAddressTextField = new JLimitedTextField(serverAddress, maxServerAddressLength);
     private ScheduledExecutorService heartbeatExecutor;
     private JLabel latencyLabel = new JLabel();
     private JButton joinGameButton = new JButton();
@@ -181,10 +185,12 @@ public class GameLobby extends JFrame {
         newGamePanel.setLayout(null);
 
         JLabel newGameNameLabel = new JLabel("Name: ");
-        JLimitedTextField newGameName = new JLimitedTextField("my new game", 30);
+        JLimitedTextField newGameName = new JLimitedTextField("my new game", maxGameNameLength);
         JLabel newGameNameLimitText = new JLabel("max " + newGameName.getLimit() + " characters");
         newGameNameLimitText.setForeground(Color.gray);
-        JPasswordField newGamePassword = new JPasswordField("");
+        JLimitedPasswordField newGamePassword = new JLimitedPasswordField("", maxPasswordLength);
+        JLabel newGamePasswordLimitText = new JLabel("max " + newGamePassword.getLimit() + " characters");
+        newGamePasswordLimitText.setForeground(Color.gray);
         newGamePassword.setEnabled(false);
         JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
         JButton newGameConfirmButton = new JButton("Confirm");
@@ -195,6 +201,7 @@ public class GameLobby extends JFrame {
         newGameNameLimitText.setBounds(290,10,200,20);
         newGamePrivateCheckbox.setBounds(7,40,70,20);
         newGamePassword.setBounds(80,40,200,20);
+        newGamePasswordLimitText.setBounds(290,40,200,20);
         newGameConfirmButton.setBounds(10,70,130,30);
         cancelNewGameButton.setBounds(150,70,130,30);
 
@@ -203,6 +210,7 @@ public class GameLobby extends JFrame {
         newGamePanel.add(newGameNameLimitText);
         newGamePanel.add(newGamePrivateCheckbox);
         newGamePanel.add(newGamePassword);
+        newGamePanel.add(newGamePasswordLimitText);
         newGamePanel.add(newGameConfirmButton);
         newGamePanel.add(cancelNewGameButton);
 
@@ -214,7 +222,7 @@ public class GameLobby extends JFrame {
         settingsPanel.setLayout(null);
 
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        JLimitedTextField newNickNameTextField = new JLimitedTextField(playerName, 16);
+        JLimitedTextField newNickNameTextField = new JLimitedTextField(playerName, maxNickNameLength);
         JLabel newNickNameLimitText = new JLabel("max " + newNickNameTextField.getLimit() + " characters");
         newNickNameLimitText.setForeground(Color.gray);
         JLabel newServerAddressLabel = new JLabel("Server address: ");
@@ -498,7 +506,7 @@ public class GameLobby extends JFrame {
                     pwFrame.setVisible(true);
                     pwFrame.setLocationRelativeTo(null);
                     JLabel pwToJoinLabel = new JLabel("Enter password");
-                    JPasswordField pwToJoinField = new JPasswordField();
+                    JLimitedPasswordField pwToJoinField = new JLimitedPasswordField("", maxPasswordLength);
                     JButton pwEnterGameButton = new JButton("Join game");
 
                     pwToJoinLabel.setBounds(100,10, 200, 20);
@@ -699,7 +707,7 @@ public class GameLobby extends JFrame {
         enterServerAddressMessage.setBounds(connectionFrame.getWidth()/2 - 102, 20, 300, 50);
 
 
-        JTextField addressTextArea = new JTextField(serverAddress);
+        JLimitedTextField addressTextArea = new JLimitedTextField(serverAddress, maxServerAddressLength);
         addressTextArea.setEditable(true);
         addressTextArea.setBounds( connectionFrame.getWidth()/2 - 100, connectionFrame.getHeight()/3, 200,20);
 
