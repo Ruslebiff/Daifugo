@@ -91,7 +91,7 @@ public class Table extends JPanel {
 
         startString = new JLabel("Waiting for game to start");
         startString.setBounds((f_width/2) - 120, 100, 250,50);
-        startString.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+        startString.setFont(new Font("Sans Serif", Font.BOLD, 15));
         add(startString);
 
 

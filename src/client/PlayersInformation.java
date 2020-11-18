@@ -29,13 +29,13 @@ public class PlayersInformation extends JPanel {
         HEIGHT = 50;
         int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
 
-        setLayout(new GridLayout(players.size()+1,0));
+        setLayout(null);
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
-
 
         infoString = new JLabel("Players", SwingConstants.CENTER);
         infoString.setFont(new Font("sans serif", Font.BOLD, 18));
         infoString.setBounds(0, 0, WIDTH, HEIGHT);
+        add(infoString);
     }
 
     private void updatePanel() {
@@ -77,6 +77,11 @@ public class PlayersInformation extends JPanel {
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
             playerInfo[i].setBackground(neutralColor);
             playerInfo[i].setOpaque(true);
+            if(i != 0) {
+                playerInfo[i].setBounds(0, playerInfo[i - 1].getY() + HEIGHT, WIDTH, HEIGHT);
+            } else {
+                playerInfo[i].setBounds(0, infoString.getY() + HEIGHT, WIDTH, HEIGHT);
+            }
             add(playerInfo[i]);
         }
         repaint();
