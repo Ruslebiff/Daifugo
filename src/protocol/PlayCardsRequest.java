@@ -16,6 +16,7 @@ public class PlayCardsRequest extends Message {
                 .map(card -> new CardData(card.getNumber(), card.getSuit()))
                 .collect(Collectors.toList());
 
+        this.cards = cardDataList;
     }
 
     public List<CardData> getCards() {

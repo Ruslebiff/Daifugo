@@ -12,7 +12,6 @@ public interface GameStateTracker {
     boolean isMyTurn();                 // er det min tur?
     List<PlayerData> getPlayerList();   // liste over spillere, i turn order
     int getActivePlayerIndex();         // aktiv spillers index i liste
-    int getMyPlayerId();                // Henter spiller sin id
 
     boolean isCancelled();
     void cancelGame();
@@ -27,4 +26,5 @@ public interface GameStateTracker {
     boolean startGame();
     boolean stopGame();
     boolean isStarted();
+    int getCardsInTrick();
 }

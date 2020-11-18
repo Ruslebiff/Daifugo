@@ -1,5 +1,6 @@
 package client;
 
+import client.exceptions.BrokenServerConnection;
 import client.networking.ClientConnection;
 import common.GameListing;
 import common.Info;
@@ -688,7 +689,7 @@ public class GameLobby extends JFrame {
      * Sends a HeartbeatMessage to the server and calculates the time it took.
      * @return the time between your heartbeat request was sent from you and received by the server.
      */
-    public int getLatency(){
+    public int getLatency() throws BrokenServerConnection {
         synchronized (this) {
             int l = 0;
             long timestampBefore = Instant.now().toEpochMilli();
@@ -698,12 +699,13 @@ public class GameLobby extends JFrame {
                         new HeartbeatMessage(timestampBefore)
                 );
                 if (response.isError()){
-                    LOGGER.warning(response.getErrorMessage());
-                    return 0;
+                    LOGGER.warning( "Failed to get heartbeat response: " + response.getErrorMessage());
+                    throw new BrokenServerConnection();
                 }
                 l = (int) (Instant.now().toEpochMilli() - timestampBefore);
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                LOGGER.warning("Exception on sending heartbeat: " + e.getMessage());
+                throw new BrokenServerConnection();
             }
             return l;
         }
@@ -796,9 +798,23 @@ public class GameLobby extends JFrame {
         }
     }
 
+    private void quitClient() {
+        JOptionPane.showMessageDialog(
+                this,
+                "Lost connection to server, the program will now exit.",
+                "Connection lost",
+                JOptionPane.ERROR_MESSAGE
+        );
+        System.exit(1);
+    }
+
     public void startHeartbeat(){
         Runnable latencyRunnable = () -> {
-            latency = getLatency();
+            try {
+                latency = getLatency();
+            } catch (BrokenServerConnection ignored) {
+                quitClient();
+            }
             latencyLabel.setText("Latency: " + latency + "  ");
         };
         heartbeatExecutor = Executors.newScheduledThreadPool(1);

@@ -78,6 +78,7 @@ public class Game {
     private boolean cancelled;
     private List<UUID> turnSequence;
     private int goneOut;        // increments for each player who goes out, resets each round
+    private int passCount;
 
 
     /**
@@ -108,8 +109,10 @@ public class Game {
         cardsOnTable = new ArrayList<>();
         noOfCardsFaceDown = 0;
         noOfCardsInTrick = 0;
+        currentPlayer = -1;
         goneOut = 0;
         started = false;
+        passCount = 0;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -163,11 +166,15 @@ public class Game {
             return new ArrayList<>();
         }
 
-        List<CardData> tail;
-        tail = cardsOnTable.subList(
-                Math.max(cardsOnTable.size() - 3, 0), cardsOnTable.size()
-        );
-        return tail;
+        int lowIndex = cardsOnTable.size();
+        int high = lowIndex;
+        while (lowIndex - 1 >= 0 && high - lowIndex < 4)
+            lowIndex--;
+
+
+        return new ArrayList<>(cardsOnTable.subList(
+                lowIndex, high
+        ));
     }
 
     public List<CardData> getTopCards() {
@@ -175,6 +182,9 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
+        SERVER_LOGGER.info("Size of top cards: " + tmp.size());
+        if (tmp.size() == 4)
+            tmp.remove(0);
         return tmp;
     }
 
@@ -212,7 +222,10 @@ public class Game {
 
     public int getCurrentPlayer() {
         synchronized (this) {
-            return currentPlayer;
+            if (started)
+                return currentPlayer;
+            else
+                return -1;
         }
     }
 
@@ -281,12 +294,16 @@ public class Game {
             shufflePlayerOrder();
             findStartingPlayer(dealCards());
             propagateChange();
+            SERVER_LOGGER.info("Game started, and state propagated");
         }
     }
 
     public void stop() {
         synchronized (this) {
             started = false;
+            currentPlayer = -1;
+            passCount = 0;
+            goneOut = 0;
             propagateChange();
         }
     }
@@ -304,13 +321,16 @@ public class Game {
     }
 
     public void playCards(UUID player, List<CardData> cards) throws GameException {
+        SERVER_LOGGER.info("Entering playCards...");
         try {
             synchronized (this) {
+                if (cards.isEmpty())
+                    throw new GameException("Cannot play 0 cards!");
+
                 if (cards.get(0).getValue() != 16 && noOfCardsInTrick > 0 && noOfCardsInTrick != cards.size()) {
                     throw new GameException("Wrong number of cards");
                 }
 
-                // TODO: if cards not allowed to be played, throw exception
                 boolean allSame = true;
                 for (CardData card : cards)
                     if (card.getValue() != cards.get(0).getValue()) {   // Checks if all the cards to play are the same
@@ -322,10 +342,11 @@ public class Game {
 
                 List<CardData> tmp = _getTopCards();
 
-                if(tmp.get(tmp.size() - 1).getValue() > cards.get(0).getValue())
+                if(!tmp.isEmpty() && tmp.get(tmp.size() - 1).getValue() > cards.get(0).getValue())
                     throw new GameException("Cards must be higher or equal to those on table");
 
                 cardsOnTable.addAll(cards);
+                SERVER_LOGGER.info("Cards on table: " + cardsOnTable.size());
                 hands.get(player).removeAll(cards);
 
                 // setting new hand count
@@ -334,18 +355,21 @@ public class Game {
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
+                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
                 } else if (topCards.size() == 4
-                        && topCards.get(1) == topCards.get(0)
-                        && topCards.get(2) == topCards.get(0)
-                        && topCards.get(3) == topCards.get(0)
+                        && topCards.get(1).getValue() == topCards.get(0).getValue()
+                        && topCards.get(2).getValue() == topCards.get(0).getValue()
+                        && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
+                    SERVER_LOGGER.info("Top 4 cards are the same, new trick.");
                     newTrick();
                     return;
                 }
+                SERVER_LOGGER.info("Past trick-check");
 
 
 
@@ -365,6 +389,7 @@ public class Game {
     public void pass(UUID player) throws RoundOver {
         synchronized (this) {
             players.get(player).getGameData().setPassed(true);
+            passCount++;
             nextPlayer();
             propagateChange();
         }
@@ -446,6 +471,9 @@ public class Game {
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
         } while (pd.hasPassed() || pd.isOutOfRound());
 
+        if (passCount == players.size()-1)
+            newTrick();
+
     }
 
     private void newTrick() {
@@ -455,6 +483,8 @@ public class Game {
         noOfCardsFaceDown += cardsOnTable.size();
         cardsOnTable = new ArrayList<>();
         noOfCardsInTrick = 0;
+        passCount = 0;
+        propagateChange();
     }
 
     /**
@@ -517,7 +547,7 @@ public class Game {
 
             tmp = turnSequence.get(player++);
 
-            SERVER_LOGGER.warning("Data: - " + tmp + " - " + (player-1) + " - " + turnSequence.size());
+            SERVER_LOGGER.fine("Data: - " + tmp + " - " + (player-1) + " - " + turnSequence.size());
             List<CardData> hand = hands.get(tmp);
             if (hand == null)
                 SERVER_LOGGER.warning("hand is null");
@@ -566,5 +596,7 @@ public class Game {
 
         if (currentPlayer < 0)
             currentPlayer = turnSequence.indexOf(threeOfDiamonds);
+
+        SERVER_LOGGER.info("Set starting player to: " + currentPlayer);
     }
 }
