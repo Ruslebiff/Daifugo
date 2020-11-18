@@ -29,13 +29,13 @@ public class PlayersInformation extends JPanel {
         HEIGHT = 50;
         int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
 
-        setLayout(new GridLayout(0,1));
+        setLayout(new GridLayout(players.size()+1,0));
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
-
 
         infoString = new JLabel("Players", SwingConstants.CENTER);
         infoString.setFont(new Font("sans serif", Font.BOLD, 18));
         infoString.setBounds(0, 0, WIDTH, HEIGHT);
+        add(infoString);
     }
 
     private void updatePanel() {
