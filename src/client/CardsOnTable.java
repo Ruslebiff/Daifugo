@@ -46,19 +46,6 @@ public class CardsOnTable extends JPanel{
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
         LOGGER.info("Top cards size: " + lastCardsOnTable.size());
-//        lastCardsOnTable.forEach(c -> {
-//            c.setBounds(
-//                    (this.getWidth()/2) - (cardWidth/2),
-//                    (this.getHeight()/2) - (cardHeight/2),
-//                    cardWidth,
-//                    cardHeight
-//
-//            );
-//            this.add(c);
-//            c.repaint();
-//        });
-
-
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
@@ -67,15 +54,12 @@ public class CardsOnTable extends JPanel{
                     (this.getHeight()/2) - (cardHeight/2),
                     cardWidth,
                     cardHeight
-
             );
             this.add(c);
         }
 
-
-
-
         faceDownCards = stateTracker.getNumberOfFaceDownCards();
+//        LOGGER.info("Antall facedown " );
         for (int i = 0; i < faceDownCards; i++) {
             FaceDownCard tmp = new FaceDownCard();
             tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
