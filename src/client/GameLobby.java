@@ -611,7 +611,6 @@ public class GameLobby extends JFrame {
         synchronized (this) {
             int l = 0;
             long timestampBefore = Instant.now().toEpochMilli();
-
             try {
                 Message response;
                 response = conn.sendMessage(
@@ -621,10 +620,7 @@ public class GameLobby extends JFrame {
                     LOGGER.warning(response.getErrorMessage());
                     return 0;
                 }
-
-                HeartbeatMessage heartbeatResponse = (HeartbeatMessage) response;
-
-                l = (int) (heartbeatResponse.getTime() - timestampBefore);
+                l = (int) (Instant.now().toEpochMilli() - timestampBefore);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
