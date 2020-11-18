@@ -143,6 +143,7 @@ public class GameLobby extends JFrame {
         JButton cancelNewGameButton = new JButton("Cancel");
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.ipadx = 40;
         gbc.weightx = 0.0;
         gbc.gridx = 0;
         gbc.gridy = 0;
