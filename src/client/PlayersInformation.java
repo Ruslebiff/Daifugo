@@ -22,7 +22,6 @@ public class PlayersInformation extends JPanel {
     private final int HEIGHT;
     private JLabel infoString;
 
-
     public PlayersInformation(GameStateTracker stateTracker) {
         this.stateTracker = stateTracker;
         this.players = stateTracker.getPlayerList();
@@ -40,7 +39,6 @@ public class PlayersInformation extends JPanel {
     }
 
     private void updatePanel() {
-        //setLayout(new GridLayout(players.size()+1,1));
         setSize(new Dimension(WIDTH, (players.size()+1) * HEIGHT));
     }
 
@@ -54,24 +52,26 @@ public class PlayersInformation extends JPanel {
             playerInfo[playerIndex].setBackground(activeColor);
             previousTurn = playerIndex;
         }
+        repaint();
     }
-    
-    // TODO: størrelse må være relativ til antall spillere med
+
     public void updateTable() {
         players = stateTracker.getPlayerList();    // Update the list of players
         LOGGER.info("updating table, " + players.size() + " players in game");
         updatePanel();
 
         remove(infoString);
-        if (playerInfo != null) {
-            for (JLabel pi : playerInfo) {
+        if (playerInfo != null)
+            for (JLabel pi : playerInfo)
                 remove(pi);
-            }
-        }
+
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
-            String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
+            String playerInformationTxt =
+                    players.get(i).getNick() + " - " +
+                    players.get(i).getRole() + " - " +
+                    players.get(i).getNumberOfCards();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
@@ -81,7 +81,4 @@ public class PlayersInformation extends JPanel {
         }
         repaint();
     }
-
-    //TODO : Trenger en måte å oppdatere seg når en ny spiller joiner spill
-
 }

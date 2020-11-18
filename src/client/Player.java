@@ -17,45 +17,30 @@ import static java.lang.Math.round;
 public class Player extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private final String name;      // Name of player
-    private final String playerID;     // Id
-    private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
+    private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private final List<Card> hand ; // The cards dealt to the player
     private final List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
     // TODO: REMOVE ADD AND REMOVE BUTTONS
-    private JButton addCard = new JButton("Add");
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
     private final PlayerButton cancelBtn;
     private final PlayerButton passTurnBtn;
     private final int cardWidth = 80;
     private final int cardHeight = 120;
     private final int widthOfComponent;
-    private final int buttonWidth = 100;
-    private final int buttonHeight = 50;
     private int boundsX = 0;
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
-    private boolean myTurn = true;
     private boolean giveCards = false; // Is set by server
     private boolean cardsClickable = true;
-    private ClientConnection conn = null;
 
 
-    public Player(String name, String playerID, List<Card> cards, int width, GameStateTracker sT) {
+    public Player(int width, GameStateTracker sT) {
         this.stateTracker = sT;
-        this.name = name;
-        this.playerID = playerID;
         this.role = 0; // Upon creation of a player, the player will be set to neutral, as the game has just begun
-        this.hand = stateTracker.getHand(playerID);
-//        this.hand = cards;
+        this.hand = stateTracker.getHand();
         sortHand(); // Sorts the players hand with respect to the card values
-        if(role != 0)       // TODO: Server should set this value on new round
-            giveCards = true;
-
-
-
         widthOfComponent = width;
         setLayout(null);
         setOpaque(true);
@@ -73,6 +58,8 @@ public class Player extends JPanel{
 
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
+        int buttonWidth = 100;
+        int buttonHeight = 50;
         passTurnBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth) + 15, 0, // Relinquishes turn
                 buttonWidth, buttonHeight, "Pass Turn");
         passTurnBtn.addActionListener(e -> relinquishTurn());
@@ -95,14 +82,14 @@ public class Player extends JPanel{
         });
         add(playCardsBtn);
 
-        addCard.setBounds(0, 175, buttonWidth, buttonHeight);
-        add(addCard);
-        addCard.addActionListener(e -> viewDealtHand());
+
 
         removeCard = new JButton("Remove");
         removeCard.setBounds(100, 175, 100, 50);
         add(removeCard);
         removeCard.addActionListener(e -> removeCardFromDisplay());
+
+        viewDealtHand();
     }
 
     public void addListener(Card c) {
@@ -196,14 +183,6 @@ public class Player extends JPanel{
         QuickSort.sort(this.hand, 0, this.hand.size() - 1);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -270,7 +249,6 @@ public class Player extends JPanel{
     // Pass turn
     public void relinquishTurn() {
         cancel(); // Deselects any and all cards selected
-        myTurn = false; // TODO: Whenever it is my turn again, set myTurn = TRUE
         stateTracker.passTurn();
     }
 

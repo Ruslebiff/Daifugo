@@ -14,12 +14,12 @@ public enum MessageType {
     GAME_LIST_RESPONSE,
     NEW_GAME,
     JOIN_GAME,
-    JOIN_GAME_RESPONSE,
     GAME_STATE,
     CANCEL_GAME,    // owner ends game
     CANCEL_GAME_ERROR,      // propagated to players if a game is cancelled
     LEAVE_GAME,     // a player leaving a game that may or may not be started
     START_GAME,     // owner starts game
+    STOP_GAME,      // calls game.stop, resetting and opening for players to join
     PLAY_CARDS,     // plays cards the user has selected
     PASS_TURN,      // Passes the turn
     GIVE_CARDS,     // trade cards between presidents and bums

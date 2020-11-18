@@ -1,13 +1,10 @@
 package client;
 
-import server.Server;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.logging.*;
 
 
@@ -18,9 +15,25 @@ public class Table extends JPanel {
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
     private Logger LOGGER;
+    private JButton startBtn;
+    private final int TABLE_WIDTH;
+    private final int TABLE_HEIGHT;
+    private final GameLobby gameLobby;
+    private JLabel startString;
 
 
     private Void updateGUI() {
+        if (stateTracker.isCancelled()) {
+            LOGGER.info("Game is cancelled, exiting...");
+            gameLobby.setWaitingCursor(true);
+            this.setVisible(false);
+            gameLobby.showLobby(true);
+            gameLobby.startHeartbeat();
+            gameLobby.refreshGamesList();
+            gameLobby.setWaitingCursor(false);
+            return null;
+        }
+
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();
         LOGGER.info("Gui got updated");
@@ -29,9 +42,12 @@ public class Table extends JPanel {
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
 
+        gameLobby = gL;
+
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
-
+        TABLE_WIDTH = f_width;
+        TABLE_HEIGHT = f_height;
         try {
             image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
         } catch (IOException ex) {
@@ -53,32 +69,62 @@ public class Table extends JPanel {
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
-
-
         stateTracker.registerCallback(this::updateGUI);
 
-        JButton startBtn = new JButton("Start");
-        startBtn.setBounds(f_width-150,50, 100,50);
-        add(startBtn);
-        startBtn.addActionListener(e -> startGame());
+        if(stateTracker.isOwner()) {
+            startBtn = new JButton("Start");
+            startBtn.setBounds(f_width-150,50, 100,50);
+            add(startBtn);
+            startBtn.addActionListener(e -> startGame());
+        }
 
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
         add(exitButton);
-        exitButton.addActionListener(l -> {
-            gL.setWaitingCursor(true);
-            stateTracker.leaveGame();
-            this.setVisible(false);
-            gL.showLobby(true);
-            gL.startHeartbeat();
-            gL.setWaitingCursor(false);
-        });
+        exitButton.addActionListener(e -> exitGame());
+
+        startString = new JLabel("Waiting for game to start");
+        startString.setBounds((f_width/2) - 120, 100, 250,50);
+        startString.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+        add(startString);
 
         gL.setWaitingCursor(false);
     }
 
+    private void exitGame() {
+        gameLobby.setWaitingCursor(true);
+        if (stateTracker.isOwner())
+            stateTracker.cancelGame();
+        else
+            stateTracker.leaveGame();
+        this.setVisible(false);
+        gameLobby.showLobby(true);
+        gameLobby.startHeartbeat();
+        gameLobby.refreshGamesList();
+        gameLobby.setWaitingCursor(false);
+    }
+
     public void startGame() {
-        stateTracker.startGame();
+        if(startBtn.getText().equals("Start")) {
+            startBtn.setText("Stop");
+            startString.setVisible(false);
+            LOGGER.info("Entered buttonlistener");
+            Player player = new Player(TABLE_WIDTH/2, stateTracker);
+            player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                    (TABLE_HEIGHT/2) + 100,
+                    TABLE_WIDTH/2,
+                    (TABLE_HEIGHT/8) + 100);
+            add(player);
+            stateTracker.startGame();
+            repaint();
+        } else {
+            startBtn.setText("Start");
+            stateTracker.stopGame();
+            this.setVisible(false);
+            gameLobby.showLobby(true);
+            gameLobby.startHeartbeat();
+            gameLobby.setWaitingCursor(false);
+        }
     }
 
     @Override

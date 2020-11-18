@@ -100,10 +100,13 @@ public class GameRunner {
 
     private void validateCancellation() throws IOException, LeftGame {
 
-        if (userNotOwner())
+        if (userNotOwner()) {
+            out.writeObject(new ErrorMessage("Non-owners cannot cancel a game"));
             return;
+        }
 
         game.cancelGame();
+        out.writeObject(new Message(OK));
         throw new LeftGame();
     }
 
@@ -121,6 +124,19 @@ public class GameRunner {
         }
 
     }
+
+
+    private void validateGameStop() throws IOException {
+        if (userNotOwner()) {
+            out.writeObject(new ErrorMessage("You are not the owner of this game"));
+            return;
+        }
+
+        game.stop();
+        out.writeObject(new Message(OK));
+
+    }
+
 
     private void playerDisconnect() throws GameDisconnect {
         userSession.leaveCurrentGame();
@@ -193,6 +209,7 @@ public class GameRunner {
                     case PLAY_CARDS -> handlePlayCards((PlayCardsRequest) request);
                     case PASS_TURN -> handlePass();
                     case START_GAME -> validateGameStart();
+                    case STOP_GAME -> validateGameStop();
                     case LEAVE_GAME -> leaveGameHandler();
                     case CANCEL_GAME -> validateCancellation();
                     case HEARTBEAT -> sendHeartbeatResponse((HeartbeatMessage) request);

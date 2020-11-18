@@ -6,7 +6,7 @@ import common.PlayerData;
 import protocol.*;
 
 import java.io.IOException;
-import java.io.StreamCorruptedException;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,7 @@ public class ServerTracker implements GameStateTracker {
     private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
 
-    // TODO: temporary list of cards, remove later
-    ArrayList<Card> tmp = new ArrayList<>();
+    private boolean cancelled;
 
 
 
@@ -51,8 +50,8 @@ public class ServerTracker implements GameStateTracker {
             Message response;
 
             while (running) {
-                synchronized (ServerTracker.this) {
-                    try {
+                try {
+                    synchronized (ServerTracker.this) {
                         LOGGER.fine("Sending heartbeat");
                         long timestamp = Instant.now().toEpochMilli();
                         response = connection.sendMessage(
@@ -63,7 +62,14 @@ public class ServerTracker implements GameStateTracker {
                             LOGGER.warning(
                                     "Received error: " + response.getErrorMessage()
                             );
+                            LOGGER.warning("Error type: " + response.getMessageType());
+                            if (response.getMessageType() == MessageType.CANCEL_GAME_ERROR) {
+                                cancelled = true;
+                                guiCallback.call();
+                            }
+
                             break;
+
                         }
 
                         if (response.getMessageType() == MessageType.GAME_STATE) {
@@ -72,12 +78,13 @@ public class ServerTracker implements GameStateTracker {
                             guiCallback.call();
                         }
 
-                        Thread.sleep(heartbeatInterval);
 
-                    } catch (Exception e) {
-                        e.printStackTrace();        // TODO: change to logging
-                        break;
-                    }
+                }
+
+                Thread.sleep(heartbeatInterval);
+                } catch (Exception e) {
+                    LOGGER.warning("Heartbeat resulted in exception: " + e.getMessage());
+                    break;
                 }
             }
 
@@ -89,8 +96,7 @@ public class ServerTracker implements GameStateTracker {
         this.connection = connection;
         this.state = state;
         backgroundThread = new HeartbeatThread();
-
-
+        cancelled = false;
     }
 
     public void stopHeartbeatThread() throws InterruptedException {
@@ -131,33 +137,58 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public void leaveGame() {
+    public int getMyPlayerId() {
+        synchronized (this) {
+            return 0;
+        }
+    }
+
+    @Override
+    public boolean isCancelled() {
+        synchronized (this) {
+            return cancelled;
+        }
+    }
+
+    @Override
+    public void cancelGame() {
         try {
-            Message response = connection.sendMessage(MessageType.LEAVE_GAME);
+            synchronized (this) {
+                Message response = connection.sendMessage(new Message(MessageType.CANCEL_GAME));
+                if (response.isError())
+                    LOGGER.warning("Failed to cancel game: " + response.getErrorMessage());
+            }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.warning("Exception during cancellation of game: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void leaveGame() {
+        LOGGER.info("Entered leave game");
+        synchronized (this) {
+            try {
+                Message response = connection.sendMessage(MessageType.LEAVE_GAME);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         try {
             stopHeartbeatThread();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.warning("failed to stop heartbeat on game leave: " + e.getMessage());
         }
     }
 
 
     @Override
-    public List<Card> getHand(String token) {
+    public List<Card> getHand() {
         synchronized (this) {
             return state.getHand()
                     .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
                     .collect(Collectors.toList());
         }
-    }
-
-    @Override
-    public int getLastPlayedType() {
-        return 0;
     }
 
     @Override
@@ -179,12 +210,6 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
-    @Override
-    public void setNextTurn() {
-        synchronized (this) {
-
-        }
-    }
 
     @Override
     public boolean playCards(List<Card> playedCards) {
@@ -226,11 +251,6 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean isNewTrick() {
-        return false;
-    }
-
-    @Override
     public List<Card> getCardsOnTable() {
         synchronized (this) {
             return state.getTopCards()
@@ -241,10 +261,35 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public boolean startGame() {
+        LOGGER.info("Entered servertrackers startgame");
+        synchronized (this) {
+            LOGGER.info("Entered synchronized block");
+            Message response = null;
+            try {
+                LOGGER.info("Sending start game message..");
+                response = connection.sendMessage(MessageType.START_GAME);
+                if(response.isError()){
+                    LOGGER.warning("Sending start message failed: " + response.getErrorMessage());
+                    return false;
+                }
+
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+            } catch (Exception e) {
+                LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean stopGame() {
         synchronized (this) {
             Message response = null;
             try {
-                response = connection.sendMessage(MessageType.START_GAME);
+                response = connection.sendMessage(MessageType.CANCEL_GAME);
                 if(response.isError())
                     return false;
 
@@ -258,8 +303,6 @@ public class ServerTracker implements GameStateTracker {
             return true;
         }
     }
-
-
 
     @Override
     public int getNumberOfFaceDownCards() {

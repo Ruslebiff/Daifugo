@@ -230,6 +230,7 @@ public class Game {
         synchronized (this) {
             cancelled = true;
             leaveGame(owner);
+            removeFromList();
             propagateChange();
         }
     }
@@ -277,7 +278,7 @@ public class Game {
         }
     }
 
-    private void stop() {
+    public void stop() {
         synchronized (this) {
             started = false;
             propagateChange();
