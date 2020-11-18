@@ -13,7 +13,7 @@ import static client.GameLobby.LOGGER;
 // Class for GUI of the cards played on the table
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
-    private List<Card> lastFourCards = new ArrayList<>();   // The last three cards played
+    private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
     private int faceDownCards;
     private final GameStateTracker stateTracker;
     private BufferedImage faceDown;
@@ -39,18 +39,41 @@ public class CardsOnTable extends JPanel{
 
     // Function shows the last cards played on the table
     public void updateCardsOnTable() {
+        for (Card card : lastCardsOnTable) {
+            this.remove(card);
+        }
+
         int cardWidth = 80, cardHeight = 120;
-        lastFourCards = stateTracker.getCardsOnTable();
-        LOGGER.info("Top cards size: " + lastFourCards.size());
-        lastFourCards.forEach(c -> {
+        lastCardsOnTable = stateTracker.getCardsOnTable();
+        LOGGER.info("Top cards size: " + lastCardsOnTable.size());
+//        lastCardsOnTable.forEach(c -> {
+//            c.setBounds(
+//                    (this.getWidth()/2) - (cardWidth/2),
+//                    (this.getHeight()/2) - (cardHeight/2),
+//                    cardWidth,
+//                    cardHeight
+//
+//            );
+//            this.add(c);
+//            c.repaint();
+//        });
+
+
+
+        for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
+            Card c = lastCardsOnTable.get(i);
             c.setBounds(
-                    (this.getWidth()/2) - (cardWidth/2),
+                    (this.getWidth()/2) - (cardWidth/2) + (i*10),
                     (this.getHeight()/2) - (cardHeight/2),
                     cardWidth,
                     cardHeight
+
             );
             this.add(c);
-        });
+        }
+
+
+
 
         faceDownCards = stateTracker.getNumberOfFaceDownCards();
         for (int i = 0; i < faceDownCards; i++) {
@@ -58,7 +81,6 @@ public class CardsOnTable extends JPanel{
             tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
             add(tmp);
         }
-
         repaint();
     }
 
