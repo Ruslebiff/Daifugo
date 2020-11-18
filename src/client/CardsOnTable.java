@@ -19,7 +19,7 @@ public class CardsOnTable extends JPanel{
     private BufferedImage faceDown;
     private JLabel cardsInPlayCounter;
 
-    public CardsOnTable(int width, int height, GameStateTracker sT) {
+    public CardsOnTable(GameStateTracker sT) {
         faceDownCards = 0;
         stateTracker = sT;
         try {
@@ -69,7 +69,7 @@ public class CardsOnTable extends JPanel{
         }
 
         faceDownCards = stateTracker.getNumberOfFaceDownCards();
-        LOGGER.info("Antall facedown " + faceDownCards);
+        LOGGER.info("Cards facing down: " + faceDownCards);
         for (int i = 0; i < faceDownCards; i++) {
             FaceDownCard tmp = new FaceDownCard();
             tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);

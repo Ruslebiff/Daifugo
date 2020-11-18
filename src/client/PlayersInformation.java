@@ -51,6 +51,7 @@ public class PlayersInformation extends JPanel {
         LOGGER.info("Changing player turn indicator");
         if (playerIndex >= 0)
             playerInfo[playerIndex].setBackground(activeColor);
+        LOGGER.info("Player has no of cards " + players.get(0).getNumberOfCards());
         repaint();
     }
 
@@ -70,7 +71,7 @@ public class PlayersInformation extends JPanel {
             String playerInformationTxt =
                     players.get(i).getNick() + " - " +
                     players.get(i).getRole() + " - " +
-                    stateTracker.getHand().size();
+                    players.get(i).getNumberOfCards();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border

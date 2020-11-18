@@ -83,7 +83,7 @@ public class Table extends JPanel {
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
+        cardsOnTable = new CardsOnTable(stateTracker);
         cardsOnTable.setBounds(
                 (f_width /2) - (cardsOnTableWidth/2),
                 (f_height /3) - (cardsOnTableHeight/2),
