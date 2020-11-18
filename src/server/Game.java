@@ -346,8 +346,19 @@ public class Game {
                     throw new GameException("Cards must be higher or equal to those on table");
 
                 cardsOnTable.addAll(cards);
-                SERVER_LOGGER.info("Cards on table: " + cardsOnTable.size());
-                hands.get(player).removeAll(cards);
+
+                SERVER_LOGGER.info("Cards in hand before removal: " + hands.get(player).size());
+//                hands.get(player).removeAll(cards);
+                List<CardData> hand = hands.get(player);
+                for (CardData card : cards) {
+                    for (CardData c : hand) {
+                        if (card.getSuit() == c.getSuit() && card.getNumber() == c.getNumber()) {
+                            hand.remove(c);
+                            break;
+                        }
+                    }
+                }
+                SERVER_LOGGER.info("Cards in hand after removal: " + hands.get(player).size());
 
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
