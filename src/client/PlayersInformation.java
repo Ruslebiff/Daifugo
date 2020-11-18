@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static client.GameLobby.LOGGER;
 
@@ -68,10 +69,17 @@ public class PlayersInformation extends JPanel {
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
-            String playerInformationTxt =
-                    players.get(i).getNick() + " - " +
-                    players.get(i).getRole() + " - " +
-                    players.get(i).getNumberOfCards();
+            String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
+            int noOfCards = players.get(i).getNumberOfCards();
+            if(noOfCards != 0)
+                playerInformationTxt += " - " + noOfCards;
+
+            LOGGER.info("Player information: " + playerInformationTxt );
+            if(stateTracker.getPlayerList().get(0).getNumberOfCards() != 0)
+                LOGGER.info("HALLO " + (stateTracker.getPlayerList().get(0).getNumberOfCards()));
+            else
+                LOGGER.info(players.get(i).getNick() + " has no cards");
+
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border

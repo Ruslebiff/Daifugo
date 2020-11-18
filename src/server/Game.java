@@ -540,18 +540,18 @@ public class Game {
 
         // deals new cards
         for (CardData card : prepareDeck()) {
-
             if (player == turnSequence.size())
                 player = 0;
-
 
             tmp = turnSequence.get(player++);
 
             SERVER_LOGGER.fine("Data: - " + tmp + " - " + (player-1) + " - " + turnSequence.size());
             List<CardData> hand = hands.get(tmp);
-            if (hand == null)
+
+            if (hand != null)
+                hand.add(card);
+            else
                 SERVER_LOGGER.warning("hand is null");
-            hand.add(card);
 
             if (playerWithThreeOfDiamonds == null
                     && card.getNumber() == 3
