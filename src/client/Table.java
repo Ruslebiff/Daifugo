@@ -121,10 +121,19 @@ public class Table extends JPanel {
 
     public void startGame() {
         if(startBtn.getText().equals("Start")) {
+            LOGGER.info("Entered buttonlistener");
+            if (!stateTracker.startGame()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "A game must have at least 3 players to start.",
+                        "Unable to start game",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
             startBtn.setText("Stop");
             startString.setVisible(false);
-            LOGGER.info("Entered buttonlistener");
-            stateTracker.startGame();
             repaint();
         } else {
             startBtn.setText("Start");

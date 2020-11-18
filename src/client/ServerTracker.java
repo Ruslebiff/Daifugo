@@ -297,6 +297,7 @@ public class ServerTracker implements GameStateTracker {
                 if(response.isError())
                     return false;
 
+                // TODO: gamerunner isn't sending state back
                 GameStateResponse tmp = (GameStateResponse) response;
                 state = tmp.getState();
                 guiCallback.call();
