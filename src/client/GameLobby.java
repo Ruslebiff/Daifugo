@@ -367,6 +367,7 @@ public class GameLobby extends JFrame {
         gamesTable.setAutoCreateRowSorter(true);
         TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(gamesTable.getModel());
         gamesTable.setRowSorter(rowSorter);
+        gamesTable.setRowHeight(30);
 
 
         /* add join buttons to table rows */
