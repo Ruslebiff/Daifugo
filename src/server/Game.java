@@ -78,6 +78,7 @@ public class Game {
     private boolean cancelled;
     private List<UUID> turnSequence;
     private int goneOut;        // increments for each player who goes out, resets each round
+    private int passCount;
 
 
     /**
@@ -111,6 +112,7 @@ public class Game {
         currentPlayer = -1;
         goneOut = 0;
         started = false;
+        passCount = 0;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -300,6 +302,8 @@ public class Game {
         synchronized (this) {
             started = false;
             currentPlayer = -1;
+            passCount = 0;
+            goneOut = 0;
             propagateChange();
         }
     }
@@ -385,6 +389,7 @@ public class Game {
     public void pass(UUID player) throws RoundOver {
         synchronized (this) {
             players.get(player).getGameData().setPassed(true);
+            passCount++;
             nextPlayer();
             propagateChange();
         }
@@ -466,6 +471,9 @@ public class Game {
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
         } while (pd.hasPassed() || pd.isOutOfRound());
 
+        if (passCount == players.size()-1)
+            newTrick();
+
     }
 
     private void newTrick() {
@@ -475,6 +483,7 @@ public class Game {
         noOfCardsFaceDown += cardsOnTable.size();
         cardsOnTable = new ArrayList<>();
         noOfCardsInTrick = 0;
+        passCount = 0;
         propagateChange();
     }
 
