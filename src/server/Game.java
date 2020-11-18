@@ -79,6 +79,9 @@ public class Game {
     private List<UUID> turnSequence;
     private int goneOut;        // increments for each player who goes out, resets each round
     private int passCount;
+    private int roundNo;
+    private int playersInTradingPhase;
+    private Map<UUID, List<CardData>> receiveFromTrade;
 
 
     /**
@@ -113,6 +116,8 @@ public class Game {
         goneOut = 0;
         started = false;
         passCount = 0;
+        roundNo = 1;
+        playersInTradingPhase = 0;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -126,6 +131,20 @@ public class Game {
         }
     }
 
+    public boolean isTradingPhase() {
+        return playersInTradingPhase > 0;
+    }
+
+    public void decrementTraders() throws GameException {
+        if (playersInTradingPhase == 0)
+            throw new GameException();
+        playersInTradingPhase--;
+    }
+
+    public void giveCards(UUID player, List<CardData> givenCards) {
+        //TODO: determine recipient, and add to map, decrement players in trading phase and set player to done trading
+        // TODO: also, propagate afterwards
+    }
 
     public UUID getID() {
         return ID;
@@ -311,11 +330,13 @@ public class Game {
     private void assignRoles() {
         if (players.size() == 3) {
             for (PlayerObject po : players.values()) {
-                po.getGameData().assignRoleFewPlayers();
+                if(po.getGameData().assignRoleFewPlayers())
+                    playersInTradingPhase++;
             }
         } else {
             for (PlayerObject po : players.values()) {
-                po.getGameData().assignRoleManyPlayers(players.size());
+                if(po.getGameData().assignRoleManyPlayers(players.size()))
+                    playersInTradingPhase++;
             }
         }
     }
@@ -366,7 +387,6 @@ public class Game {
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
-                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
@@ -376,11 +396,9 @@ public class Game {
                         && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
-                    SERVER_LOGGER.info("Top 4 cards are the same, new trick.");
                     newTrick();
                     return;
                 }
-                SERVER_LOGGER.info("Past trick-check");
 
 
 
@@ -394,6 +412,7 @@ public class Game {
                 propagateChange();
             }
         } catch (RoundOver roundOver) {
+            SERVER_LOGGER.info("Starting new round...");
             newRound();
         }
     }
@@ -407,12 +426,11 @@ public class Game {
      }
 
     public void newRound() {
-
-
         synchronized (this) {
             goneOut = 0;
             newTrick();
             noOfCardsFaceDown = 0;
+            roundNo++;
 
             assignRoles();
             findStartingPlayer(dealCards());
@@ -426,7 +444,11 @@ public class Game {
         }
     }
 
-
+    public int getRoundNo() {
+        synchronized (this) {
+            return roundNo;
+        }
+    }
 
     /**
      * Private helpers
@@ -462,6 +484,7 @@ public class Game {
 
         // only one player left -- round is over
         if (goneOut == players.size()-1) {
+            SERVER_LOGGER.info("All other players have gone out. Should start new round");
 
             // find the last remaining player, and set outcount
             for (UUID id : hands.keySet()) {
@@ -482,7 +505,7 @@ public class Game {
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
         } while (pd.hasPassed() || pd.isOutOfRound());
 
-        if (passCount == players.size()-1)
+        if (passCount + goneOut == players.size()-1)
             newTrick();
 
     }

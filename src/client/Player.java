@@ -191,6 +191,7 @@ public class Player extends JPanel{
             c.setSelectedFalse();   // Deselects all the cards
             c.repaint();
         });
+        cardsToPlay = new ArrayList<>();
     }
 
     // Function removes cards from hand and GUI and sorts the remaining cards

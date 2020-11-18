@@ -331,6 +331,27 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public int getRoundNo() {
+        synchronized (this) {
+            return state.getRoundNo();
+        }
+    }
+
+    @Override
+    public boolean isTradingPhase() {
+        synchronized (this) {
+            return state.isTradingPhase();
+        }
+    }
+
+    @Override
+    public boolean iHaveToTrade() {
+        synchronized (this) {
+            return state.haveToTrade();
+        }
+    }
+
+    @Override
     public int getNumberOfFaceDownCards() {
         synchronized (this) {
             return state.getFaceDownCards();

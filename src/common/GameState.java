@@ -22,6 +22,9 @@ public class GameState implements Serializable {
     private int cardsInTrick;
     private int faceDownCards;
     private List<CardData> topCards;
+    private boolean tradingPhase;
+    private int roundNo;
+    private boolean mustTrade;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -31,6 +34,9 @@ public class GameState implements Serializable {
         this.gameTitle = game.getTitle();
         this.cardsInTrick = game.getNoOfCardsInTrick();
         this.topCards = game.getTopCards();
+
+        roundNo = game.getRoundNo();
+        tradingPhase = game.isTradingPhase();
         gameID = game.getID();
 
         currentPlayer = game.getCurrentPlayer();
@@ -45,6 +51,20 @@ public class GameState implements Serializable {
         }
 
         started = game.hasStarted();
+
+        mustTrade = playerMap.get(session.getID()).getGameData().haveToTrade();
+    }
+
+    public boolean haveToTrade() {
+        return mustTrade;
+    }
+
+    public int getRoundNo() {
+        return roundNo;
+    }
+
+    public boolean isTradingPhase() {
+        return tradingPhase;
     }
 
     public List<CardData> getTopCards() {

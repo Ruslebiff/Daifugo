@@ -3,7 +3,6 @@ package client;
 
 import common.PlayerData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -27,4 +26,7 @@ public interface GameStateTracker {
     boolean stopGame();
     boolean isStarted();
     int getCardsInTrick();
+    int getRoundNo();
+    boolean isTradingPhase();
+    boolean iHaveToTrade();
 }
