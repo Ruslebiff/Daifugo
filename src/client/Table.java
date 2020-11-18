@@ -84,11 +84,12 @@ public class Table extends JPanel {
 
     public void startGame() {
         if(startBtn.getText().equals("Start")) {
-            Player player = new Player(TABLE_WIDTH / 2, stateTracker);
-            player.setBounds((TABLE_WIDTH / 2) - ((TABLE_WIDTH / 2) / 2) - 25,
-                    (TABLE_HEIGHT / 2) + 100,
-                    TABLE_WIDTH / 2,
-                    (TABLE_HEIGHT / 8) + 100);
+            LOGGER.info("Entered buttonlistener");
+            Player player = new Player(TABLE_WIDTH/2, stateTracker);
+            player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                    (TABLE_HEIGHT/2) + 100,
+                    TABLE_WIDTH/2,
+                    (TABLE_HEIGHT/8) + 100);
             add(player);
             repaint();
             stateTracker.startGame();

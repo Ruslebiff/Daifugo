@@ -48,8 +48,8 @@ public class ServerTracker implements GameStateTracker {
             Message response;
 
             while (running) {
-                synchronized (ServerTracker.this) {
-                    try {
+                try {
+                    synchronized (ServerTracker.this) {
                         LOGGER.fine("Sending heartbeat");
                         long timestamp = Instant.now().toEpochMilli();
                         response = connection.sendMessage(
@@ -69,12 +69,13 @@ public class ServerTracker implements GameStateTracker {
                             guiCallback.call();
                         }
 
-                        Thread.sleep(heartbeatInterval);
 
-                    } catch (Exception e) {
-                        e.printStackTrace();        // TODO: change to logging
-                        break;
-                    }
+                }
+
+                Thread.sleep(heartbeatInterval);
+                } catch (Exception e) {
+                    LOGGER.warning("Heartbeat resulted in exception: " + e.getMessage());
+                    break;
                 }
             }
 
@@ -229,18 +230,23 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public boolean startGame() {
+        LOGGER.info("Entered servertrackers startgame");
         synchronized (this) {
+            LOGGER.info("Entered synchronized block");
             Message response = null;
             try {
+                LOGGER.info("Sending start game message..");
                 response = connection.sendMessage(MessageType.START_GAME);
-                if(response.isError())
+                if(response.isError()){
+                    LOGGER.warning("Sending start message failed: " + response.getErrorMessage());
                     return false;
+                }
 
                 GameStateResponse tmp = (GameStateResponse) response;
                 state = tmp.getState();
                 guiCallback.call();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
                 return false;
             }
             return true;
