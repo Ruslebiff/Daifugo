@@ -6,7 +6,7 @@ import common.PlayerData;
 import protocol.*;
 
 import java.io.IOException;
-import java.io.StreamCorruptedException;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +26,6 @@ public class ServerTracker implements GameStateTracker {
 
     private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
-
-    // TODO: temporary list of cards, remove later
-    ArrayList<Card> tmp = new ArrayList<>();
 
 
 
@@ -131,6 +128,13 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public int getMyPlayerId() {
+        synchronized (this) {
+            return 0;
+        }
+    }
+
+    @Override
     public void leaveGame() {
         try {
             Message response = connection.sendMessage(MessageType.LEAVE_GAME);
@@ -147,17 +151,12 @@ public class ServerTracker implements GameStateTracker {
 
 
     @Override
-    public List<Card> getHand(String token) {
+    public List<Card> getHand() {
         synchronized (this) {
             return state.getHand()
                     .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
                     .collect(Collectors.toList());
         }
-    }
-
-    @Override
-    public int getLastPlayedType() {
-        return 0;
     }
 
     @Override
@@ -179,12 +178,6 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
-    @Override
-    public void setNextTurn() {
-        synchronized (this) {
-
-        }
-    }
 
     @Override
     public boolean playCards(List<Card> playedCards) {
@@ -223,11 +216,6 @@ public class ServerTracker implements GameStateTracker {
             }
             return true;
         }
-    }
-
-    @Override
-    public boolean isNewTrick() {
-        return false;
     }
 
     @Override

@@ -71,7 +71,8 @@ public class PlayersInformation extends JPanel {
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
-            String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
+            String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole()
+                    + " " + players.get(i).getNumberOfCards();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
