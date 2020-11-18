@@ -210,20 +210,14 @@ public class GameLobby extends JFrame {
          *  Settings view
          ************************/
         settingsPanel.setSize(window_width,window_height);
-        settingsPanel.setVisible(false);
-        settingsPanel.setLayout(null);
+        settingsPanel.setLayout(new GridBagLayout());
+        GridBagConstraints g = new GridBagConstraints();
 
 
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        newNickNameLabel.setBounds(100, 20, 100,20);
-
         JTextField newNickNameTextField = new JTextField(playerName);
-        newNickNameTextField.setBounds(200, 20, 150,20);
-
         JLabel newServerAddressLabel = new JLabel("Server address: ");
-        newServerAddressLabel.setBounds(100, 50, 100,20);
-
-        newServerAddressTextField.setBounds(200, 50, 150,20);
+        JButton cancelSettingsButton = new JButton("Cancel");
 
         JLabel settingsConnectionFailedMessage = new JLabel("Connection failed");
         settingsConnectionFailedMessage.setForeground(new Color(255, 0, 0));
@@ -232,15 +226,35 @@ public class GameLobby extends JFrame {
 
 
         JButton settingsConfirmButton = new JButton("Confirm");
-        settingsConfirmButton.setBounds(getWidth()/2 - 75, getHeight() - 100, 150,40);
 
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.ipadx = 40;
+        g.weightx = 0.0;
+        g.gridx = 0;
+        g.gridy = 0;
+        settingsPanel.add(newNickNameLabel, g);
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridx = 1;
+        settingsPanel.add(newNickNameTextField, g);
 
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridx = 0;
+        g.gridy = 1;
+        settingsPanel.add(newServerAddressLabel, g);
+        g.gridx = 1;
+        settingsPanel.add(newServerAddressTextField, g);
 
-        settingsPanel.add(newNickNameLabel, gbc);
-        settingsPanel.add(newNickNameTextField, gbc);
-        settingsPanel.add(newServerAddressLabel, gbc);
-        settingsPanel.add(newServerAddressTextField, gbc);
-        settingsPanel.add(settingsConfirmButton, gbc);
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridwidth = 3;
+        g.gridx = 0;
+        g.gridy = 2;
+        settingsPanel.add(settingsConfirmButton, g);
+
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridwidth = 3;
+        g.gridx = 0;
+        g.gridy = 3;
+        settingsPanel.add(cancelSettingsButton, g);
 
         /**
          *  Control bar
@@ -416,6 +430,14 @@ public class GameLobby extends JFrame {
             newGameName.setText("my new game");
             newGamePassword.setText("");
             newGamePrivateCheckbox.setSelected(false);
+
+            showLobby(true);    // reset view back to default lobby view
+        });
+
+        cancelSettingsButton.addActionListener(e -> {
+            // reset settings view
+            newNickNameTextField.setText(playerName);
+            newServerAddressTextField.setText(serverAddress);
 
             showLobby(true);    // reset view back to default lobby view
         });
