@@ -18,9 +18,21 @@ public class Table extends JPanel {
     private final JButton startBtn;
     private final int TABLE_WIDTH;
     private final int TABLE_HEIGHT;
+    private final GameLobby gameLobby;
 
 
     private Void updateGUI() {
+        if (stateTracker.isCancelled()) {
+            LOGGER.info("Game is cancelled, exiting...");
+            gameLobby.setWaitingCursor(true);
+            this.setVisible(false);
+            gameLobby.showLobby(true);
+            gameLobby.startHeartbeat();
+            gameLobby.refreshGamesList();
+            gameLobby.setWaitingCursor(false);
+            return null;
+        }
+
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();
         LOGGER.info("Gui got updated");
@@ -28,6 +40,8 @@ public class Table extends JPanel {
     }
 
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
+
+        gameLobby = gL;
 
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
@@ -64,16 +78,22 @@ public class Table extends JPanel {
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
         add(exitButton);
-        exitButton.addActionListener(l -> {
-            gL.setWaitingCursor(true);
-            stateTracker.leaveGame();
-            this.setVisible(false);
-            gL.showLobby(true);
-            gL.startHeartbeat();
-            gL.setWaitingCursor(false);
-        });
+        exitButton.addActionListener(e -> exitGame());
 
         gL.setWaitingCursor(false);
+    }
+
+    private void exitGame() {
+        gameLobby.setWaitingCursor(true);
+        if (stateTracker.isOwner())
+            stateTracker.cancelGame();
+        else
+            stateTracker.leaveGame();
+        this.setVisible(false);
+        gameLobby.showLobby(true);
+        gameLobby.startHeartbeat();
+        gameLobby.refreshGamesList();
+        gameLobby.setWaitingCursor(false);
     }
 
     public void startGame() {

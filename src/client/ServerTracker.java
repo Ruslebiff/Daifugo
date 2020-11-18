@@ -27,6 +27,8 @@ public class ServerTracker implements GameStateTracker {
     private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
 
+    private boolean cancelled;
+
 
 
     //TODO: trading cards from round 2
@@ -60,7 +62,14 @@ public class ServerTracker implements GameStateTracker {
                             LOGGER.warning(
                                     "Received error: " + response.getErrorMessage()
                             );
+                            LOGGER.warning("Error type: " + response.getMessageType());
+                            if (response.getMessageType() == MessageType.CANCEL_GAME_ERROR) {
+                                cancelled = true;
+                                guiCallback.call();
+                            }
+
                             break;
+
                         }
 
                         if (response.getMessageType() == MessageType.GAME_STATE) {
@@ -87,8 +96,7 @@ public class ServerTracker implements GameStateTracker {
         this.connection = connection;
         this.state = state;
         backgroundThread = new HeartbeatThread();
-
-
+        cancelled = false;
     }
 
     public void stopHeartbeatThread() throws InterruptedException {
@@ -136,17 +144,40 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public void leaveGame() {
+    public boolean isCancelled() {
+        synchronized (this) {
+            return cancelled;
+        }
+    }
+
+    @Override
+    public void cancelGame() {
         try {
-            Message response = connection.sendMessage(MessageType.LEAVE_GAME);
+            synchronized (this) {
+                Message response = connection.sendMessage(new Message(MessageType.CANCEL_GAME));
+                if (response.isError())
+                    LOGGER.warning("Failed to cancel game: " + response.getErrorMessage());
+            }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.warning("Exception during cancellation of game: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void leaveGame() {
+        LOGGER.info("Entered leave game");
+        synchronized (this) {
+            try {
+                Message response = connection.sendMessage(MessageType.LEAVE_GAME);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         try {
             stopHeartbeatThread();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.warning("failed to stop heartbeat on game leave: " + e.getMessage());
         }
     }
 

@@ -14,6 +14,8 @@ public interface GameStateTracker {
     int getActivePlayerIndex();         // aktiv spillers index i liste
     int getMyPlayerId();                // Henter spiller sin id
 
+    boolean isCancelled();
+    void cancelGame();
     void leaveGame();
     void registerCallback(Callable<Void> callback);
     List<Card> getHand();   // Returns an arraylist to the player with the respective token
