@@ -843,7 +843,7 @@ public class GameLobby extends JFrame {
             playTable.setBounds(0,0, getWidth(), getHeight());
             playTable.setVisible(true);
             playTable.setBounds(0,0,window_width,window_height);
-            add(playTable, 1);
+            outerPanel.add(playTable, 1);
             playTable.repaint();
             playTable.revalidate();
 
