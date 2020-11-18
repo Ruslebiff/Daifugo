@@ -17,8 +17,10 @@ public class CardsOnTable extends JPanel{
     private int faceDownCards;
     private final GameStateTracker stateTracker;
     private BufferedImage faceDown;
+    private JLabel cardsInPlayCounter;
 
     public CardsOnTable(int width, int height, GameStateTracker sT) {
+        faceDownCards = 0;
         stateTracker = sT;
         try {
             image = ImageIO.read(  // Renders the green filt
@@ -35,6 +37,11 @@ public class CardsOnTable extends JPanel{
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
+        cardsInPlayCounter = new JLabel();
+        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25 ,(this.getHeight()/2) - 25,50,50);
+        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 20));
+        add(cardsInPlayCounter);
     }
 
     // Function shows the last cards played on the table
@@ -46,6 +53,9 @@ public class CardsOnTable extends JPanel{
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
         LOGGER.info("Top cards size: " + lastCardsOnTable.size());
+
+        cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());     // How many cards are on the table
+        cardsInPlayCounter.setText(Integer.toString(lastCardsOnTable.size()));
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
@@ -59,7 +69,7 @@ public class CardsOnTable extends JPanel{
         }
 
         faceDownCards = stateTracker.getNumberOfFaceDownCards();
-//        LOGGER.info("Antall facedown " );
+        LOGGER.info("Antall facedown " + faceDownCards);
         for (int i = 0; i < faceDownCards; i++) {
             FaceDownCard tmp = new FaceDownCard();
             tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);

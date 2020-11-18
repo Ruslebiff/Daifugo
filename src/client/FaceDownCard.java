@@ -14,6 +14,7 @@ public class FaceDownCard extends JPanel {
     private int cardHeight = 120;
 
     public FaceDownCard(){
+        setOpaque(false);
         try {
             image = ImageIO.read(
                     ClientMain.class.getResourceAsStream("./cardimages/Daifugo_cardback_fade_blue_vertical.png")

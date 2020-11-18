@@ -21,9 +21,6 @@ public class Player extends JPanel{
     private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
     private List<Card> cardsToPlay = new ArrayList<>();
-    private JButton removeCard;
-
-    // TODO: REMOVE ADD AND REMOVE BUTTONS
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
     private final PlayerButton cancelBtn;
     private final PlayerButton passTurnBtn;
@@ -86,19 +83,18 @@ public class Player extends JPanel{
             }
             repaint();
         }
-//        hand = stateTracker.getHand();
         hand = newHand;
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
-        cancelBtn.setEnabled(stateTracker.isMyTurn());
-        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        updateButtonState();
     }
 
     public void updateButtonState() {
         cancelBtn.setEnabled(stateTracker.isMyTurn());
         passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
+
     public void addListener(Card c) {
 
         c.addMouseListener(new MouseListener() {
@@ -272,6 +268,7 @@ public class Player extends JPanel{
     // Pass turn
     public void relinquishTurn() {
         cancel(); // Deselects any and all cards selected
+        playCardsBtn.setEnabled(false);
         stateTracker.passTurn();
     }
 

@@ -26,7 +26,6 @@ public class Card extends JPanel {
 
     // Constructor with parameters, sets values of card
     public Card(int number, char s){
-
         setOpaque(false);
         this.number = number;
         this.suit = s;

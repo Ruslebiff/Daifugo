@@ -32,7 +32,7 @@ public class GameState implements Serializable {
         this.cardsInTrick = game.getNoOfCardsInTrick();
         this.topCards = game.getTopCards();
         gameID = game.getID();
-
+        faceDownCards = game.getNoOfCardsFaceDown();
         currentPlayer = game.getCurrentPlayer();
 
         hand = game.getPlayerHand(session.getID());
