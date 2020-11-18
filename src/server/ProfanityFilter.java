@@ -36,7 +36,7 @@ public class ProfanityFilter {
 
 
     /**
-     * Iterates over a String input and checks whether a cuss word was found in a list, then checks if the word should be ignored (e.g. bass contains the word *ss).
+     * Iterates over a String input and checks whether a cuss word was found in a list
      * @param input String that should be checked for bad words
      * @return true if any bad words were found.
      */
@@ -55,7 +55,6 @@ public class ProfanityFilter {
             // from each letter, keep going to find bad words until either the end or the max word length is reached
             for(int offset = 1; offset < (alphabetInput.length()+1 - start) && offset < largestWordLength+1; offset++)  {
                 String wordToCheck = alphabetInput.substring(start, start + offset);
-                System.out.println(wordToCheck);
                 if(wordsInFilter.contains(wordToCheck)) {
                         badWords.add(wordToCheck);
                 }
@@ -79,7 +78,6 @@ public class ProfanityFilter {
         for(int start = 0; start < allCharsInput.length(); start++) {
             for(int offset = 1; offset < (allCharsInput.length()+1 - start) && offset < largestWordLength+1; offset++)  {
                 String wordToCheck = allCharsInput.substring(start, start + offset);
-                System.out.println(wordToCheck);
                 if(wordsInFilter.contains(wordToCheck)) {
                     badWords.add(wordToCheck);
                 }
