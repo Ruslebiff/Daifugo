@@ -140,8 +140,10 @@ public class GameLobby extends JFrame {
         newGamePassword.setEnabled(false);
         JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
         JButton newGameConfirmButton = new JButton("Confirm");
+        JButton cancelNewGameButton = new JButton("Cancel");
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.ipadx = 40;
         gbc.weightx = 0.0;
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -162,6 +164,12 @@ public class GameLobby extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 2;
         newGamePanel.add(newGameConfirmButton, gbc);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        newGamePanel.add(cancelNewGameButton, gbc);
 
 
         /**
@@ -367,6 +375,15 @@ public class GameLobby extends JFrame {
             }
             createNewGame(newGameName.getText(), pw);
             sp.setVisible(false);
+        });
+
+        cancelNewGameButton.addActionListener(e -> {
+            // Reset new game view
+            newGameName.setText("my new game");
+            newGamePassword.setText("");
+            newGamePrivateCheckbox.setSelected(false);
+
+            showLobby(true);    // reset view back to default lobby view
         });
 
         settingsConfirmButton.addActionListener(e -> {
@@ -595,7 +612,6 @@ public class GameLobby extends JFrame {
         synchronized (this) {
             int l = 0;
             long timestampBefore = Instant.now().toEpochMilli();
-
             try {
                 Message response;
                 response = conn.sendMessage(
@@ -605,10 +621,7 @@ public class GameLobby extends JFrame {
                     LOGGER.warning(response.getErrorMessage());
                     return 0;
                 }
-
-                HeartbeatMessage heartbeatResponse = (HeartbeatMessage) response;
-
-                l = (int) (heartbeatResponse.getTime() - timestampBefore);
+                l = (int) (Instant.now().toEpochMilli() - timestampBefore);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
