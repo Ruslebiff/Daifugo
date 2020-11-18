@@ -247,6 +247,32 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
+    @Override
+    public boolean stopGame() {
+        synchronized (this) {
+            Message response = null;
+            try {
+                response = connection.sendMessage(MessageType.CANCEL_GAME);
+                if(response.isError())
+                    return false;
+
+                GameStateResponse tmp = (GameStateResponse) response;
+                state = tmp.getState();
+                guiCallback.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean hasStarted() {
+        synchronized (this) {
+            return state.isStarted();
+        }
+    }
 
 
     @Override

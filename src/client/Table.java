@@ -14,8 +14,9 @@ public class Table extends JPanel {
     private final PlayersInformation playersInformation;
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
+    private GameLobby gameLobby;
     private Logger LOGGER;
-    private final JButton startBtn;
+    private JButton startBtn;
     private final int TABLE_WIDTH;
     private final int TABLE_HEIGHT;
 
@@ -31,6 +32,7 @@ public class Table extends JPanel {
 
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
+        gameLobby = gL;
         TABLE_WIDTH = f_width;
         TABLE_HEIGHT = f_height;
         try {
@@ -56,10 +58,12 @@ public class Table extends JPanel {
         add(cardsOnTable);
         stateTracker.registerCallback(this::updateGUI);
 
-        startBtn = new JButton("Start");
-        startBtn.setBounds(f_width-150,50, 100,50);
-        add(startBtn);
-        startBtn.addActionListener(e -> startGame());
+        if(stateTracker.isOwner()) {
+            startBtn = new JButton("Start");
+            startBtn.setBounds(f_width-150,50, 100,50);
+            add(startBtn);
+            startBtn.addActionListener(e -> startGame());
+        }
 
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
@@ -67,6 +71,8 @@ public class Table extends JPanel {
         exitButton.addActionListener(l -> {
             gL.setWaitingCursor(true);
             stateTracker.leaveGame();
+            if(stateTracker.isOwner())
+                stateTracker.stopGame();
             this.setVisible(false);
             gL.showLobby(true);
             gL.startHeartbeat();
@@ -77,15 +83,24 @@ public class Table extends JPanel {
     }
 
     public void startGame() {
-        Player player = new Player(TABLE_WIDTH/2, stateTracker);
-        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
-                (TABLE_HEIGHT/2) + 100,
-                TABLE_WIDTH/2,
-                (TABLE_HEIGHT/8) + 100);
-        add(player);
-        repaint();
-        stateTracker.startGame();
-        startBtn.setEnabled(false);
+        if(startBtn.getText().equals("Start")) {
+            Player player = new Player(TABLE_WIDTH / 2, stateTracker);
+            player.setBounds((TABLE_WIDTH / 2) - ((TABLE_WIDTH / 2) / 2) - 25,
+                    (TABLE_HEIGHT / 2) + 100,
+                    TABLE_WIDTH / 2,
+                    (TABLE_HEIGHT / 8) + 100);
+            add(player);
+            repaint();
+            stateTracker.startGame();
+            startBtn.setText("Stop");
+        } else {
+            startBtn.setText("Start");
+            stateTracker.stopGame();
+            this.setVisible(false);
+            gameLobby.showLobby(true);
+            gameLobby.startHeartbeat();
+            gameLobby.setWaitingCursor(false);
+        }
     }
 
     @Override

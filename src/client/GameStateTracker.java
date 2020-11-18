@@ -23,5 +23,6 @@ public interface GameStateTracker {
     int getNumberOfFaceDownCards();
     List<Card> getCardsOnTable();
     boolean startGame();
-
+    boolean stopGame();
+    boolean hasStarted();
 }
