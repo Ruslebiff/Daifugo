@@ -26,4 +26,5 @@ public interface GameStateTracker {
     boolean startGame();
     boolean stopGame();
     boolean isStarted();
+    int getCardsInTrick();
 }

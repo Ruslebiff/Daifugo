@@ -75,14 +75,8 @@ public class Player extends JPanel{
 
         playCardsBtn.addActionListener(e -> {
             playCards();
-            cancelBtn.setEnabled(true);
-            passTurnBtn.setEnabled(true);
         });
         add(playCardsBtn);
-
-
-
-
     }
 
     public void update() {
@@ -90,6 +84,8 @@ public class Player extends JPanel{
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
+        cancelBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
 
     public void addListener(Card c) {
@@ -112,8 +108,6 @@ public class Player extends JPanel{
                         playCardsBtn.setEnabled(checkIfPlayable());
                     else // If the round has just started and you have to relinquish cards
                         giveUpCards();  // Function checks role and cards you have to give based on role
-
-                    //playCardsBtn.setEnabled(checkIfPlayable());
                 }
             }
 
@@ -140,21 +134,14 @@ public class Player extends JPanel{
 
     }
 
-    public void removeCardFromDisplay() {
-        this.remove(hand.get(0));
-        hand.remove(0);
-        rearrangeCardsOnDisplay();
-    }
-
-    // TODO: Y-coordinate must be further down
-
-    // TODO: når eier trykker startGame, bruk funksjon
     public void viewDealtHand() {
         space = space + ((maxCards - hand.size()) / 2);
         boundsX = (widthOfComponent / 2) - (cardWidth / 2) + (((hand.size() - 1) / 2) * space);
+        if(hand.size() == 18)
+            boundsX += 10;
         int i = 0;
         for (Card card : hand) {
-            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
+            card.setBounds(boundsX - ((i++) * space), 60, cardWidth, cardHeight);
             add(card);
         }
         repaint();
@@ -162,18 +149,16 @@ public class Player extends JPanel{
 
     public void rearrangeCardsOnDisplay() {
         hand.forEach(this::remove); // Remove all the cards on the GUI to repaint them centered
-        // The spacing between cards
-        space = space + ((maxCards - hand.size()) / 2);
+        space = space + ((maxCards - hand.size()) / 2); // The spacing between cards
 
         if (hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
             space = cardWidth;
 
-        // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
         boundsX = round(((float) widthOfComponent / 2) - ((float) cardWidth / 2) + (((float) hand.size() - 1) / 2) * (float) space);
         int i = 0;
         for (Card card : hand) {     // For each card, space it more and more to the left
-            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
+            card.setBounds(boundsX - ((i++) * space), 60, cardWidth, cardHeight);
             add(card);  // Add the cards again with the updated coordinates
         }
         repaint();
@@ -212,6 +197,7 @@ public class Player extends JPanel{
                 LOGGER.warning("Unable to play the selected cards.");
                 return;
             }
+            playCardsBtn.setEnabled(stateTracker.isMyTurn());
 
         } else {            // If it is at the beginning of the round
             LOGGER.info("Trading cards with another player...");
@@ -231,11 +217,20 @@ public class Player extends JPanel{
             rearrangeCardsOnDisplay(); // Display properly
         }
         cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
+        playCardsBtn.setEnabled(false);
+        repaint();
     }
 
     public Boolean checkIfPlayable() {
         if(cardsToPlay.size() != 0) {   // If the player has selected cards
-            List<Card> lastPlayed = stateTracker.getCardsOnTable(); // Last played cards
+            List<Card> allCardsOnTable = stateTracker.getCardsOnTable(); // Last played cards
+            List<Card> lastPlayed = new ArrayList<>();
+
+            int noOfCardsInLastTrick = stateTracker.getCardsInTrick();
+            int allCards = allCardsOnTable.size() - 1;
+            for (int i = allCards; i > allCards - noOfCardsInLastTrick; i--) {  // Get only the amount of cards from
+                lastPlayed.add(allCardsOnTable.get(i));                         // table equal to last trick
+            }
 
             if (lastPlayed.size() == 0)
                 return true;
