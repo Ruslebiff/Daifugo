@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static client.GameLobby.LOGGER;
 import static java.lang.Math.round;
 
 public class Player extends JPanel{
@@ -81,10 +82,6 @@ public class Player extends JPanel{
 
 
 
-        removeCard = new JButton("Remove");
-        removeCard.setBounds(100, 175, 100, 50);
-        add(removeCard);
-        removeCard.addActionListener(e -> removeCardFromDisplay());
 
     }
 
@@ -100,6 +97,7 @@ public class Player extends JPanel{
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
+                LOGGER.info("clicked, my turn: " + stateTracker.isMyTurn());
                 if (stateTracker.isMyTurn() && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
@@ -115,7 +113,7 @@ public class Player extends JPanel{
                     else // If the round has just started and you have to relinquish cards
                         giveUpCards();  // Function checks role and cards you have to give based on role
 
-                    playCardsBtn.setEnabled(checkIfPlayable());
+                    //playCardsBtn.setEnabled(checkIfPlayable());
                 }
             }
 
@@ -202,11 +200,21 @@ public class Player extends JPanel{
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         if(!giveCards) {   // If it is a normal round, play the cards
+            LOGGER.info("Attempting to play cards...");
             boolean ok;
-            do {
-                ok = stateTracker.playCards(cardsToPlay);
-            } while (!ok);
+            if (cardsToPlay.isEmpty()) {
+                LOGGER.warning("cards to play was empty");
+                return;
+            }
+
+            ok = stateTracker.playCards(cardsToPlay);
+            if (!ok) {
+                LOGGER.warning("Unable to play the selected cards.");
+                return;
+            }
+
         } else {            // If it is at the beginning of the round
+            LOGGER.info("Trading cards with another player...");
             playCardsBtn.setText("Play Cards");
             giveCards = false;
             cardsClickable = true;
@@ -228,6 +236,9 @@ public class Player extends JPanel{
     public Boolean checkIfPlayable() {
         if(cardsToPlay.size() != 0) {   // If the player has selected cards
             List<Card> lastPlayed = stateTracker.getCardsOnTable(); // Last played cards
+
+            if (lastPlayed.size() == 0)
+                return true;
 
             if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
                 return true;

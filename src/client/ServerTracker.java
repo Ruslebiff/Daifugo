@@ -3,6 +3,7 @@ package client;
 import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
+import jdk.jshell.spi.ExecutionControl;
 import protocol.*;
 
 import java.io.IOException;
@@ -133,15 +134,11 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public int getActivePlayerIndex() {
-        return 0;
-    }
-
-    @Override
-    public int getMyPlayerId() {
         synchronized (this) {
-            return 0;
+            return state.getCurrentPlayer();
         }
     }
+
 
     @Override
     public boolean isCancelled() {
@@ -227,13 +224,13 @@ public class ServerTracker implements GameStateTracker {
             Message response = null;
             try {
                 response = connection.sendMessage(new PlayCardsRequest(playedCards));
-                if (response.isError())
+                if (response.isError()) {
+                    LOGGER.warning("Tracker received error playing cards: " + response.getErrorMessage());
                     return false;
+                }
 
-                GameStateResponse tmp = (GameStateResponse) response;
-                state = tmp.getState();
-                guiCallback.call();
             } catch (Exception e) {
+                LOGGER.warning(e.getMessage());
                 return false;
             }
             return true;

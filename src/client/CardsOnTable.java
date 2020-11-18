@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static client.GameLobby.LOGGER;
+
 // Class for GUI of the cards played on the table
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
@@ -39,6 +41,7 @@ public class CardsOnTable extends JPanel{
     public void updateCardsOnTable() {
         int cardWidth = 80, cardHeight = 120;
         lastFourCards = stateTracker.getCardsOnTable();
+        LOGGER.info("Top cards size: " + lastFourCards.size());
         lastFourCards.forEach(c -> {
             c.setBounds(
                     (this.getWidth()/2) - (cardWidth/2),
@@ -55,6 +58,8 @@ public class CardsOnTable extends JPanel{
             tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
             add(tmp);
         }
+
+        repaint();
     }
 
     @Override

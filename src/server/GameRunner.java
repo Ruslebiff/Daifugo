@@ -145,10 +145,13 @@ public class GameRunner {
     }
 
     private void handlePlayCards(PlayCardsRequest request) throws IOException {
+        LOGGER.info("Entering playcards handler");
         try {
             game.playCards(userSession.getID(), request.getCards());
-            out.writeObject(new GameStateResponse(game, userSession));
-        } catch (UserSessionError | GameException e) {
+            LOGGER.info("Successfully played cards, sending OK response...");
+            out.writeObject(new Message(OK));
+            //out.writeObject(new GameStateResponse(game, userSession));
+        } catch (/*UserSessionError |*/ GameException e) {
             out.writeObject(new ErrorMessage(e.getMessage()));
         }
 

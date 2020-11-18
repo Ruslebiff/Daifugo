@@ -38,6 +38,7 @@ public class Table extends JPanel {
         if (stateTracker.isStarted()) {
             player.update();
             player.setVisible(true);
+            startString.setVisible(false);
         }
 
         playersInformation.indicateTurn();
@@ -133,7 +134,6 @@ public class Table extends JPanel {
             }
 
             startBtn.setText("Stop");
-            startString.setVisible(false);
             repaint();
         } else {
             startBtn.setText("Start");
