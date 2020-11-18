@@ -2,6 +2,7 @@ package client;
 
 import client.networking.ClientConnection;
 import common.GameListing;
+import common.Info;
 import protocol.*;
 
 import javax.swing.*;
@@ -11,6 +12,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,6 +27,9 @@ public class GameLobby extends JFrame {
 
     public static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
     public static FileHandler FILE_HANDLER = null;
+    private Info info = new Info();
+    private JPanel outerPanel = new JPanel(new BorderLayout());
+    private JPanel innerPanel = new JPanel(new BorderLayout());
 
     static {
         try {
@@ -125,6 +131,48 @@ public class GameLobby extends JFrame {
         setTitle("Daifugo");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        /** File menu */
+        JMenuBar topMenuBar = new JMenuBar();
+        topMenuBar.setSize(window_width, 100);
+
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem menuItemExit = new JMenuItem(new AbstractAction("Exit"){
+            public void actionPerformed(ActionEvent e) {
+                heartbeatExecutor.shutdown();    // kill latency thread
+                synchronized (this) {
+                    try {
+                        conn.disconnect();
+                    } catch (IOException | ClassNotFoundException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+                System.exit(0);
+            }
+        });
+
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem menuItemHowToPlay = new JMenuItem(new AbstractAction("Show rules"){
+            public void actionPerformed(ActionEvent e) {
+                info.showRulesWindow();
+            }
+        });
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem menuItemAbout = new JMenuItem(new AbstractAction("About"){
+            public void actionPerformed(ActionEvent e) {
+                info.showAboutWindow();
+            }
+        });
+
+        fileMenu.add(menuItemExit);
+        helpMenu.add(menuItemHowToPlay);
+        aboutMenu.add(menuItemAbout);
+
+        topMenuBar.add(fileMenu);
+        topMenuBar.add(helpMenu);
+        topMenuBar.add(aboutMenu);
+        topMenuBar.setMaximumSize(new Dimension(window_width, 50));
+        add(topMenuBar);
 
         /**
          *  New game view
@@ -176,20 +224,14 @@ public class GameLobby extends JFrame {
          *  Settings view
          ************************/
         settingsPanel.setSize(window_width,window_height);
-        settingsPanel.setVisible(false);
-        settingsPanel.setLayout(null);
+        settingsPanel.setLayout(new GridBagLayout());
+        GridBagConstraints g = new GridBagConstraints();
 
 
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        newNickNameLabel.setBounds(100, 20, 100,20);
-
         JTextField newNickNameTextField = new JTextField(playerName);
-        newNickNameTextField.setBounds(200, 20, 150,20);
-
         JLabel newServerAddressLabel = new JLabel("Server address: ");
-        newServerAddressLabel.setBounds(100, 50, 100,20);
-
-        newServerAddressTextField.setBounds(200, 50, 150,20);
+        JButton cancelSettingsButton = new JButton("Cancel");
 
         JLabel settingsConnectionFailedMessage = new JLabel("Connection failed");
         settingsConnectionFailedMessage.setForeground(new Color(255, 0, 0));
@@ -198,15 +240,35 @@ public class GameLobby extends JFrame {
 
 
         JButton settingsConfirmButton = new JButton("Confirm");
-        settingsConfirmButton.setBounds(getWidth()/2 - 75, getHeight() - 100, 150,40);
 
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.ipadx = 40;
+        g.weightx = 0.0;
+        g.gridx = 0;
+        g.gridy = 0;
+        settingsPanel.add(newNickNameLabel, g);
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridx = 1;
+        settingsPanel.add(newNickNameTextField, g);
 
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridx = 0;
+        g.gridy = 1;
+        settingsPanel.add(newServerAddressLabel, g);
+        g.gridx = 1;
+        settingsPanel.add(newServerAddressTextField, g);
 
-        settingsPanel.add(newNickNameLabel, gbc);
-        settingsPanel.add(newNickNameTextField, gbc);
-        settingsPanel.add(newServerAddressLabel, gbc);
-        settingsPanel.add(newServerAddressTextField, gbc);
-        settingsPanel.add(settingsConfirmButton, gbc);
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridwidth = 3;
+        g.gridx = 0;
+        g.gridy = 2;
+        settingsPanel.add(settingsConfirmButton, g);
+
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.gridwidth = 3;
+        g.gridx = 0;
+        g.gridy = 3;
+        settingsPanel.add(cancelSettingsButton, g);
 
         /**
          *  Control bar
@@ -386,6 +448,14 @@ public class GameLobby extends JFrame {
             showLobby(true);    // reset view back to default lobby view
         });
 
+        cancelSettingsButton.addActionListener(e -> {
+            // reset settings view
+            newNickNameTextField.setText(playerName);
+            newServerAddressTextField.setText(serverAddress);
+
+            showLobby(true);    // reset view back to default lobby view
+        });
+
         settingsConfirmButton.addActionListener(e -> {
             boolean allSettingsOK;
             if (!newServerAddressTextField.getText().equals(serverAddress)) {
@@ -431,11 +501,13 @@ public class GameLobby extends JFrame {
 
         newGameButton.addActionListener(e -> {
             showLobby(false);
+            innerPanel.setVisible(true);
             newGamePanel.setVisible(true);
         });
 
         settingsButton.addActionListener(e -> {
             showLobby(false);
+            innerPanel.setVisible(true);
             settingsPanel.setVisible(true);
         });
 
@@ -497,11 +569,18 @@ public class GameLobby extends JFrame {
             }
         });
 
-        add(newGamePanel, 0);
-        add(settingsPanel, 0);
-        add(controlPanel, BorderLayout.PAGE_START, 0);
-        add(sp, BorderLayout.CENTER, 0);
-        add(statusBar, BorderLayout.PAGE_END, 0);
+
+        innerPanel.setBounds(0,500,window_width, window_height);
+
+        outerPanel.add(topMenuBar, BorderLayout.PAGE_START, 0);
+        innerPanel.add(newGamePanel, 0);
+        innerPanel.add(settingsPanel, 0);
+        innerPanel.add(controlPanel, BorderLayout.PAGE_START, 0);
+        innerPanel.add(sp, BorderLayout.CENTER, 0);
+        innerPanel.add(statusBar, BorderLayout.PAGE_END, 0);
+        innerPanel.setVisible(true);
+        outerPanel.add(innerPanel);
+        add(outerPanel);
         setVisible(true);
         setLocationRelativeTo(null);
     }
@@ -595,7 +674,7 @@ public class GameLobby extends JFrame {
             playTable.setBounds(0,0, getWidth(), getHeight());
             playTable.setVisible(true);
             playTable.setBounds(0,0,window_width,window_height);
-            add(playTable, 1);
+            outerPanel.add(playTable, 1);
             playTable.repaint();
             playTable.revalidate();
 
@@ -700,12 +779,14 @@ public class GameLobby extends JFrame {
      */
     public void showLobby(boolean b){
         if (b){
+            innerPanel.setVisible(true);
             sp.setVisible(true);
             statusBar.setVisible(true);
             newGamePanel.setVisible(false);
             settingsPanel.setVisible(false);
             controlPanel.setVisible(true);
         } else {
+            innerPanel.setVisible(false);
             sp.setVisible(false);
             statusBar.setVisible(false);
             newGamePanel.setVisible(false);
