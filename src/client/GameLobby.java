@@ -140,6 +140,7 @@ public class GameLobby extends JFrame {
         newGamePassword.setEnabled(false);
         JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
         JButton newGameConfirmButton = new JButton("Confirm");
+        JButton cancelNewGameButton = new JButton("Cancel");
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 0.0;
@@ -162,6 +163,12 @@ public class GameLobby extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 2;
         newGamePanel.add(newGameConfirmButton, gbc);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        newGamePanel.add(cancelNewGameButton, gbc);
 
 
         /**
@@ -367,6 +374,15 @@ public class GameLobby extends JFrame {
             }
             createNewGame(newGameName.getText(), pw);
             sp.setVisible(false);
+        });
+
+        cancelNewGameButton.addActionListener(e -> {
+            // Reset new game view
+            newGameName.setText("my new game");
+            newGamePassword.setText("");
+            newGamePrivateCheckbox.setSelected(false);
+
+            showLobby(true);    // reset view back to default lobby view
         });
 
         settingsConfirmButton.addActionListener(e -> {
