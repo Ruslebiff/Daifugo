@@ -166,10 +166,9 @@ public class Game {
 
         int lowIndex = cardsOnTable.size();
         int high = lowIndex;
-        while (lowIndex - 1 >= 0 && high - lowIndex < 3)
+        while (lowIndex - 1 >= 0 && high - lowIndex < 4)
             lowIndex--;
 
-        SERVER_LOGGER.info("lowindex: " + lowIndex + " high: " + high);
 
         return new ArrayList<>(cardsOnTable.subList(
                 lowIndex, high
@@ -182,6 +181,8 @@ public class Game {
             tmp = _getTopCards();
         }
         SERVER_LOGGER.info("Size of top cards: " + tmp.size());
+        if (tmp.size() == 4)
+            tmp.remove(0);
         return tmp;
     }
 
@@ -350,18 +351,21 @@ public class Game {
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
+                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
                 } else if (topCards.size() == 4
-                        && topCards.get(1) == topCards.get(0)
-                        && topCards.get(2) == topCards.get(0)
-                        && topCards.get(3) == topCards.get(0)
+                        && topCards.get(1).getValue() == topCards.get(0).getValue()
+                        && topCards.get(2).getValue() == topCards.get(0).getValue()
+                        && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
+                    SERVER_LOGGER.info("Top 4 cards are the same, new trick.");
                     newTrick();
                     return;
                 }
+                SERVER_LOGGER.info("Past trick-check");
 
 
 
