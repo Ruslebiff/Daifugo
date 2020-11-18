@@ -18,6 +18,7 @@ public class PlayersInformation extends JPanel {
     private int previousTurn;           // ID of the player before you
     private Color activeColor = new Color(135,206,250);
     private Color neutralColor = new Color(119,136,153);
+    private Color passColor = new Color(250,128,114);
     private HashMap<Integer, String> roleIdentifier;
     private final int WIDTH;
     private final int HEIGHT;
@@ -71,7 +72,7 @@ public class PlayersInformation extends JPanel {
         for (int i = 0; i < players.size(); i++) {
             String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
             int noOfCards = players.get(i).getNumberOfCards();
-            if(noOfCards != 0)
+            if(noOfCards != 0)                                      // TODO: noOfCards blir ikke oppdatert
                 playerInformationTxt += " - " + noOfCards;
 
             LOGGER.info("Player information: " + playerInformationTxt );
@@ -83,7 +84,12 @@ public class PlayersInformation extends JPanel {
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
-            playerInfo[i].setBackground(neutralColor);
+
+            if(players.get(i).hasPassed())      // TODO: Color doesn't change
+                playerInfo[i].setBackground(passColor);
+            else
+                playerInfo[i].setBackground(neutralColor);
+
             playerInfo[i].setOpaque(true);
             if(i != 0) {
                 playerInfo[i].setBounds(0, playerInfo[i - 1].getY() + HEIGHT, WIDTH, HEIGHT);

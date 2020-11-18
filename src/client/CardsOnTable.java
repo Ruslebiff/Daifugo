@@ -16,24 +16,17 @@ public class CardsOnTable extends JPanel{
     private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
     private int faceDownCards;
     private final GameStateTracker stateTracker;
-    private BufferedImage faceDown;
-    private JLabel cardsInPlayCounter;
+    private final JLabel cardsInPlayCounter;
 
     public CardsOnTable(GameStateTracker sT) {
         faceDownCards = 0;
         stateTracker = sT;
-        try {
-            image = ImageIO.read(  // Renders the green filt
-                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
         try {
-            faceDown = ImageIO.read(  // Renders the green filt
-                    ClientMain.class.getResourceAsStream("/cardimages/Daifugo_cardback_fade_blue_vertical.png"));
+            image = ImageIO.read(  // Renders the green felt
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg") // Read the image
+            );
         } catch (IOException ex) {
             ex.printStackTrace();
         }
