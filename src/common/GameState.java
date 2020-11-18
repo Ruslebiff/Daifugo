@@ -33,10 +33,7 @@ public class GameState implements Serializable {
         this.topCards = game.getTopCards();
         gameID = game.getID();
 
-        if (!game.hasStarted())
-            currentPlayer = -1;
-        else
-            currentPlayer = game.getCurrentPlayer();
+        currentPlayer = game.getCurrentPlayer();
 
         hand = game.getPlayerHand(session.getID());
 

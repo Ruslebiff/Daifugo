@@ -25,6 +25,7 @@ public class PlayersInformation extends JPanel {
     public PlayersInformation(GameStateTracker stateTracker) {
         this.stateTracker = stateTracker;
         this.players = stateTracker.getPlayerList();
+        previousTurn = 0;
         WIDTH = 200;
         HEIGHT = 50;
         int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
@@ -47,11 +48,9 @@ public class PlayersInformation extends JPanel {
         updateTable();
         int playerIndex = stateTracker.getActivePlayerIndex();   // Get the ID of the active player
 
-        if(previousTurn != playerIndex) {       // If the turn is supposed to go to the next player, else do nothing
-            playerInfo[previousTurn].setBackground(neutralColor);
+        LOGGER.info("Changing player turn indicator");
+        if (playerIndex >= 0)
             playerInfo[playerIndex].setBackground(activeColor);
-            previousTurn = playerIndex;
-        }
         repaint();
     }
 
@@ -84,6 +83,5 @@ public class PlayersInformation extends JPanel {
             }
             add(playerInfo[i]);
         }
-        repaint();
     }
 }

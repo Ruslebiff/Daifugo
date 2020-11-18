@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static client.GameLobby.LOGGER;
 import static java.lang.Math.round;
 
 public class Player extends JPanel{
@@ -19,7 +20,7 @@ public class Player extends JPanel{
     private BufferedImage image;    // Image of green felt
     private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
-    private final List<Card> cardsToPlay = new ArrayList<>();
+    private List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
     // TODO: REMOVE ADD AND REMOVE BUTTONS
@@ -74,32 +75,36 @@ public class Player extends JPanel{
 
         playCardsBtn.addActionListener(e -> {
             playCards();
-            cancelBtn.setEnabled(true);
-            passTurnBtn.setEnabled(true);
         });
         add(playCardsBtn);
-
-
-
-        removeCard = new JButton("Remove");
-        removeCard.setBounds(100, 175, 100, 50);
-        add(removeCard);
-        removeCard.addActionListener(e -> removeCardFromDisplay());
-
     }
 
-    public void update() {
-        hand = stateTracker.getHand();
+    public void update(List<Card> newHand) {
+        if (hand != null) {
+            for (Card card : hand) {
+                this.remove(card);
+            }
+            repaint();
+        }
+//        hand = stateTracker.getHand();
+        hand = newHand;
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
+        cancelBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
 
+    public void updateButtonState() {
+        cancelBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+    }
     public void addListener(Card c) {
 
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
+                LOGGER.info("clicked, my turn: " + stateTracker.isMyTurn());
                 if (stateTracker.isMyTurn() && cardsClickable) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
@@ -114,8 +119,6 @@ public class Player extends JPanel{
                         playCardsBtn.setEnabled(checkIfPlayable());
                     else // If the round has just started and you have to relinquish cards
                         giveUpCards();  // Function checks role and cards you have to give based on role
-
-                    playCardsBtn.setEnabled(checkIfPlayable());
                 }
             }
 
@@ -142,21 +145,14 @@ public class Player extends JPanel{
 
     }
 
-    public void removeCardFromDisplay() {
-        this.remove(hand.get(0));
-        hand.remove(0);
-        rearrangeCardsOnDisplay();
-    }
-
-    // TODO: Y-coordinate must be further down
-
-    // TODO: når eier trykker startGame, bruk funksjon
     public void viewDealtHand() {
         space = space + ((maxCards - hand.size()) / 2);
         boundsX = (widthOfComponent / 2) - (cardWidth / 2) + (((hand.size() - 1) / 2) * space);
+        if(hand.size() == 18)
+            boundsX += 10;
         int i = 0;
         for (Card card : hand) {
-            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
+            card.setBounds(boundsX - ((i++) * space), 60, cardWidth, cardHeight);
             add(card);
         }
         repaint();
@@ -164,18 +160,16 @@ public class Player extends JPanel{
 
     public void rearrangeCardsOnDisplay() {
         hand.forEach(this::remove); // Remove all the cards on the GUI to repaint them centered
-        // The spacing between cards
-        space = space + ((maxCards - hand.size()) / 2);
+        space = space + ((maxCards - hand.size()) / 2); // The spacing between cards
 
         if (hand.size() < 4)  // If the cards on the hand is less than four, don't create any space
             space = cardWidth;
 
-        // TODO: Y-coordinate must be further down
         // The x-coordinate of the first card from right to left
         boundsX = round(((float) widthOfComponent / 2) - ((float) cardWidth / 2) + (((float) hand.size() - 1) / 2) * (float) space);
         int i = 0;
         for (Card card : hand) {     // For each card, space it more and more to the left
-            card.setBounds(boundsX - ((i++) * space), 50, cardWidth, cardHeight);
+            card.setBounds(boundsX - ((i++) * space), 60, cardWidth, cardHeight);
             add(card);  // Add the cards again with the updated coordinates
         }
         repaint();
@@ -202,11 +196,23 @@ public class Player extends JPanel{
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
         if(!giveCards) {   // If it is a normal round, play the cards
+            LOGGER.info("Attempting to play cards...");
             boolean ok;
-            do {
-                ok = stateTracker.playCards(cardsToPlay);
-            } while (!ok);
+            if (cardsToPlay.isEmpty()) {
+                LOGGER.warning("cards to play was empty");
+                return;
+            }
+
+            ok = stateTracker.playCards(cardsToPlay);
+            if (!ok) {
+                LOGGER.warning("Unable to play the selected cards.");
+                cancel();
+                return;
+            }
+            playCardsBtn.setEnabled(stateTracker.isMyTurn());
+
         } else {            // If it is at the beginning of the round
+            LOGGER.info("Trading cards with another player...");
             playCardsBtn.setText("Play Cards");
             giveCards = false;
             cardsClickable = true;
@@ -218,16 +224,30 @@ public class Player extends JPanel{
             hand.remove(c);     // Remove them from hand
             this.remove(c);     // Remove them from GUI
         });
+
         if (hand.size() != 0) {   // If player has more cards left
             sortHand();             // Sort hand accordingly
             rearrangeCardsOnDisplay(); // Display properly
         }
-        cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
+
+        cardsToPlay = new ArrayList<>(); // Remove all cards to play from cards to play
+        playCardsBtn.setEnabled(false);
+        repaint();
     }
 
     public Boolean checkIfPlayable() {
         if(cardsToPlay.size() != 0) {   // If the player has selected cards
-            List<Card> lastPlayed = stateTracker.getCardsOnTable(); // Last played cards
+            List<Card> allCardsOnTable = stateTracker.getCardsOnTable(); // Last played cards
+            List<Card> lastPlayed = new ArrayList<>();
+
+            int noOfCardsInLastTrick = stateTracker.getCardsInTrick();
+            int allCards = allCardsOnTable.size() - 1;
+            for (int i = allCards; i > allCards - noOfCardsInLastTrick; i--) {  // Get only the amount of cards from
+                lastPlayed.add(allCardsOnTable.get(i));                         // table equal to last trick
+            }
+
+            if (lastPlayed.size() == 0)
+                return true;
 
             if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
                 return true;
