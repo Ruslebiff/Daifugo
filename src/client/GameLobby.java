@@ -731,23 +731,25 @@ public class GameLobby extends JFrame {
      */
     public void joinGame(String gameID, char[] password){
         try {
-
-            Message response;
-            response = conn.sendMessage(new JoinGameRequest(gameID, password));
-            if (response.isError()){
-                if(response.getMessageType() == MessageType.PASSWORD_ERROR){
-                    JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+            GameStateTracker tracker;
+            synchronized (this) {
+                Message response;
+                response = conn.sendMessage(new JoinGameRequest(gameID, password));
+                if (response.isError()) {
+                    if (response.getMessageType() == MessageType.PASSWORD_ERROR) {
+                        JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
+                    }
+                    LOGGER.warning("ERROR: " + response.getErrorMessage());
                 }
-                LOGGER.warning("ERROR: " + response.getErrorMessage());
+
+
+                heartbeatExecutor.shutdown();
+                GameStateResponse tmp = (GameStateResponse) response;
+                tracker = new ServerTracker(
+                        conn,
+                        tmp.getState()
+                );
             }
-
-
-            heartbeatExecutor.shutdown();
-            GameStateResponse tmp = (GameStateResponse) response;
-            GameStateTracker tracker = new ServerTracker(
-                    conn,
-                    tmp.getState()
-            );
 
             setWaitingCursor(true);
 

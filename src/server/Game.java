@@ -229,7 +229,13 @@ public class Game {
     public void cancelGame() {
         synchronized (this) {
             cancelled = true;
-            leaveGame(owner);
+            try {
+                UserSession.retrieveSessionFromID(owner).leaveCurrentGame();
+            } catch (UserSessionError userSessionError) {
+                SERVER_LOGGER.warning(
+                        "Unable to get game owner's session for game cancellation"
+                );
+            }
             removeFromList();
             propagateChange();
         }

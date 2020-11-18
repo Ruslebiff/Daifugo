@@ -155,12 +155,22 @@ public class ServerTracker implements GameStateTracker {
         try {
             synchronized (this) {
                 Message response = connection.sendMessage(new Message(MessageType.CANCEL_GAME));
-                if (response.isError())
+                if (response.isError()) {
                     LOGGER.warning("Failed to cancel game: " + response.getErrorMessage());
+                    return;
+                }
             }
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warning("Exception during cancellation of game: " + e.getMessage());
+            return;
         }
+
+        try {
+            stopHeartbeatThread();
+        } catch (InterruptedException e) {
+            LOGGER.warning("failed to stop heartbeat on game cancel: " + e.getMessage());
+        }
+
     }
 
     @Override
