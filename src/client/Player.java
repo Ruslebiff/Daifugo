@@ -20,7 +20,7 @@ public class Player extends JPanel{
     private BufferedImage image;    // Image of green felt
     private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
-    private final List<Card> cardsToPlay = new ArrayList<>();
+    private List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
     // TODO: REMOVE ADD AND REMOVE BUTTONS
@@ -79,8 +79,15 @@ public class Player extends JPanel{
         add(playCardsBtn);
     }
 
-    public void update() {
-        hand = stateTracker.getHand();
+    public void update(List<Card> newHand) {
+        if (hand != null) {
+            for (Card card : hand) {
+                this.remove(card);
+            }
+            repaint();
+        }
+//        hand = stateTracker.getHand();
+        hand = newHand;
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
@@ -88,6 +95,10 @@ public class Player extends JPanel{
         passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
 
+    public void updateButtonState() {
+        cancelBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+    }
     public void addListener(Card c) {
 
         c.addMouseListener(new MouseListener() {
@@ -195,6 +206,7 @@ public class Player extends JPanel{
             ok = stateTracker.playCards(cardsToPlay);
             if (!ok) {
                 LOGGER.warning("Unable to play the selected cards.");
+                cancel();
                 return;
             }
             playCardsBtn.setEnabled(stateTracker.isMyTurn());
@@ -212,11 +224,13 @@ public class Player extends JPanel{
             hand.remove(c);     // Remove them from hand
             this.remove(c);     // Remove them from GUI
         });
+
         if (hand.size() != 0) {   // If player has more cards left
             sortHand();             // Sort hand accordingly
             rearrangeCardsOnDisplay(); // Display properly
         }
-        cardsToPlay.removeAll(cardsToPlay); // Remove all cards to play from cards to play
+
+        cardsToPlay = new ArrayList<>(); // Remove all cards to play from cards to play
         playCardsBtn.setEnabled(false);
         repaint();
     }

@@ -21,6 +21,7 @@ public class Table extends JPanel {
     private final GameLobby gameLobby;
     private JLabel startString;
     private Player player;
+    private boolean wasStopped;
 
 
     private Void updateGUI() {
@@ -35,10 +36,21 @@ public class Table extends JPanel {
             return null;
         }
 
-        if (stateTracker.isStarted()) {
-            player.update();
+        if (stateTracker.isStarted() && wasStopped) {
+            wasStopped = false;
+            player.update(stateTracker.getHand());
             player.setVisible(true);
             startString.setVisible(false);
+        }
+
+        if (stateTracker.isStarted() && player != null) {
+            player.updateButtonState();
+        }
+
+        if (!stateTracker.isStarted() && player != null) {
+            wasStopped = true;
+            player.setVisible(false);
+            startString.setVisible(true);
         }
 
         playersInformation.indicateTurn();
@@ -50,6 +62,8 @@ public class Table extends JPanel {
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
 
         gameLobby = gL;
+
+        wasStopped = true;
 
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
