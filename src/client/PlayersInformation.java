@@ -21,8 +21,6 @@ public class PlayersInformation extends JPanel {
     private final int WIDTH;
     private final int HEIGHT;
     private JLabel infoString;
-    private JLabel startString;
-
 
     public PlayersInformation(GameStateTracker stateTracker) {
         this.stateTracker = stateTracker;
@@ -35,7 +33,7 @@ public class PlayersInformation extends JPanel {
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
 
 
-        infoString = new JLabel("Waiting for game to start", SwingConstants.CENTER);
+        infoString = new JLabel("Players", SwingConstants.CENTER);
         infoString.setFont(new Font("sans serif", Font.BOLD, 18));
         infoString.setBounds(0, 0, WIDTH, HEIGHT);
     }
@@ -58,9 +56,6 @@ public class PlayersInformation extends JPanel {
     }
 
     public void updateTable() {
-        if(stateTracker.hasStarted())
-            infoString.setText("Players");
-
         players = stateTracker.getPlayerList();    // Update the list of players
         LOGGER.info("updating table, " + players.size() + " players in game");
         updatePanel();

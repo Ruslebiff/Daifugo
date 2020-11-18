@@ -274,14 +274,6 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean hasStarted() {
-        synchronized (this) {
-            return state.isStarted();
-        }
-    }
-
-
-    @Override
     public int getNumberOfFaceDownCards() {
         synchronized (this) {
             return state.getFaceDownCards();

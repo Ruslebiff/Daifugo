@@ -19,6 +19,7 @@ public class Table extends JPanel {
     private JButton startBtn;
     private final int TABLE_WIDTH;
     private final int TABLE_HEIGHT;
+    private JLabel startString;
 
 
     private Void updateGUI() {
@@ -79,6 +80,10 @@ public class Table extends JPanel {
             gL.setWaitingCursor(false);
         });
 
+        startString = new JLabel("Waiting for game to start");
+        startString.setBounds(exitButton.getX() + 100, exitButton.getY() + 100, 150,50);
+        add(startString);
+
         gL.setWaitingCursor(false);
     }
 
@@ -94,6 +99,7 @@ public class Table extends JPanel {
             repaint();
             stateTracker.startGame();
             startBtn.setText("Stop");
+            startString.setVisible(false);
         } else {
             startBtn.setText("Start");
             stateTracker.stopGame();
