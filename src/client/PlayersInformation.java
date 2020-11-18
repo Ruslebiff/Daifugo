@@ -70,7 +70,7 @@ public class PlayersInformation extends JPanel {
             String playerInformationTxt =
                     players.get(i).getNick() + " - " +
                     players.get(i).getRole() + " - " +
-                    players.get(i).getNumberOfCards();
+                    stateTracker.getHand().size();
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
