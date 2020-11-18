@@ -117,6 +117,7 @@ public class GameRunner {
         }
 
         try {
+            LOGGER.info("Starting game " + game.getTitle() + "...");
             game.start();
             out.writeObject(new Message(OK));
         } catch (GameException e) {

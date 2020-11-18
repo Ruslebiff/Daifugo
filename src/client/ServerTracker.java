@@ -271,11 +271,15 @@ public class ServerTracker implements GameStateTracker {
                 if(response.isError()){
                     LOGGER.warning("Sending start message failed: " + response.getErrorMessage());
                     return false;
+                } else {
+                    LOGGER.info("Start sent successfully");
                 }
 
+/*
                 GameStateResponse tmp = (GameStateResponse) response;
                 state = tmp.getState();
                 guiCallback.call();
+*/
             } catch (Exception e) {
                 LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
                 return false;
@@ -301,6 +305,13 @@ public class ServerTracker implements GameStateTracker {
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public boolean isStarted() {
+        synchronized (this) {
+            return state.isStarted();
         }
     }
 

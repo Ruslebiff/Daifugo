@@ -20,6 +20,7 @@ public class Table extends JPanel {
     private final int TABLE_HEIGHT;
     private final GameLobby gameLobby;
     private JLabel startString;
+    private Player player;
 
 
     private Void updateGUI() {
@@ -32,6 +33,11 @@ public class Table extends JPanel {
             gameLobby.refreshGamesList();
             gameLobby.setWaitingCursor(false);
             return null;
+        }
+
+        if (stateTracker.isStarted()) {
+            player.update();
+            player.setVisible(true);
         }
 
         playersInformation.indicateTurn();
@@ -88,6 +94,15 @@ public class Table extends JPanel {
         startString.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
         add(startString);
 
+
+        player = new Player(TABLE_WIDTH/2, stateTracker);
+        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                (TABLE_HEIGHT/2) + 100,
+                TABLE_WIDTH/2,
+                (TABLE_HEIGHT/8) + 100);
+        add(player);
+        player.setVisible(false);
+
         gL.setWaitingCursor(false);
     }
 
@@ -109,21 +124,17 @@ public class Table extends JPanel {
             startBtn.setText("Stop");
             startString.setVisible(false);
             LOGGER.info("Entered buttonlistener");
-            Player player = new Player(TABLE_WIDTH/2, stateTracker);
-            player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
-                    (TABLE_HEIGHT/2) + 100,
-                    TABLE_WIDTH/2,
-                    (TABLE_HEIGHT/8) + 100);
-            add(player);
             stateTracker.startGame();
             repaint();
         } else {
             startBtn.setText("Start");
             stateTracker.stopGame();
+/*
             this.setVisible(false);
             gameLobby.showLobby(true);
             gameLobby.startHeartbeat();
             gameLobby.setWaitingCursor(false);
+*/
         }
     }
 

@@ -26,4 +26,5 @@ public interface GameStateTracker {
     List<Card> getCardsOnTable();
     boolean startGame();
     boolean stopGame();
+    boolean isStarted();
 }

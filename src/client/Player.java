@@ -18,7 +18,7 @@ public class Player extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
     private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
-    private final List<Card> hand ; // The cards dealt to the player
+    private List<Card> hand ; // The cards dealt to the player
     private final List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
@@ -39,8 +39,6 @@ public class Player extends JPanel{
     public Player(int width, GameStateTracker sT) {
         this.stateTracker = sT;
         this.role = 0; // Upon creation of a player, the player will be set to neutral, as the game has just begun
-        this.hand = stateTracker.getHand();
-        sortHand(); // Sorts the players hand with respect to the card values
         widthOfComponent = width;
         setLayout(null);
         setOpaque(true);
@@ -56,7 +54,6 @@ public class Player extends JPanel{
             ex.printStackTrace();
         }
 
-        hand.forEach(this::addListener);    // Adds a mouseListener for each card
 
         int buttonWidth = 100;
         int buttonHeight = 50;
@@ -89,6 +86,12 @@ public class Player extends JPanel{
         add(removeCard);
         removeCard.addActionListener(e -> removeCardFromDisplay());
 
+    }
+
+    public void update() {
+        hand = stateTracker.getHand();
+        sortHand(); // Sorts the players hand with respect to the card values
+        hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
     }
 

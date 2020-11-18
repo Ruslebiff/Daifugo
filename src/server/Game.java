@@ -71,7 +71,7 @@ public class Game {
     private final Map<UUID, PlayerObject> players;
     private int currentPlayer;
     private boolean started;
-    private final Map<UUID, List<CardData>> hands;
+    private Map<UUID, List<CardData>> hands;
     private List<CardData> cardsOnTable;
     private int noOfCardsFaceDown;  // number of cards removed with previous tricks
     private int noOfCardsInTrick;   // number of cards being played
@@ -495,8 +495,8 @@ public class Game {
 
 
         // empties all hands
-        for (UUID hand : hands.keySet()) {
-            hands.remove(hand);
+        hands = new LinkedHashMap<>();
+        for (UUID hand : turnSequence) {
             hands.put(hand, new ArrayList<>());
         }
 
@@ -508,8 +508,14 @@ public class Game {
             if (player == turnSequence.size())
                 player = 0;
 
+
             tmp = turnSequence.get(player++);
-            hands.get(tmp).add(card);
+
+            SERVER_LOGGER.warning("Data: - " + tmp + " - " + (player-1) + " - " + turnSequence.size());
+            List<CardData> hand = hands.get(tmp);
+            if (hand == null)
+                SERVER_LOGGER.warning("hand is null");
+            hand.add(card);
 
             if (playerWithThreeOfDiamonds == null
                     && card.getNumber() == 3
