@@ -2,6 +2,7 @@ package client;
 
 import client.networking.ClientConnection;
 import common.GameListing;
+import common.Info;
 import protocol.*;
 
 import javax.swing.*;
@@ -11,6 +12,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ public class GameLobby extends JFrame {
 
     public static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
     public static FileHandler FILE_HANDLER = null;
+    private Info info = new Info();
 
     static {
         try {
@@ -125,6 +129,34 @@ public class GameLobby extends JFrame {
         setTitle("Daifugo");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        /** File menu */
+        JMenuBar topMenuBar = new JMenuBar();
+        topMenuBar.setSize(window_width, 100);
+
+        JMenu fileMenu = new JMenu("File");
+
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem menuItemHowToPlay = new JMenuItem(new AbstractAction("Show rules"){
+            public void actionPerformed(ActionEvent e) {
+                info.showRulesWindow();
+            }
+        });
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem menuItemAbout = new JMenuItem(new AbstractAction("About"){
+            public void actionPerformed(ActionEvent e) {
+                info.showAboutWindow();
+            }
+        });
+
+        helpMenu.add(menuItemHowToPlay);
+        aboutMenu.add(menuItemAbout);
+
+        topMenuBar.add(fileMenu);
+        topMenuBar.add(helpMenu);
+        topMenuBar.add(aboutMenu);
+        topMenuBar.setMaximumSize(new Dimension(window_width, 50));
+        add(topMenuBar);
 
         /**
          *  New game view
@@ -497,11 +529,19 @@ public class GameLobby extends JFrame {
             }
         });
 
-        add(newGamePanel, 0);
-        add(settingsPanel, 0);
-        add(controlPanel, BorderLayout.PAGE_START, 0);
-        add(sp, BorderLayout.CENTER, 0);
-        add(statusBar, BorderLayout.PAGE_END, 0);
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel innerPanel = new JPanel(new BorderLayout());
+        innerPanel.setBounds(0,500,window_width, window_height);
+
+        outerPanel.add(topMenuBar, BorderLayout.PAGE_START, 0);
+        innerPanel.add(newGamePanel, 0);
+        innerPanel.add(settingsPanel, 0);
+        innerPanel.add(controlPanel, BorderLayout.PAGE_START, 0);
+        innerPanel.add(sp, BorderLayout.CENTER, 0);
+        innerPanel.add(statusBar, BorderLayout.PAGE_END, 0);
+        innerPanel.setVisible(true);
+        outerPanel.add(innerPanel);
+        add(outerPanel);
         setVisible(true);
         setLocationRelativeTo(null);
     }
