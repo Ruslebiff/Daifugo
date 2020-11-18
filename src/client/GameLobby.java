@@ -630,6 +630,10 @@ public class GameLobby extends JFrame {
                         gameName,
                         gamePassword
                 ));
+                if (response.isError()){
+                    JOptionPane.showMessageDialog(this, response.getErrorMessage());
+                    return;
+                }
             }
 
             if (response.isError()){

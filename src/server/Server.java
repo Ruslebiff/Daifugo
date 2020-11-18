@@ -200,6 +200,18 @@ public class Server {
 
         private void createNewGame(NewGameMessage request) throws IOException, GameDisconnect {
             LOGGER.info("Creating new game");
+            if(request.getTitle().length() < 3) {
+                out.writeObject(
+                        new ErrorMessage("Could not create new game, game title is too short! Minimum 3 characters needed.")
+                );
+                return;
+            }
+            if(profanityFilter.checkForBadWords(request.getTitle())){
+                out.writeObject(
+                        new ErrorMessage("Could not create new game, game title includes a bad word!")
+                );
+                return;
+            }
             Game game;
             try {
                 game = new Game(
