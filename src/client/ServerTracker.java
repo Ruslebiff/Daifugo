@@ -6,7 +6,7 @@ import common.PlayerData;
 import protocol.*;
 
 import java.io.IOException;
-import java.io.StreamCorruptedException;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +26,6 @@ public class ServerTracker implements GameStateTracker {
 
     private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
-
-    // TODO: temporary list of cards, remove later
-    ArrayList<Card> tmp = new ArrayList<>();
 
 
 
@@ -51,8 +48,8 @@ public class ServerTracker implements GameStateTracker {
             Message response;
 
             while (running) {
-                synchronized (ServerTracker.this) {
-                    try {
+                try {
+                    synchronized (ServerTracker.this) {
                         LOGGER.fine("Sending heartbeat");
                         long timestamp = Instant.now().toEpochMilli();
                         response = connection.sendMessage(
@@ -72,12 +69,13 @@ public class ServerTracker implements GameStateTracker {
                             guiCallback.call();
                         }
 
-                        Thread.sleep(heartbeatInterval);
 
-                    } catch (Exception e) {
-                        e.printStackTrace();        // TODO: change to logging
-                        break;
-                    }
+                }
+
+                Thread.sleep(heartbeatInterval);
+                } catch (Exception e) {
+                    LOGGER.warning("Heartbeat resulted in exception: " + e.getMessage());
+                    break;
                 }
             }
 
@@ -131,6 +129,13 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public int getMyPlayerId() {
+        synchronized (this) {
+            return 0;
+        }
+    }
+
+    @Override
     public void leaveGame() {
         try {
             Message response = connection.sendMessage(MessageType.LEAVE_GAME);
@@ -147,17 +152,12 @@ public class ServerTracker implements GameStateTracker {
 
 
     @Override
-    public List<Card> getHand(String token) {
+    public List<Card> getHand() {
         synchronized (this) {
             return state.getHand()
                     .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
                     .collect(Collectors.toList());
         }
-    }
-
-    @Override
-    public int getLastPlayedType() {
-        return 0;
     }
 
     @Override
@@ -179,12 +179,6 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
-    @Override
-    public void setNextTurn() {
-        synchronized (this) {
-
-        }
-    }
 
     @Override
     public boolean playCards(List<Card> playedCards) {
@@ -226,11 +220,6 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean isNewTrick() {
-        return false;
-    }
-
-    @Override
     public List<Card> getCardsOnTable() {
         synchronized (this) {
             return state.getTopCards()
@@ -241,18 +230,23 @@ public class ServerTracker implements GameStateTracker {
 
     @Override
     public boolean startGame() {
+        LOGGER.info("Entered servertrackers startgame");
         synchronized (this) {
+            LOGGER.info("Entered synchronized block");
             Message response = null;
             try {
+                LOGGER.info("Sending start game message..");
                 response = connection.sendMessage(MessageType.START_GAME);
-                if(response.isError())
+                if(response.isError()){
+                    LOGGER.warning("Sending start message failed: " + response.getErrorMessage());
                     return false;
+                }
 
                 GameStateResponse tmp = (GameStateResponse) response;
                 state = tmp.getState();
                 guiCallback.call();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
                 return false;
             }
             return true;
