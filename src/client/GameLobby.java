@@ -136,6 +136,19 @@ public class GameLobby extends JFrame {
         topMenuBar.setSize(window_width, 100);
 
         JMenu fileMenu = new JMenu("File");
+        JMenuItem menuItemExit = new JMenuItem(new AbstractAction("Exit"){
+            public void actionPerformed(ActionEvent e) {
+                heartbeatExecutor.shutdown();    // kill latency thread
+                synchronized (this) {
+                    try {
+                        conn.disconnect();
+                    } catch (IOException | ClassNotFoundException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+                System.exit(0);
+            }
+        });
 
 
         JMenu helpMenu = new JMenu("Help");
@@ -151,6 +164,7 @@ public class GameLobby extends JFrame {
             }
         });
 
+        fileMenu.add(menuItemExit);
         helpMenu.add(menuItemHowToPlay);
         aboutMenu.add(menuItemAbout);
 
