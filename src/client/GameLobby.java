@@ -13,7 +13,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ public class GameLobby extends JFrame {
     private int latency = 0;
     private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
     private volatile boolean connectionOK = false;
-    private JTextField newServerAddressTextField = new JTextField(serverAddress);
+    private JLimitedTextField newServerAddressTextField = new JLimitedTextField(serverAddress, 36);
     private ScheduledExecutorService heartbeatExecutor;
     private JLabel latencyLabel = new JLabel();
     private JButton joinGameButton = new JButton();
@@ -179,96 +178,68 @@ public class GameLobby extends JFrame {
          ************************/
         newGamePanel.setSize(window_width,window_height);
         newGamePanel.setVisible(false);
-        newGamePanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        newGamePanel.setLayout(null);
 
         JLabel newGameNameLabel = new JLabel("Name: ");
-        JTextField newGameName = new JTextField("my new game");
+        JLimitedTextField newGameName = new JLimitedTextField("my new game", 30);
+        JLabel newGameNameLimitText = new JLabel("max " + newGameName.getLimit() + " characters");
+        newGameNameLimitText.setForeground(Color.gray);
         JPasswordField newGamePassword = new JPasswordField("");
         newGamePassword.setEnabled(false);
         JCheckBox newGamePrivateCheckbox = new JCheckBox("Private ");
         JButton newGameConfirmButton = new JButton("Confirm");
         JButton cancelNewGameButton = new JButton("Cancel");
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.ipadx = 40;
-        gbc.weightx = 0.0;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        newGamePanel.add(newGameNameLabel, gbc);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1;
-        newGamePanel.add(newGameName, gbc);
+        newGameNameLabel.setBounds(10,10,70,20);
+        newGameName.setBounds(80,10,200,20);
+        newGameNameLimitText.setBounds(290,10,200,20);
+        newGamePrivateCheckbox.setBounds(7,40,70,20);
+        newGamePassword.setBounds(80,40,200,20);
+        newGameConfirmButton.setBounds(10,70,130,30);
+        cancelNewGameButton.setBounds(150,70,130,30);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        newGamePanel.add(newGamePrivateCheckbox, gbc);
-        gbc.gridx = 1;
-        newGamePanel.add(newGamePassword, gbc);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        newGamePanel.add(newGameConfirmButton, gbc);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridwidth = 3;
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        newGamePanel.add(cancelNewGameButton, gbc);
+        newGamePanel.add(newGameNameLabel);
+        newGamePanel.add(newGameName);
+        newGamePanel.add(newGameNameLimitText);
+        newGamePanel.add(newGamePrivateCheckbox);
+        newGamePanel.add(newGamePassword);
+        newGamePanel.add(newGameConfirmButton);
+        newGamePanel.add(cancelNewGameButton);
 
 
         /**
          *  Settings view
          ************************/
         settingsPanel.setSize(window_width,window_height);
-        settingsPanel.setLayout(new GridBagLayout());
-        GridBagConstraints g = new GridBagConstraints();
-
+        settingsPanel.setLayout(null);
 
         JLabel newNickNameLabel = new JLabel("Nickname: ");
-        JTextField newNickNameTextField = new JTextField(playerName);
+        JLimitedTextField newNickNameTextField = new JLimitedTextField(playerName, 16);
+        JLabel newNickNameLimitText = new JLabel("max " + newNickNameTextField.getLimit() + " characters");
+        newNickNameLimitText.setForeground(Color.gray);
         JLabel newServerAddressLabel = new JLabel("Server address: ");
+        JLabel newServerLimitText = new JLabel("max " + newServerAddressTextField.getLimit() + " characters");
+        newServerLimitText.setForeground(Color.gray);
         JButton cancelSettingsButton = new JButton("Cancel");
-
-        JLabel settingsConnectionFailedMessage = new JLabel("Connection failed");
-        settingsConnectionFailedMessage.setForeground(new Color(255, 0, 0));
-        settingsConnectionFailedMessage.setBounds(400, 50, 150,20);
-        settingsConnectionFailedMessage.setVisible(false);
-
-
         JButton settingsConfirmButton = new JButton("Confirm");
 
-        g.fill = GridBagConstraints.HORIZONTAL;
-        g.ipadx = 40;
-        g.weightx = 0.0;
-        g.gridx = 0;
-        g.gridy = 0;
-        settingsPanel.add(newNickNameLabel, g);
-        g.fill = GridBagConstraints.HORIZONTAL;
-        g.gridx = 1;
-        settingsPanel.add(newNickNameTextField, g);
+        newNickNameLabel.setBounds(10,10,100,20);
+        newNickNameTextField.setBounds(110,10,200,20);
+        newNickNameLimitText.setBounds(320, 10, 200, 20);
+        newServerAddressLabel.setBounds(10,40,100,20);
+        newServerAddressTextField.setBounds(110,40,200,20);
+        newServerLimitText.setBounds(320, 40, 200, 20);
+        settingsConfirmButton.setBounds(10,70,145,30);
+        cancelSettingsButton.setBounds(165,70,145,30);
 
-        g.fill = GridBagConstraints.HORIZONTAL;
-        g.gridx = 0;
-        g.gridy = 1;
-        settingsPanel.add(newServerAddressLabel, g);
-        g.gridx = 1;
-        settingsPanel.add(newServerAddressTextField, g);
-
-        g.fill = GridBagConstraints.HORIZONTAL;
-        g.gridwidth = 3;
-        g.gridx = 0;
-        g.gridy = 2;
-        settingsPanel.add(settingsConfirmButton, g);
-
-        g.fill = GridBagConstraints.HORIZONTAL;
-        g.gridwidth = 3;
-        g.gridx = 0;
-        g.gridy = 3;
-        settingsPanel.add(cancelSettingsButton, g);
+        settingsPanel.add(newNickNameLabel);
+        settingsPanel.add(newNickNameTextField);
+        settingsPanel.add(newNickNameLimitText);
+        settingsPanel.add(newServerAddressLabel);
+        settingsPanel.add(newServerAddressTextField);
+        settingsPanel.add(newServerLimitText);
+        settingsPanel.add(settingsConfirmButton);
+        settingsPanel.add(cancelSettingsButton);
 
         /**
          *  Control bar

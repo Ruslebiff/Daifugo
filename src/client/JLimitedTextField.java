@@ -9,11 +9,15 @@ import javax.swing.text.PlainDocument;
 public class JLimitedTextField extends JTextField {
     private int limit;
 
+
     public JLimitedTextField(String text, int limit) {
         super();
         this.limit = limit;
         this.setText(text);
+
     }
+
+
 
     @Override
     protected Document createDefaultModel() {
@@ -21,6 +25,7 @@ public class JLimitedTextField extends JTextField {
     }
 
     private class LimitDocument extends PlainDocument {
+
 
         @Override
         public void insertString( int offset, String  str, AttributeSet attr ) throws BadLocationException {
@@ -33,4 +38,7 @@ public class JLimitedTextField extends JTextField {
 
     }
 
+    public int getLimit(){
+        return this.limit;
+    }
 }
