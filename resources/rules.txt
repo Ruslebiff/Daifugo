@@ -1,0 +1,57 @@
+Game Rules
+* A game can have 3-8 players
+
+* The game is played with a regular 52-card deck, divided randomly as evenly as possible 
+  among the players to form their hands.
+
+* The game is trick-based and a round is over when only a single player has cards left
+  in hand. A game can have an arbitrary number of rounds.
+
+* The game has five roles:
+- President
+   - The player who emptied their hand first in the previous round
+- Vice president (4+ players only)
+   - The player who emptied their hand second in the previous round
+- Vice-bum (4+ players only)
+   - The player who emptied their hand next to last in the previous round
+- Bum
+   - The player who emptied their hand last in the previoius round
+- Neutral
+   - All other players
+
+* In the initial round the player with the card 3 of diamonds in their hand starts the 
+  game, and play proceeds clockwise (or simply in a ranomly decided player order, since
+  the game is virtual). In following rounds the sitting bum will, after trading cards
+  with the president, play first and play will proceed in the same order.
+
+* After cards are dealt in subsequent rounds, presidents will trade cards
+with bums.
+- In a 3-player game the bum must give their very best card (except the 3 of clubs) to
+  the president, and the president gives a card in return, however they may choose any
+  card they wish.
+- In games with 4 or more players, the president and bum will exchange 2 cards with
+  eachother in the same fashion as in a 3-player game, and the vice-president and
+  vice-bum will exchange a single card like the president and bum does in a 3-player game.
+
+* Card values, suits add no value to a card:
+- 2 - second highest card
+- Ace, King, Queen . . . 3
+- 3 of clubs is a special card that can wipe out whatever combination of cards that are
+  on the table, however if this is the last card on your hand - you lose.
+
+* Tricks
+- A round is played through several tricks
+- In the beginning of a round, the table is empty, and the starting player is free to
+  play 1-4 cards of the same value. Players must match the number of cards, and play a
+  value equal or higher than the top card on the table, until the trick is scored. If
+  unable to do so, a player must pass, and can not play any cards until the current trick
+  is over.
+   - The exception to this is 3 of clubs, which can be played on anything to win a trick.
+- A trick is primarily scored when all other players pass after you have played your
+  cards. The cards on the table are removed and you are free to play any number of
+  cards, starting a new trick.
+But a trick may also be scored if:
+   - After playing your card(s), the top 4 cards on the table have the same value
+   - You play the 3 of clubs
+- If the player winning a trick has no cards left, the next player in order who is
+  still part of the round is free to play.
