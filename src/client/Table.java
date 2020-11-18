@@ -15,6 +15,7 @@ public class Table extends JPanel {
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
     private Logger LOGGER;
+    private final JButton startBtn;
     private final int TABLE_WIDTH;
     private final int TABLE_HEIGHT;
 
@@ -55,7 +56,7 @@ public class Table extends JPanel {
         add(cardsOnTable);
         stateTracker.registerCallback(this::updateGUI);
 
-        JButton startBtn = new JButton("Start");
+        startBtn = new JButton("Start");
         startBtn.setBounds(f_width-150,50, 100,50);
         add(startBtn);
         startBtn.addActionListener(e -> startGame());
@@ -84,6 +85,7 @@ public class Table extends JPanel {
         add(player);
         repaint();
         stateTracker.startGame();
+        startBtn.setEnabled(false);
     }
 
     @Override
