@@ -584,6 +584,7 @@ public class GameLobby extends JFrame {
         add(outerPanel);
         setVisible(true);
         setLocationRelativeTo(null);
+        showLobby(true);
     }
 
     /**
