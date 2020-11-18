@@ -28,6 +28,8 @@ public class GameLobby extends JFrame {
     public static final ConsoleHandler CONSOLE_HANDLER = new ConsoleHandler();
     public static FileHandler FILE_HANDLER = null;
     private Info info = new Info();
+    private JPanel outerPanel = new JPanel(new BorderLayout());
+    private JPanel innerPanel = new JPanel(new BorderLayout());
 
     static {
         try {
@@ -463,11 +465,13 @@ public class GameLobby extends JFrame {
 
         newGameButton.addActionListener(e -> {
             showLobby(false);
+            innerPanel.setVisible(true);
             newGamePanel.setVisible(true);
         });
 
         settingsButton.addActionListener(e -> {
             showLobby(false);
+            innerPanel.setVisible(true);
             settingsPanel.setVisible(true);
         });
 
@@ -529,8 +533,7 @@ public class GameLobby extends JFrame {
             }
         });
 
-        JPanel outerPanel = new JPanel(new BorderLayout());
-        JPanel innerPanel = new JPanel(new BorderLayout());
+
         innerPanel.setBounds(0,500,window_width, window_height);
 
         outerPanel.add(topMenuBar, BorderLayout.PAGE_START, 0);
@@ -635,7 +638,7 @@ public class GameLobby extends JFrame {
             playTable.setBounds(0,0, getWidth(), getHeight());
             playTable.setVisible(true);
             playTable.setBounds(0,0,window_width,window_height);
-            add(playTable, 1);
+            outerPanel.add(playTable, 1);
             playTable.repaint();
             playTable.revalidate();
 
@@ -740,12 +743,14 @@ public class GameLobby extends JFrame {
      */
     public void showLobby(boolean b){
         if (b){
+            innerPanel.setVisible(true);
             sp.setVisible(true);
             statusBar.setVisible(true);
             newGamePanel.setVisible(false);
             settingsPanel.setVisible(false);
             controlPanel.setVisible(true);
         } else {
+            innerPanel.setVisible(false);
             sp.setVisible(false);
             statusBar.setVisible(false);
             newGamePanel.setVisible(false);
