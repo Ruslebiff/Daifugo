@@ -38,7 +38,7 @@ public class Card extends JPanel {
             this.value = number;
         }
 
-        this.filePath = "/cardimages/" + this.suit + Integer.toString(this.number) + ".png"; // Filepath
+        this.filePath = "/cardimages/" + this.suit + this.number + ".png"; // Filepath
         try {
             image =ImageIO.read(
                     ClientMain.class.getResourceAsStream(filePath)
