@@ -81,7 +81,8 @@ public class Table extends JPanel {
         });
 
         startString = new JLabel("Waiting for game to start");
-        startString.setBounds(exitButton.getX() + 100, exitButton.getY() + 100, 150,50);
+        startString.setBounds((f_width/2) - 120, 100, 250,50);
+        startString.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
         add(startString);
 
         gL.setWaitingCursor(false);
@@ -89,6 +90,8 @@ public class Table extends JPanel {
 
     public void startGame() {
         if(startBtn.getText().equals("Start")) {
+            startBtn.setText("Stop");
+            startString.setVisible(false);
             LOGGER.info("Entered buttonlistener");
             Player player = new Player(TABLE_WIDTH/2, stateTracker);
             player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
@@ -96,10 +99,8 @@ public class Table extends JPanel {
                     TABLE_WIDTH/2,
                     (TABLE_HEIGHT/8) + 100);
             add(player);
-            repaint();
             stateTracker.startGame();
-            startBtn.setText("Stop");
-            startString.setVisible(false);
+            repaint();
         } else {
             startBtn.setText("Start");
             stateTracker.stopGame();
