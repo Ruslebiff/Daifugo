@@ -278,7 +278,7 @@ public class Game {
         }
     }
 
-    private void stop() {
+    public void stop() {
         synchronized (this) {
             started = false;
             propagateChange();
