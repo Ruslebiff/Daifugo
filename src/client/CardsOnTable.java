@@ -50,9 +50,11 @@ public class CardsOnTable extends JPanel{
         });
 
         faceDownCards = stateTracker.getNumberOfFaceDownCards();
-//        for (int i = 0; i < faceDownCards; i++) {
-//
-//        }
+        for (int i = 0; i < faceDownCards; i++) {
+            FaceDownCard tmp = new FaceDownCard();
+            tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
+            add(tmp);
+        }
     }
 
     @Override

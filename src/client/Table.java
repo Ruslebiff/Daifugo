@@ -15,10 +15,11 @@ public class Table extends JPanel {
     private CardsOnTable cardsOnTable;
     private GameStateTracker stateTracker;
     private Logger LOGGER;
-    private final JButton startBtn;
+    private JButton startBtn;
     private final int TABLE_WIDTH;
     private final int TABLE_HEIGHT;
     private final GameLobby gameLobby;
+    private JLabel startString;
 
 
     private Void updateGUI() {
@@ -70,15 +71,22 @@ public class Table extends JPanel {
         add(cardsOnTable);
         stateTracker.registerCallback(this::updateGUI);
 
-        startBtn = new JButton("Start");
-        startBtn.setBounds(f_width-150,50, 100,50);
-        add(startBtn);
-        startBtn.addActionListener(e -> startGame());
+        if(stateTracker.isOwner()) {
+            startBtn = new JButton("Start");
+            startBtn.setBounds(f_width-150,50, 100,50);
+            add(startBtn);
+            startBtn.addActionListener(e -> startGame());
+        }
 
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(f_width-150, 100, 100, 50);
         add(exitButton);
         exitButton.addActionListener(e -> exitGame());
+
+        startString = new JLabel("Waiting for game to start");
+        startString.setBounds((f_width/2) - 120, 100, 250,50);
+        startString.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+        add(startString);
 
         gL.setWaitingCursor(false);
     }
@@ -97,16 +105,26 @@ public class Table extends JPanel {
     }
 
     public void startGame() {
-        LOGGER.info("Entered buttonlistener");
-        Player player = new Player(TABLE_WIDTH/2, stateTracker);
-        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
-                (TABLE_HEIGHT/2) + 100,
-                TABLE_WIDTH/2,
-                (TABLE_HEIGHT/8) + 100);
-        add(player);
-        repaint();
-        stateTracker.startGame();
-        startBtn.setEnabled(false);
+        if(startBtn.getText().equals("Start")) {
+            startBtn.setText("Stop");
+            startString.setVisible(false);
+            LOGGER.info("Entered buttonlistener");
+            Player player = new Player(TABLE_WIDTH/2, stateTracker);
+            player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+                    (TABLE_HEIGHT/2) + 100,
+                    TABLE_WIDTH/2,
+                    (TABLE_HEIGHT/8) + 100);
+            add(player);
+            stateTracker.startGame();
+            repaint();
+        } else {
+            startBtn.setText("Start");
+            stateTracker.stopGame();
+            this.setVisible(false);
+            gameLobby.showLobby(true);
+            gameLobby.startHeartbeat();
+            gameLobby.setWaitingCursor(false);
+        }
     }
 
     @Override
