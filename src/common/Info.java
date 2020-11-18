@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -82,7 +84,7 @@ public class Info {
         textArea.setEditable(false);
 
         // Read the file
-        try (BufferedReader textInput = new BufferedReader(new InputStreamReader(ClientMain.class.getResourceAsStream("/rules.txt"), Charset.defaultCharset()))) {
+        try (BufferedReader textInput = new BufferedReader(new InputStreamReader(ClientMain.class.getResourceAsStream("/rules.txt"), "Cp1252"))) {
             textArea.read(textInput, "File");
         } catch (IOException e) {
             e.printStackTrace();
