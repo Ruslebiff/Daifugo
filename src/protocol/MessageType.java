@@ -14,7 +14,6 @@ public enum MessageType {
     GAME_LIST_RESPONSE,
     NEW_GAME,
     JOIN_GAME,
-    JOIN_GAME_RESPONSE,
     GAME_STATE,
     CANCEL_GAME,    // owner ends game
     CANCEL_GAME_ERROR,      // propagated to players if a game is cancelled

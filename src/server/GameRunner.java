@@ -100,10 +100,13 @@ public class GameRunner {
 
     private void validateCancellation() throws IOException, LeftGame {
 
-        if (userNotOwner())
+        if (userNotOwner()) {
+            out.writeObject(new ErrorMessage("Non-owners cannot cancel a game"));
             return;
+        }
 
         game.cancelGame();
+        out.writeObject(new Message(OK));
         throw new LeftGame();
     }
 
