@@ -68,12 +68,13 @@ public class GameLobby extends JFrame {
             "Owner",
             "Players",
             "Access",
+            "Status",
             ""
     };
     private final DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            return column == 5; // only last column, needed for button to work
+            return column == 6; // only last column, needed for button to work
         }
     };
     private final JTable gamesTable = new JTable(tableModel);
@@ -386,6 +387,8 @@ public class GameLobby extends JFrame {
         gamesTable.getColumnModel().getColumn(4).setMinWidth(50);
         gamesTable.getColumnModel().getColumn(5).setMinWidth(78);
         gamesTable.getColumnModel().getColumn(5).setMaxWidth(78);
+        gamesTable.getColumnModel().getColumn(6).setMinWidth(78);
+        gamesTable.getColumnModel().getColumn(6).setMaxWidth(78);
 
 
         /**
@@ -627,7 +630,12 @@ public class GameLobby extends JFrame {
                 if (listing.hasPassword()){
                     p = "Private";
                 }
-                Object[] gameToTable = {i,listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers() + " / " + MAX_PLAYERS, p, "Join"};
+
+                String s = "Not started";
+                if (listing.hasStarted()){
+                    s = "In progress";
+                }
+                Object[] gameToTable = {i,listing.getTitle(), listing.getOwner(), listing.getNumberOfPlayers() + " / " + MAX_PLAYERS, p, s, "Join"};
                 tableModel.addRow(gameToTable);
                 i++;
             }
