@@ -25,10 +25,7 @@ public class ServerTracker implements GameStateTracker {
     private GameState state;
     private final long heartbeatInterval = 300;
 
-    private HeartbeatThread backgroundThread;
-
-    private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
-    private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
+    private final HeartbeatThread backgroundThread;
 
     private boolean cancelled;
     private Callable<Void> connectionLost;
@@ -295,11 +292,6 @@ public class ServerTracker implements GameStateTracker {
                     LOGGER.info("Start sent successfully");
                 }
 
-/*
-                GameStateResponse tmp = (GameStateResponse) response;
-                state = tmp.getState();
-                guiCallback.call();
-*/
             } catch (Exception e) {
                 LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
                 return false;
@@ -389,6 +381,12 @@ public class ServerTracker implements GameStateTracker {
     public Role getRole() {
         synchronized (this) {
             return state.getRole();
+        }
+    }
+
+    public int getCardsInPlay() {
+        synchronized (this) {
+            return state.getCardsOnTable();
         }
     }
 

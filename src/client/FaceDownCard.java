@@ -14,15 +14,15 @@ public class FaceDownCard extends JPanel {
     private int cardHeight = 120;
 
     public FaceDownCard(){
+        setOpaque(false);
         try {
             image = ImageIO.read(
-                    ClientMain.class.getResourceAsStream("./cardimages/Daifugo_cardback_fade_blue_vertical.png")
+                    ClientMain.class.getResourceAsStream("/cardimages/Daifugo_cardback_fade_blue_vertical.png")
             );  // Read the image
             scaledImage = image.getScaledInstance(cardWidth,cardHeight, Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Override
@@ -30,7 +30,6 @@ public class FaceDownCard extends JPanel {
         super.paintComponent(g);       // Rounds the corner of the cards
         RoundRectangle2D r = new RoundRectangle2D.Float(0, 0, cardWidth, cardHeight, 10, 10);
         g.setClip(r);
-        g.drawImage(scaledImage, 0, 0, this); // Draws the image of onto the Jpanel
-
+        g.drawImage(scaledImage, 0, 0, this); // Draws the image of onto the JPanel
     }
 }

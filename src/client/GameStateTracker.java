@@ -33,4 +33,5 @@ public interface GameStateTracker {
     int getMyRoleNumber();
     void registerConnectionLostCallback(Callable<Void> func);
     Role getRole();
+    int getCardsInPlay();
 }

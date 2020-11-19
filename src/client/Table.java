@@ -28,6 +28,7 @@ public class Table extends JPanel {
     private Player player;
     private boolean wasStopped;
     private boolean wasTradePhase;
+    private final JLabel cardsInPlayCounter;
 
     private final String yourTurn = "It's your turn to play cards. Select cards to play.";
     private final String bumTwoTrade = "You must give your 2 best cards to the President.";
@@ -93,6 +94,16 @@ public class Table extends JPanel {
             statusString.setVisible(true);
         }
 
+        cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
+        String inPlay = "";
+        switch(stateTracker.getCardsInTrick()) {
+            case 1 -> inPlay = "SINGLES";
+            case 2 -> inPlay = "DOUBLES";
+            case 3 -> inPlay = "TRIPLES";
+            default -> inPlay = "";
+        }
+        cardsInPlayCounter.setText(inPlay);
+
         // setting new round text according to state
         newRoundString.setVisible(stateTracker.isTradingPhase());
 
@@ -153,13 +164,18 @@ public class Table extends JPanel {
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        cardsOnTable = new CardsOnTable(cardsOnTableWidth, cardsOnTableHeight, stateTracker);
+        cardsOnTable = new CardsOnTable(stateTracker, cardsOnTableWidth, cardsOnTableHeight);
         cardsOnTable.setBounds(
-                (f_width /2) - (cardsOnTableWidth/2),
+                (f_width /2) - (cardsOnTableWidth/2) - 25,
                 (f_height /3) - (cardsOnTableHeight/2),
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
+
+        cardsInPlayCounter = new JLabel();
+        cardsInPlayCounter.setBounds((f_width/2) + (f_width/4), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,100);
+        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 30));
+        add(cardsInPlayCounter);
 
         stateTracker.registerConnectionLostCallback(() -> {
             gameLobby.quitClient();
@@ -243,12 +259,6 @@ public class Table extends JPanel {
         } else {
             startBtn.setText("Start");
             stateTracker.stopGame();
-/*
-            this.setVisible(false);
-            gameLobby.showLobby(true);
-            gameLobby.startHeartbeat();
-            gameLobby.setWaitingCursor(false);
-*/
         }
     }
 

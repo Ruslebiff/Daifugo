@@ -14,26 +14,23 @@ import static client.GameLobby.LOGGER;
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
     private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
-    private int faceDownCards;
+    private List<FaceDownCard> faceDownCards = new ArrayList<>();   // The last three cards played
     private final GameStateTracker stateTracker;
-    private BufferedImage faceDown;
 
-    public CardsOnTable(int width, int height, GameStateTracker sT) {
+
+    public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
+        setLayout(null);
         stateTracker = sT;
-        try {
-            image = ImageIO.read(  // Renders the green filt
-                    ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
+        setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
+        try {
+            image = ImageIO.read(  // Renders the green felt
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg") // Read the image
+            );
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
-        try {
-            faceDown = ImageIO.read(  // Renders the green filt
-                    ClientMain.class.getResourceAsStream("/cardimages/Daifugo_cardback_fade_blue_vertical.png"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
     }
 
     // Function shows the last cards played on the table
@@ -41,21 +38,12 @@ public class CardsOnTable extends JPanel{
         for (Card card : lastCardsOnTable) {
             this.remove(card);
         }
+        for(FaceDownCard fc : faceDownCards) {
+            this.remove(fc);
+        }
 
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
-//        lastCardsOnTable.forEach(c -> {
-//            c.setBounds(
-//                    (this.getWidth()/2) - (cardWidth/2),
-//                    (this.getHeight()/2) - (cardHeight/2),
-//                    cardWidth,
-//                    cardHeight
-//
-//            );
-//            this.add(c);
-//            c.repaint();
-//        });
-
 
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
@@ -65,18 +53,18 @@ public class CardsOnTable extends JPanel{
                     (this.getHeight()/2) - (cardHeight/2),
                     cardWidth,
                     cardHeight
-
             );
             this.add(c);
         }
 
-
-
-
-        faceDownCards = stateTracker.getNumberOfFaceDownCards();
-        for (int i = 0; i < faceDownCards; i++) {
+        int noOfFaceDown = stateTracker.getNumberOfFaceDownCards();
+        for (int i = 0; i < noOfFaceDown; i++) {
+            int boundsX = 1 + i;
+            if(i > 5)
+                boundsX -= 5;
             FaceDownCard tmp = new FaceDownCard();
-            tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
+            faceDownCards.add(tmp);
+            tmp.setBounds(boundsX, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
             add(tmp);
         }
         repaint();

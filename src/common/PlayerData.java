@@ -1,7 +1,8 @@
 package common;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerData implements Serializable {
     private String nick;
@@ -58,13 +59,12 @@ public class PlayerData implements Serializable {
     }
 
     public int getNumberOfCards() {
-        return numberOfCards;
+        return this.numberOfCards;
     }
 
     public Role getRole() {
         return role;
     }
-
 
     public void setConnectionLost(boolean connectionLost) {
         this.connectionLost = connectionLost;
@@ -78,8 +78,8 @@ public class PlayerData implements Serializable {
         this.nick = nick;
     }
 
-    public void setNumberOfCards(int numberOfCards) {
-        this.numberOfCards = numberOfCards;
+    public void setNumberOfCards(int noOfCards) {
+        this.numberOfCards = noOfCards;
     }
 
     public void setPassed(boolean passed) {
@@ -87,7 +87,7 @@ public class PlayerData implements Serializable {
     }
 
     public boolean hasPassed() {
-        return passed;
+        return this.passed;
     }
 
     public void setRole(Role role) {
@@ -98,11 +98,6 @@ public class PlayerData implements Serializable {
         this.outCount = outCount;
         outOfRound = true;
     }
-
-    public int getOutCount() {
-        return outCount;
-    }
-
 
     public boolean isOutOfRound() {
         return outOfRound;

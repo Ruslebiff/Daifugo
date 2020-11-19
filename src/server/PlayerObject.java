@@ -2,6 +2,8 @@ package server;
 
 import common.PlayerData;
 
+import static server.Server.SERVER_LOGGER;
+
 public class PlayerObject {
     private final UserSession session;
     private PlayerData gameData;
@@ -26,7 +28,7 @@ public class PlayerObject {
     }
 
     public PlayerData getGameData() {
-        return gameData;
+        return this.gameData;
     }
 
     public UserSession getSession() {

@@ -1,5 +1,6 @@
 package common;
 
+import client.Player;
 import server.*;
 import server.exceptions.*;
 
@@ -20,6 +21,7 @@ public class GameState implements Serializable {
     private String ownerNick;
     private String playerNick;
     private int cardsInTrick;
+    private int cardsOnTable;
     private int faceDownCards;
     private List<CardData> topCards;
     private boolean tradingPhase;
@@ -34,12 +36,13 @@ public class GameState implements Serializable {
         this.ownerNick = game.getOwnerNick();
         this.gameTitle = game.getTitle();
         this.cardsInTrick = game.getNoOfCardsInTrick();
+        this.cardsOnTable = game.getCardsOnTable().size();
         this.topCards = game.getTopCards();
 
         roundNo = game.getRoundNo();
         tradingPhase = game.isTradingPhase();
         gameID = game.getID();
-
+        faceDownCards = game.getNoOfCardsFaceDown();
         currentPlayer = game.getCurrentPlayer();
 
         try {
@@ -54,8 +57,16 @@ public class GameState implements Serializable {
 
         Map<UUID, PlayerObject> playerMap = game.getPlayers();
         players = new ArrayList<>();
+
         for (UUID id : game.getTurnSequence()) {
-            players.add(playerMap.get(id).getGameData());
+            PlayerData tmp = playerMap.get(id).getGameData();
+            players.add(new PlayerData(
+                    tmp.getNick(),
+                    tmp.getNumberOfCards(),
+                    tmp.hasPassed(),
+                    tmp.getRole(),
+                    (int) tmp.getLatency()
+            ));
         }
 
         started = game.hasStarted();
@@ -85,7 +96,7 @@ public class GameState implements Serializable {
     }
 
     public int getCardsInTrick() {
-        return cardsInTrick;
+        return this.cardsInTrick;
     }
 
     public int getFaceDownCards() {
@@ -107,14 +118,6 @@ public class GameState implements Serializable {
         return currentPlayer;
     }
 
-    public String getGameTitle() {
-        return gameTitle;
-    }
-
-    public String getGameID() {
-        return gameID.toString();
-    }
-
     public boolean isStarted() {
         return started;
     }
@@ -124,7 +127,11 @@ public class GameState implements Serializable {
     }
 
     public List<PlayerData> getPlayers() {
-        return players;
+        return this.players;
+    }
+
+    public int getCardsOnTable() {
+        return this.cardsOnTable;
     }
 
 }

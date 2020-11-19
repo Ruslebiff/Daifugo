@@ -5,6 +5,7 @@ import common.*;
 import server.exceptions.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static server.Server.SERVER_LOGGER;
 
@@ -259,10 +260,18 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
+
         SERVER_LOGGER.fine("Size of top cards: " + tmp.size());
+
         if (tmp.size() == 4)
             tmp.remove(0);
         return tmp;
+    }
+
+    public List<CardData> getCardsOnTable() {
+        synchronized (this) {
+            return cardsOnTable;
+        }
     }
 
     public String getOwnerNick() throws UserSessionError {
@@ -388,7 +397,7 @@ public class Game {
     }
 
     private void assignRoles() {
-        SERVER_LOGGER.info("Assinging roles with goneOut: " + goneOut);
+        SERVER_LOGGER.info("Assigning roles with goneOut: " + goneOut);
         if (players.size() == 3) {
             for (PlayerObject po : players.values()) {
                 if(po.getGameData().assignRoleFewPlayers())
@@ -431,6 +440,7 @@ public class Game {
                 cardsOnTable.addAll(cards);
 
                 SERVER_LOGGER.fine("Cards in hand before removal: " + hands.get(player).size());
+
                 List<CardData> hand = hands.get(player);
                 for (CardData card : cards) {
                     for (CardData c : hand) {
@@ -440,7 +450,6 @@ public class Game {
                         }
                     }
                 }
-                SERVER_LOGGER.fine("Cards in hand after removal: " + hands.get(player).size());
 
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
@@ -448,6 +457,7 @@ public class Game {
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
+
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
@@ -528,8 +538,9 @@ public class Game {
     private List<CardData> prepareDeck() {
         List<CardData> deck = new ArrayList<>();
 
-        //int numCards = 15;
-        int numCards = 3; // to speed up testing TODO: remove later
+        int numCards = 15;
+//        int numCards = 6; // to speed up testing TODO: remove later
+
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
@@ -575,7 +586,6 @@ public class Game {
         PlayerData pd;
         do {
 
-            SERVER_LOGGER.info("HERE!");
             if (++currentPlayer == players.size())
                 currentPlayer = 0;
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
@@ -647,6 +657,7 @@ public class Game {
         }
 
         // deals new cards
+
         List<CardData> deck = prepareDeck();
         SERVER_LOGGER.info("Size of deck: " + deck.size());
         for (CardData card : deck) {
@@ -654,14 +665,14 @@ public class Game {
             if (player == turnSequence.size())
                 player = 0;
 
-
-
             tmp = turnSequence.get(player++);
 
             List<CardData> hand = hands.get(tmp);
-            if (hand == null)
+
+            if (hand != null)
+                hand.add(card);
+            else
                 SERVER_LOGGER.warning("hand is null");
-            hand.add(card);
 
             if (playerWithThreeOfDiamonds == null
                     && card.getNumber() == 3
@@ -676,6 +687,7 @@ public class Game {
         for (UUID hand : hands.keySet()) {
             players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
         }
+
 
         return playerWithThreeOfDiamonds;
     }
@@ -695,9 +707,8 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-        currentPlayer = 0; // to speed up testing TODO: remove later
+        //currentPlayer = 0; // to speed up testing TODO: remove later
 
-/*
         currentPlayer = -1;
         for (UUID id : turnSequence) {
             if (players.get(id).getGameData().getRole() == Role.BUM) {
@@ -708,7 +719,6 @@ public class Game {
 
         if (currentPlayer < 0)
             currentPlayer = turnSequence.indexOf(threeOfDiamonds);
-*/
 
         SERVER_LOGGER.info("Set starting player to: " + currentPlayer);
     }
