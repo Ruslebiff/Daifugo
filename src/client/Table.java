@@ -25,6 +25,7 @@ public class Table extends JPanel {
     private Player player;
     private boolean wasStopped;
     private boolean wasTradePhase;
+    private final JLabel cardsInPlayCounter;
 
 
     private Void updateGUI() {
@@ -58,6 +59,16 @@ public class Table extends JPanel {
             wasTradePhase = true;
             player.update(stateTracker.getHand());
         }
+
+        cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
+        String inPlay = "";
+        switch(stateTracker.getCardsInTrick()) {
+            case 1 -> inPlay = "SINGLES";
+            case 2 -> inPlay = "DOUBLES";
+            case 3 -> inPlay = "TRIPLES";
+            default -> inPlay = "";
+        }
+        cardsInPlayCounter.setText(inPlay);
 
         // setting new round text according to state
         newRoundString.setVisible(stateTracker.isTradingPhase());
@@ -121,6 +132,11 @@ public class Table extends JPanel {
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
+
+        cardsInPlayCounter = new JLabel();
+        cardsInPlayCounter.setBounds((f_width/2) + (f_width/4), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,100);
+        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 30));
+        add(cardsInPlayCounter);
 
         stateTracker.registerConnectionLostCallback(() -> {
             gameLobby.quitClient();
@@ -196,12 +212,6 @@ public class Table extends JPanel {
         } else {
             startBtn.setText("Start");
             stateTracker.stopGame();
-/*
-            this.setVisible(false);
-            gameLobby.showLobby(true);
-            gameLobby.startHeartbeat();
-            gameLobby.setWaitingCursor(false);
-*/
         }
     }
 

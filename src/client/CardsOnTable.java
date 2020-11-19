@@ -16,7 +16,7 @@ public class CardsOnTable extends JPanel{
     private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
     private List<FaceDownCard> faceDownCards = new ArrayList<>();   // The last three cards played
     private final GameStateTracker stateTracker;
-    private final JLabel cardsInPlayCounter;
+
 
     public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
         setLayout(null);
@@ -31,10 +31,6 @@ public class CardsOnTable extends JPanel{
             ex.printStackTrace();
         }
 
-        cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds(panelWidth - 50, (panelHeight/2) - 25,50,50);
-        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 20));
-        add(cardsInPlayCounter);
     }
 
     // Function shows the last cards played on the table
@@ -48,9 +44,6 @@ public class CardsOnTable extends JPanel{
 
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
-
-        cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
-        cardsInPlayCounter.setText(Integer.toString(stateTracker.getCardsInPlay()));
 
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
