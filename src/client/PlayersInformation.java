@@ -4,7 +4,6 @@ import common.PlayerData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -12,22 +11,19 @@ import static client.GameLobby.LOGGER;
 
 // Class shows the players in the current game, their respective roles and whose turn it is.
 public class PlayersInformation extends JPanel {
-    private GameStateTracker stateTracker;
+    private final GameStateTracker stateTracker;
     private List<PlayerData> players;     // Array of the players in the game
     private JLabel[] playerInfo;        // Array of the labels representing the players
-    private int previousTurn;           // ID of the player before you
-    private Color activeColor = new Color(135,206,250);
-    private Color neutralColor = new Color(119,136,153);
-    private Color passColor = new Color(250,128,114);
-    private HashMap<Integer, String> roleIdentifier;
+    private final Color activeColor = new Color(135,206,250);
+    private final Color neutralColor = new Color(119,136,153);
+    private final Color passColor = new Color(250,128,114);
     private final int WIDTH;
     private final int HEIGHT;
-    private JLabel infoString;
+    private final JLabel infoString;
 
     public PlayersInformation(GameStateTracker stateTracker) {
         this.stateTracker = stateTracker;
         this.players = stateTracker.getPlayerList();
-        previousTurn = 0;
         WIDTH = 200;
         HEIGHT = 50;
         int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
@@ -73,14 +69,14 @@ public class PlayersInformation extends JPanel {
 
             String playerInformationTxt = player.getNick() + " - " + player.getRole();
             int noOfCards = player.getNumberOfCards();
-            if(noOfCards != 0)                                      // TODO: noOfCards blir ikke oppdatert
+            if(noOfCards != 0)
                 playerInformationTxt += " - " + noOfCards;
 
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
 
-            if(player.hasPassed())      // TODO: Color doesn't change
+            if(player.hasPassed())
                 playerInfo[i].setBackground(passColor);
             else
                 playerInfo[i].setBackground(neutralColor);

@@ -10,6 +10,7 @@ import java.util.logging.*;
 
 import static protocol.MessageType.*;
 
+import static server.Server.SERVER_LOGGER;
 /**
  * Module for handling all server requests while the client is participating
  * in a game.
@@ -58,7 +59,6 @@ public class GameRunner {
             out.writeObject(
                     new HeartbeatMessage(receiveTime)
             );
-
             po.getGameData().setLatency(receiveTime - request.getTime());
             return;
         }
@@ -72,11 +72,12 @@ public class GameRunner {
         }
 
 
-
         // returning game state response
         try {
             out.writeObject(new GameStateResponse(game, userSession));
             po.stateHasBeenSent();
+//            SERVER_LOGGER.info("Inside game runner " + po.getGameData().getNumberOfCards());
+            // GOOD
         } catch (UserSessionError userSessionError) {
             out.writeObject(new ErrorMessage(userSessionError.getMessage()));
         }

@@ -44,7 +44,7 @@ public class CardsOnTable extends JPanel{
         }
 
         int cardWidth = 80, cardHeight = 120;
-        lastCardsOnTable = stateTracker.getCardsOnTable();
+        lastCardsOnTable = stateTracker.getCardsOnTable();      // TODO: Henter bare de tre siste
         LOGGER.info("Top cards size: " + lastCardsOnTable.size());
 
         cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());     // How many cards are on the table

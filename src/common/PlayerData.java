@@ -2,7 +2,6 @@ package common;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.logging.Logger;
 import static client.GameLobby.LOGGER;
 
 public class PlayerData implements Serializable {
@@ -54,6 +53,9 @@ public class PlayerData implements Serializable {
     }
 
     public int getNumberOfCards() {
+//        LOGGER.info("Inside playerData, getting cards: " + this.numberOfCards);
+
+        // TODO: HER ER DET NOEN UGLER
         return this.numberOfCards;
     }
 
@@ -83,6 +85,7 @@ public class PlayerData implements Serializable {
 
     public void setPassed(boolean passed) {
         this.passed = passed;
+        LOGGER.info("Inside player, setting passed: " + this.passed);
     }
 
     public boolean hasPassed() {

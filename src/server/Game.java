@@ -364,7 +364,7 @@ public class Game {
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
 
-                SERVER_LOGGER.info("Before setting size of" + pd.getNick() + " cards to " + pd.getNumberOfCards());
+                SERVER_LOGGER.info("Before setting size of " + pd.getNick() + " cards to " + pd.getNumberOfCards());
                 pd.setNumberOfCards(hands.get(player).size());
                 SERVER_LOGGER.info("After setting size of " + pd.getNick() + " cards to " + pd.getNumberOfCards());
 
@@ -457,6 +457,9 @@ public class Game {
 
     private void propagateChange() {
         for (PlayerObject player : players.values()) {
+            /**
+             * DETTE ER OGSÅ GOOD
+             */
             player.newStateAvailable();
         }
     }
@@ -578,7 +581,8 @@ public class Game {
         // Counts all hands
         for (UUID hand : hands.keySet()) {
             players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
-            SERVER_LOGGER.info("Setting " + players.get(hand).getGameData().getNick() + " cards to " + hands.get(hand).size());
+//            SERVER_LOGGER.info("Setting " + players.get(hand).getGameData().getNick() + " cards to " + hands.get(hand).size());
+//            SERVER_LOGGER.info("Player cards " + players.get(hand).getGameData().getNumberOfCards());
             /**
              * DENNE ER GOOD
              */

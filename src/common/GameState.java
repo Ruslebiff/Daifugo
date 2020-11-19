@@ -1,5 +1,6 @@
 package common;
 
+import client.Player;
 import server.*;
 import server.exceptions.*;
 
@@ -40,8 +41,14 @@ public class GameState implements Serializable {
         Map<UUID, PlayerObject> playerMap = game.getPlayers();
         players = new ArrayList<>();
         for (UUID id : game.getTurnSequence()) {
-            SERVER_LOGGER.fine("adding player to state");
-            players.add(playerMap.get(id).getGameData());
+            PlayerData tmp = playerMap.get(id).getGameData();
+            players.add(new PlayerData(
+                    tmp.getNick(),
+                    tmp.getNumberOfCards(),
+                    tmp.hasPassed(),
+                    tmp.getRole(),
+                    (int) tmp.getLatency()
+            ));
         }
 
         started = game.hasStarted();
@@ -86,7 +93,7 @@ public class GameState implements Serializable {
     public List<CardData> getHand() { return hand; }
 
     public List<PlayerData> getPlayers() {
-        return players;
+        return this.players;
     }
 
 }
