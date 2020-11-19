@@ -23,7 +23,7 @@ public class ServerTracker implements GameStateTracker {
     private final ClientConnection connection;
     private Callable<Void> guiCallback;
     private GameState state;
-    private final long heartbeatInterval = 300;
+    private final long heartbeatInterval = 100;
 
     private final HeartbeatThread backgroundThread;
 
