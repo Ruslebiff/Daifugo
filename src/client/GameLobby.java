@@ -841,6 +841,8 @@ public class GameLobby extends JFrame {
                         JOptionPane.showMessageDialog(joinGameButton, "Wrong password!");
                     }
                     LOGGER.warning("ERROR: " + response.getErrorMessage());
+                    JOptionPane.showMessageDialog(joinGameButton, "Could not join game: " + response.getErrorMessage());
+                    return;
                 }
 
 
