@@ -489,6 +489,7 @@ public class Game {
             SERVER_LOGGER.info("Starting new round...");
             newRound();
         }
+
     }
     public void pass(UUID player) throws RoundOver {
         synchronized (this) {
@@ -507,6 +508,11 @@ public class Game {
 
             assignRoles();
             dealCards();
+            for (PlayerObject po : players.values()) {
+                PlayerData pd = po.getGameData();
+                pd.setPassed(false);
+                pd.setOutOfRound(false);
+            }
             currentPlayer = -1;
             goneOut = 0;
             propagateChange();
@@ -532,8 +538,9 @@ public class Game {
     private List<CardData> prepareDeck() {
         List<CardData> deck = new ArrayList<>();
 
-//        int numCards = 15;
-        int numCards = 7; // to speed up testing TODO: remove later
+        int numCards = 15;
+        //int numCards = 3; // to speed up testing TODO: remove later
+
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
@@ -578,6 +585,8 @@ public class Game {
         // find the next player in turn order who hasn't passed or gone out
         PlayerData pd;
         do {
+
+            SERVER_LOGGER.info("HERE!");
             if (++currentPlayer == players.size())
                 currentPlayer = 0;
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
@@ -699,8 +708,7 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-        currentPlayer = 0; // to speed up testing TODO: remove later
-/*
+        //currentPlayer = 0; // to speed up testing TODO: remove later
 
         currentPlayer = -1;
         for (UUID id : turnSequence) {
@@ -712,7 +720,6 @@ public class Game {
 
         if (currentPlayer < 0)
             currentPlayer = turnSequence.indexOf(threeOfDiamonds);
-*/
 
         SERVER_LOGGER.info("Set starting player to: " + currentPlayer);
     }
