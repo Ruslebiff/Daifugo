@@ -78,6 +78,7 @@ public class Server {
         private ObjectOutputStream out;
         private ObjectInputStream in;
         private UserSession currentSession = null;
+        private final ProfanityFilter profanityFilter = new ProfanityFilter();
 
         public ClientHandler(Socket socket) throws SocketException {
             clientSocket = socket;
@@ -147,9 +148,25 @@ public class Server {
         }
 
         private void updateNick(UpdateNickMessage request) throws IOException {
-            LOGGER.info("Received request to change nick form " + currentSession.getNick());
+            LOGGER.info("Received request to change nick from " + currentSession.getNick());
             try {
                 String tmp = currentSession.getNick();
+                if(request.getNick().length() < 3) {
+                    out.writeObject(
+                            new ErrorMessage("Nick change unsuccessful, new nick is too short!")
+                    );
+                    return;
+                }
+                if(profanityFilter.checkForBadWords(request.getNick())){
+                    out.writeObject(
+                            new ErrorMessage("Nick change unsuccessful due to a bad word!")
+                    );
+                    return;
+                }
+
+
+
+
                 currentSession.setNick(request.getNick());
                 out.writeObject(
                         new IdentityResponse(
@@ -183,6 +200,18 @@ public class Server {
 
         private void createNewGame(NewGameMessage request) throws IOException, GameDisconnect {
             LOGGER.info("Creating new game");
+            if(request.getTitle().length() < 3) {
+                out.writeObject(
+                        new ErrorMessage("Could not create new game, game title is too short! Minimum 3 characters needed.")
+                );
+                return;
+            }
+            if(profanityFilter.checkForBadWords(request.getTitle())){
+                out.writeObject(
+                        new ErrorMessage("Could not create new game, game title includes a bad word!")
+                );
+                return;
+            }
             Game game;
             try {
                 game = new Game(
