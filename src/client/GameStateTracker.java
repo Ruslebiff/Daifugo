@@ -30,4 +30,5 @@ public interface GameStateTracker {
     boolean isTradingPhase();
     boolean iHaveToTrade();
     int getMyRoleNumber();
+    void registerConnectionLostCallback(Callable<Void> func);
 }

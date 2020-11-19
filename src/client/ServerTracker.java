@@ -30,6 +30,7 @@ public class ServerTracker implements GameStateTracker {
     private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
 
     private boolean cancelled;
+    private Callable<Void> connectionLost;
 
 
 
@@ -86,6 +87,11 @@ public class ServerTracker implements GameStateTracker {
                 Thread.sleep(heartbeatInterval);
                 } catch (Exception e) {
                     LOGGER.warning("Heartbeat resulted in exception: " + Arrays.toString(e.getStackTrace()));
+                    try {
+                        connectionLost.call();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
                     break;
                 }
             }
@@ -370,6 +376,11 @@ public class ServerTracker implements GameStateTracker {
             }
         }
         return roleNo;
+    }
+
+    @Override
+    public void registerConnectionLostCallback(Callable<Void> func) {
+        connectionLost = func;
     }
 
     @Override

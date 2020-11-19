@@ -782,7 +782,7 @@ public class GameLobby extends JFrame {
         }
     }
 
-    private void quitClient() {
+    public void quitClient() {
         JOptionPane.showMessageDialog(
                 this,
                 "Lost connection to server, the program will now exit.",
