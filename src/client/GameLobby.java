@@ -726,10 +726,10 @@ public class GameLobby extends JFrame {
 
         JLabel connectionFailedMessage = new JLabel("Connection failed");
         connectionFailedMessage.setForeground(new Color(255, 0, 0));
-        connectionFailedMessage.setBounds(connectionFrame.getWidth()/2 - 50, 0, 100, 50);
+        connectionFailedMessage.setBounds(connectionFrame.getWidth()/2 - 70, 0, 300, 50);
 
         JLabel enterServerAddressMessage = new JLabel("Please enter a valid server address");
-        enterServerAddressMessage.setBounds(connectionFrame.getWidth()/2 - 102, 20, 300, 50);
+        enterServerAddressMessage.setBounds(connectionFrame.getWidth()/2 - 130, 22, 300, 50);
 
 
         JLimitedTextField addressTextArea = new JLimitedTextField(serverAddress, maxServerAddressLength);
