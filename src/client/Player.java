@@ -31,7 +31,7 @@ public class Player extends JPanel{
     private int space = 24; // Space between cards when a player has maximum cards
     private final int maxCards = 18;
     private boolean giveCards = false; // Is set by server
-    private boolean cardsClickable = true;
+    private boolean cardsClickable;
 
 
     public Player(int width, GameStateTracker sT) {
@@ -99,6 +99,7 @@ public class Player extends JPanel{
     public void updateButtonState() {
         if (!stateTracker.isTradingPhase()) {
             passTurnBtn.setEnabled(stateTracker.isMyTurn());
+            cardsClickable = stateTracker.isMyTurn();
             tradeMode(false);
         } else {
             tradeMode(true);
@@ -126,7 +127,7 @@ public class Player extends JPanel{
 
                     playCardsBtn.setEnabled(checkIfGivable());
                 } else {
-                    LOGGER.info("clicked, my turn: " + stateTracker.isMyTurn());
+                    LOGGER.info("clicked, my turn: " + cardsClickable);
                     if (stateTracker.isMyTurn() && cardsClickable) {
                         c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                         c.paintComponent(c.getGraphics());  // Paint it accordingly
