@@ -57,7 +57,7 @@ public class PlayersInformation extends JPanel {
     }
 
     public void updateTable() {
-        players = stateTracker.getPlayerList();    // Update the list of players
+        this.players = stateTracker.getPlayerList();    // Update the list of players
         LOGGER.info("updating table, " + players.size() + " players in game");
         updatePanel();
 
@@ -69,7 +69,7 @@ public class PlayersInformation extends JPanel {
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
-            PlayerData player = players.get(i);
+            PlayerData player = this.players.get(i);
 
             String playerInformationTxt = player.getNick() + " - " + player.getRole();
             int noOfCards = player.getNumberOfCards();

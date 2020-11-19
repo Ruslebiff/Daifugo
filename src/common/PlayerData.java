@@ -54,7 +54,6 @@ public class PlayerData implements Serializable {
     }
 
     public int getNumberOfCards() {
-        LOGGER.info("Inside player data function returning " + this.numberOfCards + " cards");
         return this.numberOfCards;
     }
 
@@ -76,7 +75,10 @@ public class PlayerData implements Serializable {
 
     public void setNumberOfCards(int noOfCards) {
         this.numberOfCards = noOfCards;
-        LOGGER.info("Setting number of cards to " + this.numberOfCards);
+//        LOGGER.info("Setting number of cards to inside playerdata " + this.numberOfCards);
+        /**
+         * *DETTE ER GUCCI
+         */
     }
 
     public void setPassed(boolean passed) {

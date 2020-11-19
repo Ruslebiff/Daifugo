@@ -183,7 +183,7 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
-        SERVER_LOGGER.info("Size of top cards: " + tmp.size());
+//        SERVER_LOGGER.info("Size of top cards: " + tmp.size());
         if (tmp.size() == 4)
             tmp.remove(0);
         return tmp;
@@ -348,7 +348,7 @@ public class Game {
 
                 cardsOnTable.addAll(cards);
 
-                SERVER_LOGGER.info("Cards in hand before removal: " + hands.get(player).size());
+//                SERVER_LOGGER.info("Cards in hand before removal: " + hands.get(player).size());
 //                hands.get(player).removeAll(cards);
                 List<CardData> hand = hands.get(player);
                 for (CardData card : cards) {
@@ -359,16 +359,18 @@ public class Game {
                         }
                     }
                 }
-                SERVER_LOGGER.info("Cards in hand after removal: " + hands.get(player).size());
+//                SERVER_LOGGER.info("Cards in hand after removal: " + hands.get(player).size());
 
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
-                SERVER_LOGGER.info("Setting " + pd.getNick() + " cards to " + hands.get(player).size());
+
+                SERVER_LOGGER.info("Before setting size of" + pd.getNick() + " cards to " + pd.getNumberOfCards());
                 pd.setNumberOfCards(hands.get(player).size());
+                SERVER_LOGGER.info("After setting size of " + pd.getNick() + " cards to " + pd.getNumberOfCards());
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
-                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
+//                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
@@ -577,7 +579,11 @@ public class Game {
         for (UUID hand : hands.keySet()) {
             players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
             SERVER_LOGGER.info("Setting " + players.get(hand).getGameData().getNick() + " cards to " + hands.get(hand).size());
+            /**
+             * DENNE ER GOOD
+             */
         }
+
 
         return playerWithThreeOfDiamonds;
     }
