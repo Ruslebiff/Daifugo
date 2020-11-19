@@ -70,6 +70,7 @@ public class ProfanityFilter {
         allCharsInput = allCharsInput.replaceAll("4","a");
         allCharsInput = allCharsInput.replaceAll("@","a");
         allCharsInput = allCharsInput.replaceAll("5","s");
+        allCharsInput = allCharsInput.replaceAll("\\$","s");
         allCharsInput = allCharsInput.replaceAll("7","t");
         allCharsInput = allCharsInput.replaceAll("0","o");
         allCharsInput = allCharsInput.replaceAll("9","g");
