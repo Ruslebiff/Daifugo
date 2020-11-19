@@ -121,6 +121,11 @@ public class Table extends JPanel {
                    cardsOnTableWidth, cardsOnTableHeight
         );
         add(cardsOnTable);
+
+        stateTracker.registerConnectionLostCallback(() -> {
+            gameLobby.quitClient();
+            return null;
+        });
         stateTracker.registerCallback(this::updateGUI);
 
         if(stateTracker.isOwner()) {
