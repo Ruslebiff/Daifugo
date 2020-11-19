@@ -164,9 +164,6 @@ public class Server {
                     return;
                 }
 
-
-
-
                 currentSession.setNick(request.getNick());
                 out.writeObject(
                         new IdentityResponse(

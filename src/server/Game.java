@@ -5,6 +5,7 @@ import common.*;
 import server.exceptions.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static server.Server.SERVER_LOGGER;
 
@@ -362,6 +363,7 @@ public class Game {
 
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
+                SERVER_LOGGER.info("Setting " + pd.getNick() + " cards to " + hands.get(player).size());
                 pd.setNumberOfCards(hands.get(player).size());
 
                 // check if there is a new trick from playing
@@ -547,8 +549,6 @@ public class Game {
             hands.put(hand, new ArrayList<>());
         }
 
-
-
         // deals new cards
         for (CardData card : prepareDeck()) {
             if (player == turnSequence.size())
@@ -576,6 +576,7 @@ public class Game {
         // Counts all hands
         for (UUID hand : hands.keySet()) {
             players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
+            SERVER_LOGGER.info("Setting " + players.get(hand).getGameData().getNick() + " cards to " + hands.get(hand).size());
         }
 
         return playerWithThreeOfDiamonds;

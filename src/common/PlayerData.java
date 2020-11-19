@@ -2,6 +2,8 @@ package common;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
+import static client.GameLobby.LOGGER;
 
 public class PlayerData implements Serializable {
     private String nick;
@@ -52,13 +54,13 @@ public class PlayerData implements Serializable {
     }
 
     public int getNumberOfCards() {
-        return numberOfCards;
+        LOGGER.info("Inside player data function returning " + this.numberOfCards + " cards");
+        return this.numberOfCards;
     }
 
     public Role getRole() {
         return role;
     }
-
 
     public void setConnectionLost(boolean connectionLost) {
         this.connectionLost = connectionLost;
@@ -72,8 +74,9 @@ public class PlayerData implements Serializable {
         this.nick = nick;
     }
 
-    public void setNumberOfCards(int numberOfCards) {
-        this.numberOfCards = numberOfCards;
+    public void setNumberOfCards(int noOfCards) {
+        this.numberOfCards = noOfCards;
+        LOGGER.info("Setting number of cards to " + this.numberOfCards);
     }
 
     public void setPassed(boolean passed) {
@@ -81,7 +84,8 @@ public class PlayerData implements Serializable {
     }
 
     public boolean hasPassed() {
-        return passed;
+        LOGGER.info("Inside player, has passed: " + this.passed);
+        return this.passed;
     }
 
     public void setRole(Role role) {

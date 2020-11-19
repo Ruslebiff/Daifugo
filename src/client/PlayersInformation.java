@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 import static client.GameLobby.LOGGER;
 
@@ -53,7 +53,6 @@ public class PlayersInformation extends JPanel {
         LOGGER.info("Changing player turn indicator");
         if (playerIndex >= 0)
             playerInfo[playerIndex].setBackground(activeColor);
-        LOGGER.info("Player has no of cards " + players.get(0).getNumberOfCards());
         repaint();
     }
 
@@ -70,22 +69,18 @@ public class PlayersInformation extends JPanel {
         playerInfo = new JLabel[players.size()];  // For each player in the game, create a JLabel
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
-            String playerInformationTxt = players.get(i).getNick() + " - " + players.get(i).getRole();
-            int noOfCards = players.get(i).getNumberOfCards();
+            PlayerData player = players.get(i);
+
+            String playerInformationTxt = player.getNick() + " - " + player.getRole();
+            int noOfCards = player.getNumberOfCards();
             if(noOfCards != 0)                                      // TODO: noOfCards blir ikke oppdatert
                 playerInformationTxt += " - " + noOfCards;
-
-            LOGGER.info("Player information: " + playerInformationTxt );
-            if(stateTracker.getPlayerList().get(0).getNumberOfCards() != 0)
-                LOGGER.info("HALLO " + (stateTracker.getPlayerList().get(0).getNumberOfCards()));
-            else
-                LOGGER.info(players.get(i).getNick() + " has no cards");
 
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
 
-            if(players.get(i).hasPassed())      // TODO: Color doesn't change
+            if(player.hasPassed())      // TODO: Color doesn't change
                 playerInfo[i].setBackground(passColor);
             else
                 playerInfo[i].setBackground(neutralColor);
