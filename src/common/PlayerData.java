@@ -14,6 +14,7 @@ public class PlayerData implements Serializable {
     private boolean outOfRound;
     private int outCount;
     private List<Role> previousRoles;
+    private boolean mustTrade;
 
     public PlayerData(
             String nick,
@@ -28,6 +29,7 @@ public class PlayerData implements Serializable {
        this.role = role;
        this.latency = latency;
 
+       mustTrade = false;
        outCount = 0;
        outOfRound = false;
        previousRoles = new ArrayList<>();
@@ -102,19 +104,23 @@ public class PlayerData implements Serializable {
         return outOfRound;
     }
 
-    public void assignRoleFewPlayers() {
+    public boolean assignRoleFewPlayers() {
+        mustTrade = true;
         if (outCount == 1) {
             role = Role.PRESIDENT;
         } else if (outCount == 3) {
             role = Role.BUM;
         } else {
             role = Role.NEUTRAL;
+            mustTrade = false;
         }
         previousRoles.add(role);
+        return mustTrade;
     }
 
 
-    public void assignRoleManyPlayers(int playerAmount) {
+    public boolean assignRoleManyPlayers(int playerAmount) {
+        mustTrade = true;
         if (outCount == 1) {
             role = Role.PRESIDENT;
         } else if (outCount == 2) {
@@ -125,8 +131,17 @@ public class PlayerData implements Serializable {
             role = Role.BUM;
         } else {
             role = Role.NEUTRAL;
+            mustTrade = false;
         }
         previousRoles.add(role);
+        return mustTrade;
     }
 
+    public boolean hasToTrade() {
+        return mustTrade;
+    }
+
+    public void doneTrading() {
+        mustTrade = false;
+    }
 }

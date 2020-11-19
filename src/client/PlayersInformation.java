@@ -46,15 +46,15 @@ public class PlayersInformation extends JPanel {
         updateTable();
         int playerIndex = stateTracker.getActivePlayerIndex();   // Get the ID of the active player
 
-        LOGGER.info("Changing player turn indicator");
         if (playerIndex >= 0)
             playerInfo[playerIndex].setBackground(activeColor);
         repaint();
     }
 
     public void updateTable() {
-        this.players = stateTracker.getPlayerList();    // Update the list of players
-        LOGGER.info("updating table, " + players.size() + " players in game");
+        players = stateTracker.getPlayerList();    // Update the list of players
+        LOGGER.fine("updating table, " + players.size() + " players in game");
+
         updatePanel();
 
         remove(infoString);
