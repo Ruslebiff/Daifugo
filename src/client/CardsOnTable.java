@@ -33,8 +33,8 @@ public class CardsOnTable extends JPanel{
         }
 
         cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25,25,50,50);
-        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 20));
+        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25,5,50,50);
+        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 15));
         add(cardsInPlayCounter);
     }
 
