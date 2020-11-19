@@ -79,6 +79,9 @@ public class Game {
     private List<UUID> turnSequence;
     private int goneOut;        // increments for each player who goes out, resets each round
     private int passCount;
+    private int roundNo;
+    private int playersInTradingPhase;
+    private Map<UUID, List<CardData>> receiveFromTrade;
 
 
     /**
@@ -113,6 +116,9 @@ public class Game {
         goneOut = 0;
         started = false;
         passCount = 0;
+        roundNo = 1;
+        playersInTradingPhase = 0;
+        receiveFromTrade = new HashMap<>();
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -126,6 +132,75 @@ public class Game {
         }
     }
 
+    public boolean isTradingPhase() {
+        synchronized (this) {
+            return playersInTradingPhase > 0;
+        }
+    }
+
+    private void decrementTraders() throws GameException {
+        if (playersInTradingPhase == 0)
+            throw new GameException();
+        playersInTradingPhase--;
+
+        // making sure players receive the given cards
+        if (playersInTradingPhase == 0) {
+            SERVER_LOGGER.info("Trading phase is over");
+            for (UUID pID : receiveFromTrade.keySet()) {
+                List<CardData> hand = hands.get(pID);
+                hand.addAll(receiveFromTrade.get(pID));
+
+            }
+
+            findStartingPlayer(UUID.randomUUID()); // if three of diamonds is chosen, theres a bug
+        }
+    }
+
+    public void giveCards(UUID player, List<CardData> givenCards) throws GameException {
+        synchronized (this) {
+            if (!isTradingPhase())
+                throw new GameException("Not in trading phase");
+
+            PlayerData playerData = players.get(player).getGameData();
+            if (!playerData.hasToTrade())
+                throw new GameException("Player no longer needs to trade");
+
+
+            Role recipientRole;
+            switch (playerData.getRole()) {
+                case BUM -> recipientRole = Role.PRESIDENT;
+                case VICE_BUM -> recipientRole = Role.VICE_PRESIDENT;
+                case VICE_PRESIDENT -> recipientRole = Role.VICE_BUM;
+                case PRESIDENT -> recipientRole = Role.BUM;
+                default -> throw new GameException("Invalid role");
+            }
+
+            // removing cards from own hand
+            List<CardData> hand = hands.get(player);
+            for (CardData card : givenCards) {
+                for (CardData c : hand) {
+                    if (card.getSuit() == c.getSuit() && card.getNumber() == c.getNumber()) {
+                        hand.remove(c);
+                        break;
+                    }
+                }
+            }
+
+            // put given cards into receive map
+            for (UUID pID : players.keySet()) {
+                if (players.get(pID).getGameData().getRole() == recipientRole) {
+                    SERVER_LOGGER.fine("Adding given cards to receive map");
+                    receiveFromTrade.put(pID, givenCards);
+                    break;
+                }
+            }
+
+
+            playerData.doneTrading();
+            decrementTraders();
+            propagateChange();
+        }
+    }
 
     public UUID getID() {
         return ID;
@@ -154,7 +229,9 @@ public class Game {
     }
 
     public int getNoOfCardsInTrick() {
-        return noOfCardsInTrick;
+        synchronized (this) {
+            return noOfCardsInTrick;
+        }
     }
 
     /**
@@ -182,7 +259,7 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
-        SERVER_LOGGER.info("Size of top cards: " + tmp.size());
+        SERVER_LOGGER.fine("Size of top cards: " + tmp.size());
         if (tmp.size() == 4)
             tmp.remove(0);
         return tmp;
@@ -236,7 +313,9 @@ public class Game {
     }
 
     public List<UUID> getTurnSequence() {
-        return turnSequence;
+        synchronized (this) {
+            return turnSequence;
+        }
     }
 
     public void cancelGame() {
@@ -309,15 +388,19 @@ public class Game {
     }
 
     private void assignRoles() {
+        SERVER_LOGGER.info("Assinging roles with goneOut: " + goneOut);
         if (players.size() == 3) {
             for (PlayerObject po : players.values()) {
-                po.getGameData().assignRoleFewPlayers();
+                if(po.getGameData().assignRoleFewPlayers())
+                    playersInTradingPhase++;
             }
         } else {
             for (PlayerObject po : players.values()) {
-                po.getGameData().assignRoleManyPlayers(players.size());
+                if(po.getGameData().assignRoleManyPlayers(players.size()))
+                    playersInTradingPhase++;
             }
         }
+        SERVER_LOGGER.info("Roles assigned, players in trading phase: " + playersInTradingPhase);
     }
 
     public void playCards(UUID player, List<CardData> cards) throws GameException {
@@ -346,8 +429,18 @@ public class Game {
                     throw new GameException("Cards must be higher or equal to those on table");
 
                 cardsOnTable.addAll(cards);
-                SERVER_LOGGER.info("Cards on table: " + cardsOnTable.size());
-                hands.get(player).removeAll(cards);
+
+                SERVER_LOGGER.fine("Cards in hand before removal: " + hands.get(player).size());
+                List<CardData> hand = hands.get(player);
+                for (CardData card : cards) {
+                    for (CardData c : hand) {
+                        if (card.getSuit() == c.getSuit() && card.getNumber() == c.getNumber()) {
+                            hand.remove(c);
+                            break;
+                        }
+                    }
+                }
+                SERVER_LOGGER.fine("Cards in hand after removal: " + hands.get(player).size());
 
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
@@ -355,7 +448,6 @@ public class Game {
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
-                SERVER_LOGGER.info(("topCards in playCards: " + topCards.size()));
                 if (cards.get(0).getValue() == 16) {
                     newTrick();
                     return;
@@ -365,17 +457,18 @@ public class Game {
                         && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
-                    SERVER_LOGGER.info("Top 4 cards are the same, new trick.");
                     newTrick();
                     return;
                 }
-                SERVER_LOGGER.info("Past trick-check");
 
 
 
                 // if hand is empty, go out of round
-                if (hands.get(player).isEmpty())
-                    pd.setOutCount(++goneOut);
+                if (hands.get(player).isEmpty()) {
+                    goneOut++;
+                    SERVER_LOGGER.info("Set goneout to: " + goneOut);
+                    pd.setOutCount(goneOut);
+                }
 
                 if (noOfCardsInTrick == 0)
                     noOfCardsInTrick = cards.size();
@@ -383,8 +476,10 @@ public class Game {
                 propagateChange();
             }
         } catch (RoundOver roundOver) {
+            SERVER_LOGGER.info("Starting new round...");
             newRound();
         }
+
     }
     public void pass(UUID player) throws RoundOver {
         synchronized (this) {
@@ -396,15 +491,20 @@ public class Game {
      }
 
     public void newRound() {
-
-
         synchronized (this) {
-            goneOut = 0;
             newTrick();
             noOfCardsFaceDown = 0;
+            roundNo++;
 
             assignRoles();
-            findStartingPlayer(dealCards());
+            dealCards();
+            for (PlayerObject po : players.values()) {
+                PlayerData pd = po.getGameData();
+                pd.setPassed(false);
+                pd.setOutOfRound(false);
+            }
+            currentPlayer = -1;
+            goneOut = 0;
             propagateChange();
         }
     }
@@ -415,7 +515,11 @@ public class Game {
         }
     }
 
-
+    public int getRoundNo() {
+        synchronized (this) {
+            return roundNo;
+        }
+    }
 
     /**
      * Private helpers
@@ -424,9 +528,12 @@ public class Game {
     private List<CardData> prepareDeck() {
         List<CardData> deck = new ArrayList<>();
 
+        int numCards = 15;
+        //int numCards = 3; // to speed up testing TODO: remove later
+
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
-            for (int number = 2; number < 15; number++)
+            for (int number = 2; number < numCards; number++)
                 deck.add(new CardData(number, suits[suit]));    // Add the card to the cardList
         Collections.shuffle(deck);          // Shuffle the cards
 
@@ -451,11 +558,12 @@ public class Game {
 
         // only one player left -- round is over
         if (goneOut == players.size()-1) {
+            SERVER_LOGGER.info("All other players have gone out. Should start new round");
 
             // find the last remaining player, and set outcount
             for (UUID id : hands.keySet()) {
-                if (hands.get(id).isEmpty()) {
-                    players.get(id).getGameData().setOutCount(players.size());
+                if (!hands.get(id).isEmpty()) {
+                    players.get(id).getGameData().setOutCount(++goneOut);
                     break;
                 }
             }
@@ -466,12 +574,14 @@ public class Game {
         // find the next player in turn order who hasn't passed or gone out
         PlayerData pd;
         do {
+
+            SERVER_LOGGER.info("HERE!");
             if (++currentPlayer == players.size())
                 currentPlayer = 0;
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();
         } while (pd.hasPassed() || pd.isOutOfRound());
 
-        if (passCount == players.size()-1)
+        if (passCount + goneOut == players.size()-1)
             newTrick();
 
     }
@@ -536,18 +646,18 @@ public class Game {
             hands.put(hand, new ArrayList<>());
         }
 
-
-
         // deals new cards
-        for (CardData card : prepareDeck()) {
+        List<CardData> deck = prepareDeck();
+        SERVER_LOGGER.info("Size of deck: " + deck.size());
+        for (CardData card : deck) {
 
             if (player == turnSequence.size())
                 player = 0;
 
 
+
             tmp = turnSequence.get(player++);
 
-            SERVER_LOGGER.fine("Data: - " + tmp + " - " + (player-1) + " - " + turnSequence.size());
             List<CardData> hand = hands.get(tmp);
             if (hand == null)
                 SERVER_LOGGER.warning("hand is null");
@@ -574,7 +684,7 @@ public class Game {
         turnSequence = new ArrayList<>();
         turnSequence.addAll(players.keySet());
         Collections.shuffle(turnSequence);
-        SERVER_LOGGER.info("Shuffling player order, new sequence size: " + turnSequence.size());
+        SERVER_LOGGER.fine("Shuffling player order, new sequence size: " + turnSequence.size());
     }
 
     /**
@@ -585,6 +695,7 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
+        //currentPlayer = 0; // to speed up testing TODO: remove later
 
         currentPlayer = -1;
         for (UUID id : turnSequence) {

@@ -18,10 +18,14 @@ import static java.lang.Math.round;
 public class Player extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
+    private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
     private List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
+
+    public PlayerButton getPlayCardsBtn() {
+        return playCardsBtn;
+    }
 
     // TODO: REMOVE ADD AND REMOVE BUTTONS
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
@@ -86,7 +90,6 @@ public class Player extends JPanel{
             }
             repaint();
         }
-//        hand = stateTracker.getHand();
         hand = newHand;
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
@@ -95,17 +98,30 @@ public class Player extends JPanel{
         passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
 
+    public void setTradingPhase(boolean phase) {
+        this.giveCards = phase;
+        if (phase)
+            cardsClickable = true;
+    }
+
     public void updateButtonState() {
-        cancelBtn.setEnabled(stateTracker.isMyTurn());
-        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        if (!stateTracker.isTradingPhase()) {
+            cancelBtn.setEnabled(stateTracker.isMyTurn());
+            passTurnBtn.setEnabled(stateTracker.isMyTurn());
+            tradeMode(false);
+        } else {
+            tradeMode(true);
+            cancelBtn.setEnabled(stateTracker.iHaveToTrade());
+            passTurnBtn.setEnabled(false);
+        }
     }
     public void addListener(Card c) {
 
         c.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
-                LOGGER.info("clicked, my turn: " + stateTracker.isMyTurn());
-                if (stateTracker.isMyTurn() && cardsClickable) {
+
+                if (stateTracker.isTradingPhase()) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
@@ -115,10 +131,21 @@ public class Player extends JPanel{
                     else
                         cardsToPlay.remove(c);
 
-                    if (!giveCards)
+                    playCardsBtn.setEnabled(checkIfGivable());
+                } else {
+                    LOGGER.info("clicked, my turn: " + stateTracker.isMyTurn());
+                    if (stateTracker.isMyTurn() && cardsClickable) {
+                        c.setSelected();    // Set the object to either selected or not, based upon what it previously was
+                        c.paintComponent(c.getGraphics());  // Paint it accordingly
+                        hand.forEach(c -> repaint());       // Repaint all the rest of the cards
+
+                        if (c.isSelected())      // If the card is selected, add it to the arrayList
+                            cardsToPlay.add(c);
+                        else
+                            cardsToPlay.remove(c);
+
                         playCardsBtn.setEnabled(checkIfPlayable());
-                    else // If the round has just started and you have to relinquish cards
-                        giveUpCards();  // Function checks role and cards you have to give based on role
+                    }
                 }
             }
 
@@ -191,11 +218,12 @@ public class Player extends JPanel{
             c.setSelectedFalse();   // Deselects all the cards
             c.repaint();
         });
+        cardsToPlay = new ArrayList<>();
     }
 
     // Function removes cards from hand and GUI and sorts the remaining cards
     public void playCards() {
-        if(!giveCards) {   // If it is a normal round, play the cards
+        if(!stateTracker.isTradingPhase()) {   // If it is a normal round, play the cards
             LOGGER.info("Attempting to play cards...");
             boolean ok;
             if (cardsToPlay.isEmpty()) {
@@ -213,10 +241,12 @@ public class Player extends JPanel{
 
         } else {            // If it is at the beginning of the round
             LOGGER.info("Trading cards with another player...");
-            playCardsBtn.setText("Play Cards");
-            giveCards = false;
-            cardsClickable = true;
-            stateTracker.giveCards(cardsToPlay);   // Give cards to player
+            if(!stateTracker.giveCards(cardsToPlay)) {   // Give cards to player
+                LOGGER.warning("Unable to give selected cards, server error");
+                return;
+            } else {
+                LOGGER.info("Trade went well... ?");
+            }
         }
 
         // Clean up the buffer of cards to play
@@ -269,22 +299,53 @@ public class Player extends JPanel{
         return false;
     }
 
+    public boolean checkIfGivable() {
+        if(cardsToPlay.size() == 0)
+            return false;
+
+        int noOfCardsToGive = Math.abs(stateTracker.getMyRoleNumber());
+        if (cardsToPlay.size() != noOfCardsToGive )
+            return false;
+
+        boolean mustChooseHighest = stateTracker.getMyRoleNumber() < 0;
+
+        for (Card card : cardsToPlay) {
+            if (card.getValue() == 16)  // 3 of clubs cannot be given
+                return false;
+
+            if (mustChooseHighest) {
+                for (Card handCard : hand) {
+                    if (handCard.getValue() > card.getValue() && handCard.getValue() != 16 )
+                        return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     // Pass turn
     public void relinquishTurn() {
         cancel(); // Deselects any and all cards selected
         stateTracker.passTurn();
     }
 
-    // TODO: Når spiller får beskjed fra server om ny runde, playCardsBtn.setText("Give Cards")
-    // TODO: Kjør også giveUpCards() neste runde uavhengig
-    // TODO: Neste runde så må cardsClickable også settes basert på rolle
+    public void tradeMode(boolean on) {
+       if (on) {
+           playCardsBtn.setText("Give Cards");
+       } else {
+           playCardsBtn.setText("Play Cards");
+       }
+    }
+
     // Whenever the round starts, the server should run each player's giveUpCards()
     public void giveUpCards() {
+        LOGGER.info("Entered give up cards");
+        giveCards = true;
+        role = stateTracker.getMyRoleNumber();
         if (role != 0) {
-            passTurnBtn.setEnabled(false);  // TODO: sett til true etter at kort er gitt
             int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished
             if (role < 0) {
-                cancelBtn.setEnabled(false);
                 // Highest cards to be selected
                 for (int i = 0; i < amountOfCards; i++) {   // Loop from the highest valued cards
                     Card temp = hand.get(i);
@@ -300,7 +361,6 @@ public class Player extends JPanel{
                 // Pick cards to give up (role is higher than neutral), if it is not right amount, disable button
                 playCardsBtn.setEnabled(cardsToPlay.size() == amountOfCards);
             }
-            playCardsBtn.setText("Give Cards");
             rearrangeCardsOnDisplay();
         } else
             cardsClickable = true;

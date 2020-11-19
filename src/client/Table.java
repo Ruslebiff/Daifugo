@@ -3,6 +3,7 @@ package client;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.logging.*;
@@ -20,11 +21,20 @@ public class Table extends JPanel {
     private final int TABLE_HEIGHT;
     private final GameLobby gameLobby;
     private JLabel startString;
+    private JLabel newRoundString;
     private Player player;
     private boolean wasStopped;
+    private boolean wasTradePhase;
 
 
     private Void updateGUI() {
+
+        List<Card> cards = stateTracker.getHand();
+        for (Card card : cards) {
+            LOGGER.info("Currently in hand: " + card.getNumber() + card.getSuit());
+        }
+
+
         if (stateTracker.isCancelled()) {
             LOGGER.info("Game is cancelled, exiting...");
             gameLobby.setWaitingCursor(true);
@@ -43,15 +53,35 @@ public class Table extends JPanel {
             startString.setVisible(false);
         }
 
-        if (stateTracker.isStarted() && player != null) {
-            player.updateButtonState();
+
+        if (stateTracker.isTradingPhase() && !wasTradePhase) {
+            wasTradePhase = true;
+            player.update(stateTracker.getHand());
         }
 
-        if (!stateTracker.isStarted() && player != null) {
-            wasStopped = true;
-            player.setVisible(false);
-            startString.setVisible(true);
+        // setting new round text according to state
+        newRoundString.setVisible(stateTracker.isTradingPhase());
+
+        if (player != null) {
+            if (wasTradePhase && !stateTracker.isTradingPhase()) {
+                wasTradePhase = false;
+                player.update(stateTracker.getHand());
+                player.updateButtonState();
+                player.setTradingPhase(false);
+            }
+            if (stateTracker.isStarted()) {
+                player.updateButtonState();
+            }
+            if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
+                player.update(stateTracker.getHand());
+
+            if (!stateTracker.isStarted()) {
+                wasStopped = true;
+                player.setVisible(false);
+                startString.setVisible(true);
+            }
         }
+
 
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();
@@ -64,6 +94,7 @@ public class Table extends JPanel {
         gameLobby = gL;
 
         wasStopped = true;
+        wasTradePhase = false;
 
         LOGGER = GameLobby.LOGGER;
         this.stateTracker = sT;
@@ -108,6 +139,14 @@ public class Table extends JPanel {
         startString.setBounds((f_width/2) - 120, 100, 250,50);
         startString.setFont(new Font("Sans Serif", Font.BOLD, 15));
         add(startString);
+
+
+        newRoundString = new JLabel("Trading phase");
+        newRoundString.setBounds((f_width/2) - 120, 100, 250,50);
+        newRoundString.setFont(new Font("Sans Serif", Font.BOLD, 24));
+        newRoundString.setForeground(Color.YELLOW);
+        newRoundString.setVisible(false);
+        add(newRoundString);
 
 
         player = new Player(TABLE_WIDTH/2, stateTracker);
