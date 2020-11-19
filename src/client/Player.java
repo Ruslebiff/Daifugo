@@ -18,7 +18,7 @@ import static java.lang.Math.round;
 public class Player extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private final int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
+    private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
     private List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
@@ -281,6 +281,8 @@ public class Player extends JPanel{
     // TODO: Neste runde så må cardsClickable også settes basert på rolle
     // Whenever the round starts, the server should run each player's giveUpCards()
     public void giveUpCards() {
+        LOGGER.info("Entered give up cards");
+        role = stateTracker.getMyRoleNumber();
         if (role != 0) {
             passTurnBtn.setEnabled(false);  // TODO: sett til true etter at kort er gitt
             int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished

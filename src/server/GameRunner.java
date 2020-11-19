@@ -145,13 +145,12 @@ public class GameRunner {
     }
 
     private void handlePlayCards(PlayCardsRequest request) throws IOException {
-        LOGGER.info("Entering playcards handler");
+        LOGGER.info("Entering play cards handler");
         try {
             game.playCards(userSession.getID(), request.getCards());
             LOGGER.info("Successfully played cards, sending OK response...");
             out.writeObject(new Message(OK));
-            //out.writeObject(new GameStateResponse(game, userSession));
-        } catch (/*UserSessionError |*/ GameException e) {
+        } catch (GameException e) {
             out.writeObject(new ErrorMessage(e.getMessage()));
         }
 
@@ -169,10 +168,20 @@ public class GameRunner {
         }
     }
 
-    void leaveGameHandler() throws IOException, LeftGame {
+    private void leaveGameHandler() throws IOException, LeftGame {
         userSession.leaveCurrentGame();
         out.writeObject(new Message(OK));
         throw new LeftGame();
+    }
+
+    private void giveCardsHandler(GiveCardsRequest request) throws IOException {
+        try {
+            game.giveCards(userSession.getID(), request.getCards());
+            out.writeObject(new Message(OK));
+        } catch (GameException e) {
+            LOGGER.warning(logPrefix() + "Couldn't give cards: " + e.getMessage());
+            out.writeObject(new ErrorMessage(e.getMessage()));
+        }
     }
 
     public void run() throws GameDisconnect, IOException {
@@ -212,6 +221,7 @@ public class GameRunner {
                         }*/
                     case PLAY_CARDS -> handlePlayCards((PlayCardsRequest) request);
                     case PASS_TURN -> handlePass();
+                    case GIVE_CARDS -> giveCardsHandler((GiveCardsRequest) request);
                     case START_GAME -> validateGameStart();
                     case STOP_GAME -> validateGameStop();
                     case LEAVE_GAME -> leaveGameHandler();

@@ -25,6 +25,7 @@ public class GameState implements Serializable {
     private boolean tradingPhase;
     private int roundNo;
     private boolean mustTrade;
+    private Role role;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -52,7 +53,12 @@ public class GameState implements Serializable {
 
         started = game.hasStarted();
 
-        mustTrade = playerMap.get(session.getID()).getGameData().haveToTrade();
+        mustTrade = playerMap.get(session.getID()).getGameData().hasToTrade();
+        role = playerMap.get(session.getID()).getGameData().getRole();
+    }
+
+    public Role getRole() {
+        return role;
     }
 
     public boolean haveToTrade() {

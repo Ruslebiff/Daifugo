@@ -43,6 +43,12 @@ public class Table extends JPanel {
             startString.setVisible(false);
         }
 
+
+        if (stateTracker.isTradingPhase() && stateTracker.iHaveToTrade()) {
+            player.update(stateTracker.getHand());
+            player.giveUpCards();
+        }
+
         if (stateTracker.isStarted() && player != null) {
             player.updateButtonState();
         }
@@ -52,6 +58,7 @@ public class Table extends JPanel {
             player.setVisible(false);
             startString.setVisible(true);
         }
+
 
         playersInformation.indicateTurn();
         cardsOnTable.updateCardsOnTable();

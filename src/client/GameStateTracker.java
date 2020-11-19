@@ -29,4 +29,5 @@ public interface GameStateTracker {
     int getRoundNo();
     boolean isTradingPhase();
     boolean iHaveToTrade();
+    int getMyRoleNumber();
 }

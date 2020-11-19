@@ -84,7 +84,7 @@ public class ServerTracker implements GameStateTracker {
 
                 Thread.sleep(heartbeatInterval);
                 } catch (Exception e) {
-                    LOGGER.warning("Heartbeat resulted in exception: " + e.getMessage());
+                    LOGGER.warning("Heartbeat resulted in exception: " + e.toString());
                     break;
                 }
             }
@@ -349,6 +349,22 @@ public class ServerTracker implements GameStateTracker {
         synchronized (this) {
             return state.haveToTrade();
         }
+    }
+
+    @Override
+    public int getMyRoleNumber() {
+        int noOfPlayers = state.getPlayers().size();
+        int roleNo;
+        synchronized (this) {
+            switch (state.getRole()) {
+                case BUM -> roleNo = (noOfPlayers == 3) ? -1 : -2;
+                case PRESIDENT -> roleNo = (noOfPlayers == 3) ? 1 : 2;
+                case VICE_BUM -> roleNo = -1;
+                case VICE_PRESIDENT -> roleNo = 1;
+                default -> roleNo = 0;
+            }
+        }
+        return roleNo;
     }
 
     @Override
