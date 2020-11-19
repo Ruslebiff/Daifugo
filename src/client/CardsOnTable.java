@@ -57,6 +57,9 @@ public class CardsOnTable extends JPanel{
         cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());
         cardsInPlayCounter.setText(Integer.toString(cardsInTrick));
 
+        if(cardsInTrick == 0)
+            LOGGER.info("Cards in trick " + cardsInTrick);
+
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
             c.setBounds(

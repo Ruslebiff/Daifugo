@@ -538,8 +538,8 @@ public class Game {
     private List<CardData> prepareDeck() {
         List<CardData> deck = new ArrayList<>();
 
-        int numCards = 15;
-        //int numCards = 3; // to speed up testing TODO: remove later
+//        int numCards = 15;
+        int numCards = 3; // to speed up testing TODO: remove later
 
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
@@ -708,9 +708,9 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-        //currentPlayer = 0; // to speed up testing TODO: remove later
+        currentPlayer = 0; // to speed up testing TODO: remove later
 
-        currentPlayer = -1;
+//        currentPlayer = -1;   // TODO: REMOVE LATERE
         for (UUID id : turnSequence) {
             if (players.get(id).getGameData().getRole() == Role.BUM) {
                 currentPlayer = turnSequence.indexOf(id);
