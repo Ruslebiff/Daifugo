@@ -1,10 +1,8 @@
 package client;
 
-import java.awt.Color;
-import java.awt.Component;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 
 public class TableRowColorRenderer extends DefaultTableCellRenderer {
 
@@ -41,9 +39,6 @@ public class TableRowColorRenderer extends DefaultTableCellRenderer {
         } else {
             DEFAULT_RENDERER.setHorizontalAlignment(JLabel.LEFT);
         }
-
-
-
 
         return c;
     }
