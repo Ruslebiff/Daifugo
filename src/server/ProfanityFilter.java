@@ -1,14 +1,14 @@
 package server;
 
 import client.ClientMain;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.util.ArrayList;
 
 /**
  * A filter to check if a string contains any illegal words.
  * Filters out both whole words, and words who has a substring matching a word in the profanityfilter.txt file
+ * profanityfilter.txt file must be placed in the same folder as the JAR-file
  * Works with normal text, all kinds of CaPiTaLiZiNg, s p a c e s, l337sp3@K
  */
 public class ProfanityFilter {
@@ -18,7 +18,7 @@ public class ProfanityFilter {
     private int counter = 0;
 
     public ProfanityFilter() {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(ClientMain.class.getResourceAsStream("/profanityfilter.txt"), "Cp1252"))) { // TODO: Change path, it should not be in "resources"
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File("profanityfilter.txt"))))) {
                 String line = reader.readLine();
                 while (line != null) {                      // loop through all lines
                     wordsInFilter.add(line);                        // add line as a word
@@ -70,6 +70,7 @@ public class ProfanityFilter {
         allCharsInput = allCharsInput.replaceAll("4","a");
         allCharsInput = allCharsInput.replaceAll("@","a");
         allCharsInput = allCharsInput.replaceAll("5","s");
+        allCharsInput = allCharsInput.replaceAll("\\$","s");
         allCharsInput = allCharsInput.replaceAll("7","t");
         allCharsInput = allCharsInput.replaceAll("0","o");
         allCharsInput = allCharsInput.replaceAll("9","g");
