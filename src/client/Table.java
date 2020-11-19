@@ -1,5 +1,7 @@
 package client;
 
+import common.Role;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -22,12 +24,26 @@ public class Table extends JPanel {
     private final GameLobby gameLobby;
     private JLabel startString;
     private JLabel newRoundString;
+    private JLabel statusString;
     private Player player;
     private boolean wasStopped;
     private boolean wasTradePhase;
 
+    private final String yourTurn = "It's your turn to play cards. Select cards to play.";
+    private final String bumTwoTrade = "You must give your 2 best cards to the President.";
+    private final String bumOneTrade = "You must give your best card to the President.";
+    private final String viceBumTrade = "You must give your best card to the Vice-President.";
+    private final String vicePresidentTrade = "Please choose one card to give to the Vice-Bum.";
+    private final String presidentOneTrade = "Please choose any one card to give to the Bum.";
+    private final String presidentTwoTrade = "Please choose any two cards to give to the Bum.";
+    private final String neutralTrade = "Please be patient while the rich and poor trades cards.";
+
+
 
     private Void updateGUI() {
+
+        if (statusString != null)
+            statusString.setVisible(false);
 
         List<Card> cards = stateTracker.getHand();
         for (Card card : cards) {
@@ -59,6 +75,24 @@ public class Table extends JPanel {
             player.update(stateTracker.getHand());
         }
 
+        if (stateTracker.isTradingPhase()) {
+            if (stateTracker.iHaveToTrade()) {
+                switch (stateTracker.getRole()) {
+                    case PRESIDENT -> statusString.setText(
+                            (stateTracker.getMyRoleNumber() == 2) ? presidentTwoTrade : presidentOneTrade
+                    );
+                    case BUM -> statusString.setText(
+                            (stateTracker.getMyRoleNumber() == -2) ? bumTwoTrade : bumOneTrade
+                    );
+                    case VICE_BUM -> statusString.setText(viceBumTrade);
+                    case VICE_PRESIDENT -> statusString.setText(vicePresidentTrade);
+                }
+            }
+            if (stateTracker.getRole() == Role.NEUTRAL)
+                statusString.setText(neutralTrade);
+            statusString.setVisible(true);
+        }
+
         // setting new round text according to state
         newRoundString.setVisible(stateTracker.isTradingPhase());
 
@@ -71,6 +105,10 @@ public class Table extends JPanel {
             }
             if (stateTracker.isStarted()) {
                 player.updateButtonState();
+                if (stateTracker.isMyTurn()) {
+                    statusString.setText(yourTurn);
+                    statusString.setVisible(true);
+                }
             }
             if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
                 player.update(stateTracker.getHand());
@@ -80,6 +118,7 @@ public class Table extends JPanel {
                 player.setVisible(false);
                 startString.setVisible(true);
             }
+
         }
 
 
@@ -141,21 +180,29 @@ public class Table extends JPanel {
         exitButton.addActionListener(e -> exitGame());
 
         startString = new JLabel("Waiting for game to start");
-        startString.setBounds((f_width/2) - 120, 100, 250,50);
-        startString.setFont(new Font("Sans Serif", Font.BOLD, 15));
+        startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
+        startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
+        startString.setForeground(new Color(0x652010));
         add(startString);
 
 
         newRoundString = new JLabel("Trading phase");
-        newRoundString.setBounds((f_width/2) - 120, 100, 250,50);
-        newRoundString.setFont(new Font("Sans Serif", Font.BOLD, 24));
+        newRoundString.setBounds((f_width/2) - 120, (f_height/2)-50, 250,50);
+        newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
         newRoundString.setForeground(Color.YELLOW);
         newRoundString.setVisible(false);
         add(newRoundString);
 
+        statusString = new JLabel("Some testing text that doesn't matter", SwingConstants.CENTER);
+        statusString.setBounds((f_width/2) - 250, (f_height/2)+50, 500,50);
+        statusString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 28));
+        statusString.setForeground(new Color(0xcccc00));
+        statusString.setVisible(false);
+        add(statusString);
+
 
         player = new Player(TABLE_WIDTH/2, stateTracker);
-        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2) - 25,
+        player.setBounds((TABLE_WIDTH/2) - ((TABLE_WIDTH/2)/2),
                 (TABLE_HEIGHT/2) + 100,
                 TABLE_WIDTH/2,
                 (TABLE_HEIGHT/8) + 100);

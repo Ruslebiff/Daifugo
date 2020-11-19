@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class Info {
-    private double version;
+    private String version;
     private static ArrayList<String> contributors;
-    private int year;
+    private String year;
 
     public Info() {
         this.contributors = getContributors(); // TODO: get contributors
-        this.version = 1.0;
-        this.year = 2020;
+        this.version = "1.0";
+        this.year = "2020";
     }
 
     public static ArrayList<String> getContributors() {
@@ -40,7 +40,7 @@ public class Info {
 
     public void showAboutWindow() {
         JFrame f = new JFrame("About Daifugo");
-        int SCREEN_HEIGHT = 200;
+        int SCREEN_HEIGHT = 250;
         int SCREEN_WIDTH = 300;
         f.setLayout(new FlowLayout());
 
@@ -84,7 +84,7 @@ public class Info {
         textArea.setEditable(false);
 
         // Read the file
-        try (BufferedReader textInput = new BufferedReader(new InputStreamReader(ClientMain.class.getResourceAsStream("/rules.txt"), "Cp1252"))) {
+        try (BufferedReader textInput = new BufferedReader(new InputStreamReader(ClientMain.class.getResourceAsStream("/rules.txt"), StandardCharsets.UTF_8))) {
             textArea.read(textInput, "File");
         } catch (IOException e) {
             e.printStackTrace();
@@ -96,5 +96,13 @@ public class Info {
         f.add(scrollPane);
         f.setLocationRelativeTo(null);          // Place in middle of screen
         f.setVisible(true);                     // Frame visible
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getYear() {
+        return year;
     }
 }

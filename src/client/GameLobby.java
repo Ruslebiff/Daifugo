@@ -15,6 +15,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,10 @@ public class GameLobby extends JFrame {
     private JFrame pwFrame = new JFrame("Join game");
     private String playerToken;
 
+    public Font westernFont;
+    public Font normalFont;
+
+
     /* Lobby Panels */
     JPanel newGamePanel = new JPanel();
     JPanel statusBar = new JPanel();
@@ -100,6 +105,20 @@ public class GameLobby extends JFrame {
     JScrollPane sp = new JScrollPane(gamesTable);
 
     public GameLobby() {
+
+        InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
+        try {
+            westernFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            is = getClass().getResourceAsStream("/fonts/roboto/Roboto-Bold.ttf");
+            normalFont = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+        }
+        UIManager.put("Label.font", normalFont.deriveFont(Font.PLAIN, 16));
+        UIManager.put("Checkbox.font", normalFont.deriveFont(Font.PLAIN, 14));
+        UIManager.put("LimitedTextField.font", normalFont.deriveFont(Font.BOLD, 14));
+        UIManager.put("ScrollPane.font", normalFont.deriveFont(Font.BOLD, 16));
+        UIManager.put("Button.font", normalFont.deriveFont(Font.BOLD, 18));
 
         try {
             conn = new ClientConnection(serverAddress);
@@ -198,11 +217,11 @@ public class GameLobby extends JFrame {
         JButton cancelNewGameButton = new JButton("Cancel");
 
         newGameNameLabel.setBounds(10,10,70,20);
-        newGameName.setBounds(80,10,200,20);
-        newGameNameLimitText.setBounds(290,10,200,20);
-        newGamePrivateCheckbox.setBounds(7,40,70,20);
-        newGamePassword.setBounds(80,40,200,20);
-        newGamePasswordLimitText.setBounds(290,40,200,20);
+        newGameName.setBounds(90,10,200,20);
+        newGameNameLimitText.setBounds(300,10,200,20);
+        newGamePrivateCheckbox.setBounds(7,40,80,20);
+        newGamePassword.setBounds(90,40,200,20);
+        newGamePasswordLimitText.setBounds(300,40,200,20);
         newGameConfirmButton.setBounds(10,70,130,30);
         cancelNewGameButton.setBounds(150,70,130,30);
 
@@ -233,19 +252,19 @@ public class GameLobby extends JFrame {
         JButton settingsConfirmButton = new JButton("Confirm");
 
         newNickNameLabel.setBounds(10,10,100,20);
-        newNickNameTextField.setBounds(110,10,200,20);
-        newNickNameLimitText.setBounds(320, 10, 200, 20);
-        newServerAddressLabel.setBounds(10,40,100,20);
-        newServerAddressTextField.setBounds(110,40,200,20);
-        newServerLimitText.setBounds(320, 40, 200, 20);
-        settingsConfirmButton.setBounds(10,70,145,30);
-        cancelSettingsButton.setBounds(165,70,145,30);
+        newNickNameTextField.setBounds(130,10,200,20);
+        newNickNameLimitText.setBounds(340, 10, 200, 20);
+        newServerAddressLabel.setBounds(10,40,200,20);
+        newServerAddressTextField.setBounds(130,40,200,20);
+        newServerLimitText.setBounds(340, 40, 200, 20);
+        settingsConfirmButton.setBounds(10,70,150,30);
+        cancelSettingsButton.setBounds(180,70,150,30);
 
         settingsPanel.add(newNickNameLabel);
         settingsPanel.add(newNickNameTextField);
         settingsPanel.add(newNickNameLimitText);
-        settingsPanel.add(newServerAddressLabel);
         settingsPanel.add(newServerAddressTextField);
+        settingsPanel.add(newServerAddressLabel);
         settingsPanel.add(newServerLimitText);
         settingsPanel.add(settingsConfirmButton);
         settingsPanel.add(cancelSettingsButton);

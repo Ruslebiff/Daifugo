@@ -47,7 +47,6 @@ public class Player extends JPanel{
         widthOfComponent = width;
         setLayout(null);
         setOpaque(true);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));  // Create border
 
         // Renders the green felt unto the player-section
         try {
@@ -63,18 +62,19 @@ public class Player extends JPanel{
         int buttonWidth = 100;
         int buttonHeight = 50;
         passTurnBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth) + 15, 0, // Relinquishes turn
-                buttonWidth, buttonHeight, "Pass Turn");
+                buttonWidth, buttonHeight, "Pass");
         passTurnBtn.addActionListener(e -> relinquishTurn());
         add(passTurnBtn);
 
         playCardsBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth / 2) + passTurnBtn.getBounds().x, 0,
-                buttonWidth, buttonHeight, "Play Cards");
+                buttonWidth, buttonHeight, "Play");
         playCardsBtn.setEnabled(false);
 
 
         cancelBtn = new PlayerButton((widthOfComponent / 3) - (buttonWidth / 2) + playCardsBtn.getBounds().x, 0,
                 buttonWidth, buttonHeight, "Cancel");
         cancelBtn.addActionListener(e -> cancel());
+        cancelBtn.setEnabled(false);
         add(cancelBtn);
 
         playCardsBtn.addActionListener(e -> {
@@ -94,7 +94,6 @@ public class Player extends JPanel{
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
-        cancelBtn.setEnabled(stateTracker.isMyTurn());
         passTurnBtn.setEnabled(stateTracker.isMyTurn());
     }
 
@@ -106,12 +105,10 @@ public class Player extends JPanel{
 
     public void updateButtonState() {
         if (!stateTracker.isTradingPhase()) {
-            cancelBtn.setEnabled(stateTracker.isMyTurn());
             passTurnBtn.setEnabled(stateTracker.isMyTurn());
             tradeMode(false);
         } else {
             tradeMode(true);
-            cancelBtn.setEnabled(stateTracker.iHaveToTrade());
             passTurnBtn.setEnabled(false);
         }
     }
@@ -121,13 +118,15 @@ public class Player extends JPanel{
             @Override
             public void mouseClicked(MouseEvent e) {    // Upon selection, paint/unpaint the component with overlay
 
-                if (stateTracker.isTradingPhase()) {
+                if (stateTracker.isTradingPhase() && stateTracker.iHaveToTrade()) {
                     c.setSelected();    // Set the object to either selected or not, based upon what it previously was
                     c.paintComponent(c.getGraphics());  // Paint it accordingly
                     hand.forEach(c -> repaint());       // Repaint all the rest of the cards
 
-                    if (c.isSelected())      // If the card is selected, add it to the arrayList
+                    if (c.isSelected()) {      // If the card is selected, add it to the arrayList
                         cardsToPlay.add(c);
+                        cancelBtn.setEnabled(true);
+                    }
                     else
                         cardsToPlay.remove(c);
 
@@ -145,6 +144,7 @@ public class Player extends JPanel{
                             cardsToPlay.remove(c);
 
                         playCardsBtn.setEnabled(checkIfPlayable());
+                        cancelBtn.setEnabled(true);
                     }
                 }
             }
@@ -219,6 +219,7 @@ public class Player extends JPanel{
             c.repaint();
         });
         cardsToPlay = new ArrayList<>();
+        cancelBtn.setEnabled(false);
     }
 
     // Function removes cards from hand and GUI and sorts the remaining cards
@@ -262,6 +263,9 @@ public class Player extends JPanel{
 
         cardsToPlay = new ArrayList<>(); // Remove all cards to play from cards to play
         playCardsBtn.setEnabled(false);
+        cancelBtn.setEnabled(false);
+        cardsClickable = false;
+        giveCards = false;
         repaint();
     }
 
@@ -332,37 +336,10 @@ public class Player extends JPanel{
 
     public void tradeMode(boolean on) {
        if (on) {
-           playCardsBtn.setText("Give Cards");
+           playCardsBtn.setText("Give");
        } else {
-           playCardsBtn.setText("Play Cards");
+           playCardsBtn.setText("Play");
        }
     }
 
-    // Whenever the round starts, the server should run each player's giveUpCards()
-    public void giveUpCards() {
-        LOGGER.info("Entered give up cards");
-        giveCards = true;
-        role = stateTracker.getMyRoleNumber();
-        if (role != 0) {
-            int amountOfCards = Math.abs(role); // Get the amount of cards to be relinquished
-            if (role < 0) {
-                // Highest cards to be selected
-                for (int i = 0; i < amountOfCards; i++) {   // Loop from the highest valued cards
-                    Card temp = hand.get(i);
-                    if (temp.getValue() != 16) {            // If it is 3 of clubs, skip it
-                        temp.setSelected();
-                        cardsToPlay.add(hand.get(i));
-                    } else
-                        amountOfCards++;
-                }
-                playCardsBtn.setEnabled(true);
-            } else {
-                cardsClickable = true;  // If you are not bum/vice bum
-                // Pick cards to give up (role is higher than neutral), if it is not right amount, disable button
-                playCardsBtn.setEnabled(cardsToPlay.size() == amountOfCards);
-            }
-            rearrangeCardsOnDisplay();
-        } else
-            cardsClickable = true;
-    }
 }

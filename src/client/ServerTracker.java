@@ -3,6 +3,7 @@ package client;
 import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
+import common.Role;
 import jdk.jshell.spi.ExecutionControl;
 import protocol.*;
 
@@ -88,6 +89,7 @@ public class ServerTracker implements GameStateTracker {
                 } catch (Exception e) {
                     LOGGER.warning("Heartbeat resulted in exception: " + Arrays.toString(e.getStackTrace()));
                     try {
+                        e.printStackTrace();
                         connectionLost.call();
                     } catch (Exception exception) {
                         exception.printStackTrace();
@@ -381,6 +383,13 @@ public class ServerTracker implements GameStateTracker {
     @Override
     public void registerConnectionLostCallback(Callable<Void> func) {
         connectionLost = func;
+    }
+
+    @Override
+    public Role getRole() {
+        synchronized (this) {
+            return state.getRole();
+        }
     }
 
     @Override

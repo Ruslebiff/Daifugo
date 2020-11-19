@@ -27,7 +27,6 @@ public class CardsOnTable extends JPanel{
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
         try {
             faceDown = ImageIO.read(  // Renders the green filt

@@ -2,6 +2,7 @@ package client;
 
 
 import common.PlayerData;
+import common.Role;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -31,4 +32,5 @@ public interface GameStateTracker {
     boolean iHaveToTrade();
     int getMyRoleNumber();
     void registerConnectionLostCallback(Callable<Void> func);
+    Role getRole();
 }
