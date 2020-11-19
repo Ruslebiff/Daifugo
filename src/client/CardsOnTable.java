@@ -45,7 +45,6 @@ public class CardsOnTable extends JPanel{
 
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
-        LOGGER.info("Top cards size: " + lastCardsOnTable.size());
 //        lastCardsOnTable.forEach(c -> {
 //            c.setBounds(
 //                    (this.getWidth()/2) - (cardWidth/2),

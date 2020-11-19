@@ -22,6 +22,10 @@ public class GameState implements Serializable {
     private int cardsInTrick;
     private int faceDownCards;
     private List<CardData> topCards;
+    private boolean tradingPhase;
+    private int roundNo;
+    private boolean mustTrade;
+    private Role role;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -31,20 +35,49 @@ public class GameState implements Serializable {
         this.gameTitle = game.getTitle();
         this.cardsInTrick = game.getNoOfCardsInTrick();
         this.topCards = game.getTopCards();
+
+        roundNo = game.getRoundNo();
+        tradingPhase = game.isTradingPhase();
         gameID = game.getID();
 
         currentPlayer = game.getCurrentPlayer();
 
-        hand = game.getPlayerHand(session.getID());
+        try {
+            hand = new ArrayList<>(game.getPlayerHand(session.getID()));
+        } catch (Exception ignored) {
+            hand = new ArrayList<>();
+        }
+        if (!hand.isEmpty())
+            for (CardData c : hand) {
+                SERVER_LOGGER.fine("added to " + playerNick + "'s hand for sending: " + c.getNumber()+c.getSuit());
+            }
 
         Map<UUID, PlayerObject> playerMap = game.getPlayers();
         players = new ArrayList<>();
         for (UUID id : game.getTurnSequence()) {
-            SERVER_LOGGER.fine("adding player to state");
             players.add(playerMap.get(id).getGameData());
         }
 
         started = game.hasStarted();
+
+        mustTrade = playerMap.get(session.getID()).getGameData().hasToTrade();
+        role = playerMap.get(session.getID()).getGameData().getRole();
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public boolean haveToTrade() {
+        return mustTrade;
+    }
+
+    public int getRoundNo() {
+        return roundNo;
+    }
+
+    public boolean isTradingPhase() {
+        return tradingPhase;
     }
 
     public List<CardData> getTopCards() {
@@ -60,7 +93,10 @@ public class GameState implements Serializable {
     }
 
     public boolean isMyTurn() {
-        return players.get(currentPlayer).getNick().equals(playerNick);
+        if (currentPlayer < 0)
+            return false;
+        else
+            return players.get(currentPlayer).getNick().equals(playerNick);
     }
 
     public boolean iAmOwner() {
@@ -83,7 +119,9 @@ public class GameState implements Serializable {
         return started;
     }
 
-    public List<CardData> getHand() { return hand; }
+    public List<CardData> getHand() {
+        return new ArrayList<>(hand);
+    }
 
     public List<PlayerData> getPlayers() {
         return players;
