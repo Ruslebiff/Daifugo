@@ -24,10 +24,7 @@ public class ServerTracker implements GameStateTracker {
     private GameState state;
     private final long heartbeatInterval = 300;
 
-    private HeartbeatThread backgroundThread;
-
-    private ArrayList<Card> lastPlayedCards = new ArrayList<>();    // array list of the cards played
-    private ArrayList<Card> allCardsInRound = new ArrayList<>();    // array list of the cards played
+    private final HeartbeatThread backgroundThread;
 
     private boolean cancelled;
 

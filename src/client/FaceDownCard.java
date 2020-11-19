@@ -17,7 +17,7 @@ public class FaceDownCard extends JPanel {
         setOpaque(false);
         try {
             image = ImageIO.read(
-                    ClientMain.class.getResourceAsStream("./cardimages/Daifugo_cardback_fade_blue_vertical.png")
+                    ClientMain.class.getResourceAsStream("/cardimages/Daifugo_cardback_fade_blue_vertical.png")
             );  // Read the image
             scaledImage = image.getScaledInstance(cardWidth,cardHeight, Image.SCALE_SMOOTH);
         } catch (IOException ex) {

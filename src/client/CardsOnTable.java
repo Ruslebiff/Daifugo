@@ -14,12 +14,13 @@ import static client.GameLobby.LOGGER;
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
     private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
-    private int faceDownCards;
+    private List<FaceDownCard> faceDownCards = new ArrayList<>();   // The last three cards played
     private final GameStateTracker stateTracker;
     private final JLabel cardsInPlayCounter;
 
     public CardsOnTable(GameStateTracker sT) {
-        faceDownCards = 0;
+        setLayout(null);
+
         stateTracker = sT;
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
@@ -32,7 +33,7 @@ public class CardsOnTable extends JPanel{
         }
 
         cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25 ,(this.getHeight()/2) - 25,50,50);
+        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25,25,50,50);
         cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 20));
         add(cardsInPlayCounter);
     }
@@ -43,12 +44,17 @@ public class CardsOnTable extends JPanel{
             this.remove(card);
         }
 
+        for(FaceDownCard fc : faceDownCards) {
+            this.remove(fc);
+        }
+
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
+        int cardsInTrick = stateTracker.getCardsInTrick();
 
 
-        cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());     // How many cards are on the table
-        cardsInPlayCounter.setText(Integer.toString(lastCardsOnTable.size()));
+        cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());
+        cardsInPlayCounter.setText(Integer.toString(cardsInTrick));
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
@@ -61,11 +67,14 @@ public class CardsOnTable extends JPanel{
             this.add(c);
         }
 
-        faceDownCards = stateTracker.getNumberOfFaceDownCards();
-        LOGGER.info("Cards facing down: " + faceDownCards);
-        for (int i = 0; i < faceDownCards; i++) {
+        int noOfFaceDown = stateTracker.getNumberOfFaceDownCards();
+        for (int i = 0; i < noOfFaceDown; i++) {
+            int boundsX = i;
+            if(i > 5)
+                boundsX -= 5;
             FaceDownCard tmp = new FaceDownCard();
-            tmp.setBounds(i, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
+            faceDownCards.add(tmp);
+            tmp.setBounds(boundsX, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
             add(tmp);
         }
         repaint();

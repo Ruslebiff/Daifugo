@@ -533,7 +533,7 @@ public class Game {
         List<CardData> deck = new ArrayList<>();
 
 //        int numCards = 15;
-        int numCards = 3; // to speed up testing TODO: remove later
+        int numCards = 7; // to speed up testing TODO: remove later
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
@@ -553,9 +553,6 @@ public class Game {
 
     private void propagateChange() {
         for (PlayerObject player : players.values()) {
-            /**
-             * DETTE ER OGSÅ GOOD
-             */
             player.newStateAvailable();
         }
     }
@@ -681,11 +678,6 @@ public class Game {
         // Counts all hands
         for (UUID hand : hands.keySet()) {
             players.get(hand).getGameData().setNumberOfCards(hands.get(hand).size());
-//            SERVER_LOGGER.info("Setting " + players.get(hand).getGameData().getNick() + " cards to " + hands.get(hand).size());
-//            SERVER_LOGGER.info("Player cards " + players.get(hand).getGameData().getNumberOfCards());
-            /**
-             * DENNE ER GOOD
-             */
         }
 
 

@@ -95,11 +95,6 @@ public class PlayerData implements Serializable {
         outOfRound = true;
     }
 
-    public int getOutCount() {
-        return outCount;
-    }
-
-
     public boolean isOutOfRound() {
         return outOfRound;
     }
