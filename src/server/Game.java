@@ -268,6 +268,12 @@ public class Game {
         return tmp;
     }
 
+    public List<CardData> getCardsOnTable() {
+        synchronized (this) {
+            return cardsOnTable;
+        }
+    }
+
     public String getOwnerNick() throws UserSessionError {
         return UserSession.retrieveSessionFromID(owner).getNick();
     }
@@ -391,7 +397,7 @@ public class Game {
     }
 
     private void assignRoles() {
-        SERVER_LOGGER.info("Assinging roles with goneOut: " + goneOut);
+        SERVER_LOGGER.info("Assigning roles with goneOut: " + goneOut);
         if (players.size() == 3) {
             for (PlayerObject po : players.values()) {
                 if(po.getGameData().assignRoleFewPlayers())
@@ -445,15 +451,9 @@ public class Game {
                     }
                 }
 
-                SERVER_LOGGER.fine("Cards in hand after removal: " + hands.get(player).size());
-
-
                 // setting new hand count
                 PlayerData pd = players.get(player).getGameData();
-
-                SERVER_LOGGER.info("Before setting size of " + pd.getNick() + " cards to " + pd.getNumberOfCards());
                 pd.setNumberOfCards(hands.get(player).size());
-                SERVER_LOGGER.info("After setting size of " + pd.getNick() + " cards to " + pd.getNumberOfCards());
 
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
@@ -539,7 +539,7 @@ public class Game {
         List<CardData> deck = new ArrayList<>();
 
 //        int numCards = 15;
-        int numCards = 3; // to speed up testing TODO: remove later
+        int numCards = 6; // to speed up testing TODO: remove later
 
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
@@ -586,7 +586,6 @@ public class Game {
         PlayerData pd;
         do {
 
-            SERVER_LOGGER.info("HERE!");
             if (++currentPlayer == players.size())
                 currentPlayer = 0;
             pd = players.get(turnSequence.get(currentPlayer)).getGameData();

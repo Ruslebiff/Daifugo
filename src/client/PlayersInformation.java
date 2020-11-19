@@ -66,24 +66,41 @@ public class PlayersInformation extends JPanel {
         add(infoString);
         for (int i = 0; i < players.size(); i++) {
             PlayerData player = this.players.get(i);
+            String role;
 
-            String playerInformationTxt = player.getNick() + " - " + player.getRole();
-            int noOfCards = player.getNumberOfCards();
+            switch(player.getRole()) {
+                case PRESIDENT -> role ="P";
+                case VICE_PRESIDENT -> role = "VP";
+                case NEUTRAL -> role = "N";
+                case VICE_BUM -> role = "VB";
+                case BUM -> role = "B";
+                default -> role = "";
+            }
 
-            if(noOfCards != 0)
-                playerInformationTxt += " - " + noOfCards;
-            else
-                playerInformationTxt += " - " + " DONE";
+
+            String playerInformationTxt = player.getNick() + " - " + role;
 
 
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);
             playerInfo[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
 
-            if(player.hasPassed())
+            int noOfCards = player.getNumberOfCards();
+
+            playerInfo[i].setBackground(neutralColor);
+
+            if(noOfCards != 0 && stateTracker.isStarted()) {
+                playerInformationTxt += " - " + noOfCards;
+            }
+            if (player.hasPassed()) {
+                playerInformationTxt += " - PASS";
                 playerInfo[i].setBackground(passColor);
-            else
-                playerInfo[i].setBackground(neutralColor);
+            } else if (stateTracker.isStarted() && noOfCards == 0){
+                playerInformationTxt += " - DONE";
+                playerInfo[i].setBackground(new Color(152,251,152));
+            }
+
+            playerInfo[i].setText(playerInformationTxt);
 
             playerInfo[i].setOpaque(true);
             if(i != 0) {

@@ -290,11 +290,6 @@ public class ServerTracker implements GameStateTracker {
                     LOGGER.info("Start sent successfully");
                 }
 
-/*
-                GameStateResponse tmp = (GameStateResponse) response;
-                state = tmp.getState();
-                guiCallback.call();
-*/
             } catch (Exception e) {
                 LOGGER.warning("Starting game resulted in exception: " + e.getMessage());
                 return false;
@@ -378,6 +373,13 @@ public class ServerTracker implements GameStateTracker {
     @Override
     public void registerConnectionLostCallback(Callable<Void> func) {
         connectionLost = func;
+    }
+
+    @Override
+    public int getCardsInPlay() {
+        synchronized (this) {
+            return state.getCardsOnTable();
+        }
     }
 
     @Override

@@ -114,9 +114,9 @@ public class Table extends JPanel {
         add(playersInformation);
 
         int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
-        cardsOnTable = new CardsOnTable(stateTracker);
+        cardsOnTable = new CardsOnTable(stateTracker, cardsOnTableWidth, cardsOnTableHeight);
         cardsOnTable.setBounds(
-                (f_width /2) - (cardsOnTableWidth/2),
+                (f_width /2) - (cardsOnTableWidth/2) - 25,
                 (f_height /3) - (cardsOnTableHeight/2),
                    cardsOnTableWidth, cardsOnTableHeight
         );

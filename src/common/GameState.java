@@ -21,6 +21,7 @@ public class GameState implements Serializable {
     private String ownerNick;
     private String playerNick;
     private int cardsInTrick;
+    private int cardsOnTable;
     private int faceDownCards;
     private List<CardData> topCards;
     private boolean tradingPhase;
@@ -35,6 +36,7 @@ public class GameState implements Serializable {
         this.ownerNick = game.getOwnerNick();
         this.gameTitle = game.getTitle();
         this.cardsInTrick = game.getNoOfCardsInTrick();
+        this.cardsOnTable = game.getCardsOnTable().size();
         this.topCards = game.getTopCards();
 
         roundNo = game.getRoundNo();
@@ -94,7 +96,7 @@ public class GameState implements Serializable {
     }
 
     public int getCardsInTrick() {
-        return cardsInTrick;
+        return this.cardsInTrick;
     }
 
     public int getFaceDownCards() {
@@ -116,14 +118,6 @@ public class GameState implements Serializable {
         return currentPlayer;
     }
 
-    public String getGameTitle() {
-        return gameTitle;
-    }
-
-    public String getGameID() {
-        return gameID.toString();
-    }
-
     public boolean isStarted() {
         return started;
     }
@@ -134,6 +128,10 @@ public class GameState implements Serializable {
 
     public List<PlayerData> getPlayers() {
         return this.players;
+    }
+
+    public int getCardsOnTable() {
+        return this.cardsOnTable;
     }
 
 }

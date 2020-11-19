@@ -31,4 +31,5 @@ public interface GameStateTracker {
     boolean iHaveToTrade();
     int getMyRoleNumber();
     void registerConnectionLostCallback(Callable<Void> func);
+    int getCardsInPlay();
 }

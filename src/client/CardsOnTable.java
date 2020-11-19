@@ -18,9 +18,8 @@ public class CardsOnTable extends JPanel{
     private final GameStateTracker stateTracker;
     private final JLabel cardsInPlayCounter;
 
-    public CardsOnTable(GameStateTracker sT) {
+    public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
         setLayout(null);
-
         stateTracker = sT;
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
@@ -33,8 +32,8 @@ public class CardsOnTable extends JPanel{
         }
 
         cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds((this.getWidth()/2) - 25,5,50,50);
-        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 15));
+        cardsInPlayCounter.setBounds(panelWidth - 50, (panelHeight/2) - 25,50,50);
+        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 20));
         add(cardsInPlayCounter);
     }
 
@@ -43,7 +42,6 @@ public class CardsOnTable extends JPanel{
         for (Card card : lastCardsOnTable) {
             this.remove(card);
         }
-
         for(FaceDownCard fc : faceDownCards) {
             this.remove(fc);
         }
@@ -51,14 +49,9 @@ public class CardsOnTable extends JPanel{
         int cardWidth = 80, cardHeight = 120;
         lastCardsOnTable = stateTracker.getCardsOnTable();
 
-        int cardsInTrick = stateTracker.getCardsInTrick();
+        cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
+        cardsInPlayCounter.setText(Integer.toString(stateTracker.getCardsInPlay()));
 
-
-        cardsInPlayCounter.setVisible(!lastCardsOnTable.isEmpty());
-        cardsInPlayCounter.setText(Integer.toString(cardsInTrick));
-
-        if(cardsInTrick == 0)
-            LOGGER.info("Cards in trick " + cardsInTrick);
 
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
@@ -73,7 +66,7 @@ public class CardsOnTable extends JPanel{
 
         int noOfFaceDown = stateTracker.getNumberOfFaceDownCards();
         for (int i = 0; i < noOfFaceDown; i++) {
-            int boundsX = i;
+            int boundsX = 1 + i;
             if(i > 5)
                 boundsX -= 5;
             FaceDownCard tmp = new FaceDownCard();
