@@ -69,8 +69,12 @@ public class PlayersInformation extends JPanel {
 
             String playerInformationTxt = player.getNick() + " - " + player.getRole();
             int noOfCards = player.getNumberOfCards();
-            if(noOfCards != 0)
+
+            if(noOfCards == 0 && player.isOutOfRound()) {
+                playerInformationTxt += " - " + " DONE";
+            } else
                 playerInformationTxt += " - " + noOfCards;
+
 
             playerInfo[i] = new JLabel(playerInformationTxt, SwingConstants.CENTER);
             playerInfo[i].setBounds(0, HEIGHT+(HEIGHT*i), WIDTH, HEIGHT);

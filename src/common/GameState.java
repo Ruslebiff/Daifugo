@@ -35,7 +35,6 @@ public class GameState implements Serializable {
         gameID = game.getID();
         faceDownCards = game.getNoOfCardsFaceDown();
         currentPlayer = game.getCurrentPlayer();
-
         hand = game.getPlayerHand(session.getID());
 
         Map<UUID, PlayerObject> playerMap = game.getPlayers();

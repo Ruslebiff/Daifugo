@@ -1,8 +1,8 @@
 package common;
 
 import java.io.Serializable;
-import java.util.*;
-import static client.GameLobby.LOGGER;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerData implements Serializable {
     private String nick;
@@ -53,9 +53,6 @@ public class PlayerData implements Serializable {
     }
 
     public int getNumberOfCards() {
-//        LOGGER.info("Inside playerData, getting cards: " + this.numberOfCards);
-
-        // TODO: HER ER DET NOEN UGLER
         return this.numberOfCards;
     }
 
@@ -77,19 +74,13 @@ public class PlayerData implements Serializable {
 
     public void setNumberOfCards(int noOfCards) {
         this.numberOfCards = noOfCards;
-//        LOGGER.info("Setting number of cards to inside playerdata " + this.numberOfCards);
-        /**
-         * *DETTE ER GUCCI
-         */
     }
 
     public void setPassed(boolean passed) {
         this.passed = passed;
-        LOGGER.info("Inside player, setting passed: " + this.passed);
     }
 
     public boolean hasPassed() {
-        LOGGER.info("Inside player, has passed: " + this.passed);
         return this.passed;
     }
 
