@@ -97,9 +97,9 @@ public class Table extends JPanel {
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
         switch(stateTracker.getCardsInTrick()) {
-            case 1 -> inPlay = "SINGLES";
-            case 2 -> inPlay = "DOUBLES";
-            case 3 -> inPlay = "TRIPLES";
+            case 1 -> inPlay = "SINGLES...";
+            case 2 -> inPlay = "DOUBLES!";
+            case 3 -> inPlay = "TRIPLES!";
             default -> inPlay = "";
         }
         cardsInPlayCounter.setText(inPlay);
@@ -172,9 +172,13 @@ public class Table extends JPanel {
         );
         add(cardsOnTable);
 
+        Color westernYellow = new Color(0xbbaa00);
+        Color westernRed = new Color(0x652010);
+
         cardsInPlayCounter = new JLabel();
         cardsInPlayCounter.setBounds((f_width/2) + (f_width/4), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,100);
-        cardsInPlayCounter.setFont(new Font("Sans Serif", Font.BOLD, 30));
+        cardsInPlayCounter.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
+        cardsInPlayCounter.setForeground(westernYellow);
         add(cardsInPlayCounter);
 
         stateTracker.registerConnectionLostCallback(() -> {
@@ -198,21 +202,21 @@ public class Table extends JPanel {
         startString = new JLabel("Waiting for game to start");
         startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
-        startString.setForeground(new Color(0x652010));
+        startString.setForeground(westernRed);
         add(startString);
 
 
-        newRoundString = new JLabel("Trading phase");
-        newRoundString.setBounds((f_width/2) - 120, (f_height/2)-50, 250,50);
-        newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
-        newRoundString.setForeground(Color.YELLOW);
+        newRoundString = new JLabel("Trading phase", SwingConstants.CENTER);
+        newRoundString.setBounds((f_width/2) - 200, (f_height/2)-80, 400,80);
+        newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.PLAIN, 72));
+        newRoundString.setForeground(westernRed);
         newRoundString.setVisible(false);
         add(newRoundString);
 
         statusString = new JLabel("Some testing text that doesn't matter", SwingConstants.CENTER);
         statusString.setBounds((f_width/2) - 250, (f_height/2)+50, 500,50);
-        statusString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 28));
-        statusString.setForeground(new Color(0xcccc00));
+        statusString.setFont(gameLobby.normalFont.deriveFont(Font.BOLD, 18));
+        statusString.setForeground(westernYellow);
         statusString.setVisible(false);
         add(statusString);
 
