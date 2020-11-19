@@ -23,6 +23,10 @@ public class Player extends JPanel{
     private List<Card> cardsToPlay = new ArrayList<>();
     private JButton removeCard;
 
+    public PlayerButton getPlayCardsBtn() {
+        return playCardsBtn;
+    }
+
     // TODO: REMOVE ADD AND REMOVE BUTTONS
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
     private final PlayerButton cancelBtn;

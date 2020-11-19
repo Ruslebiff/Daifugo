@@ -37,6 +37,10 @@ public class PlayerData implements Serializable {
        connectionLost = latency < 0;
     }
 
+    public void setOutOfRound(boolean outOfRound) {
+        this.outOfRound = outOfRound;
+    }
+
     public void reset() {
         role = Role.NEUTRAL;
         previousRoles = new ArrayList<>();
