@@ -175,8 +175,10 @@ public class GameRunner {
     }
 
     private void giveCardsHandler(GiveCardsRequest request) throws IOException {
+        LOGGER.info(logPrefix() + "Entered giveCardsHandler...");
         try {
             game.giveCards(userSession.getID(), request.getCards());
+            LOGGER.info(logPrefix() + "Gave cards successfully, sending OK...");
             out.writeObject(new Message(OK));
         } catch (GameException e) {
             LOGGER.warning(logPrefix() + "Couldn't give cards: " + e.getMessage());

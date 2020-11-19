@@ -92,7 +92,6 @@ public class PlayerData implements Serializable {
 
     public void setOutCount(int outCount) {
         this.outCount = outCount;
-        System.out.println(nick + " got outcount set to " + this.outCount);
         outOfRound = true;
     }
 
@@ -106,7 +105,6 @@ public class PlayerData implements Serializable {
     }
 
     public boolean assignRoleFewPlayers() {
-        System.out.println("outcount: " + outCount);
         mustTrade = true;
         if (outCount == 1) {
             role = Role.PRESIDENT;

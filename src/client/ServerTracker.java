@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -84,7 +85,7 @@ public class ServerTracker implements GameStateTracker {
 
                 Thread.sleep(heartbeatInterval);
                 } catch (Exception e) {
-                    LOGGER.warning("Heartbeat resulted in exception: " + e.toString());
+                    LOGGER.warning("Heartbeat resulted in exception: " + Arrays.toString(e.getStackTrace()));
                     break;
                 }
             }
@@ -192,9 +193,14 @@ public class ServerTracker implements GameStateTracker {
     @Override
     public List<Card> getHand() {
         synchronized (this) {
-            return state.getHand()
-                    .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
-                    .collect(Collectors.toList());
+            try {
+                return state.getHand()
+                        .stream().map(card -> new Card(card.getNumber(), card.getSuit()))
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                LOGGER.warning(e.getStackTrace().toString());
+                return new ArrayList<>();
+            }
         }
     }
 
@@ -243,14 +249,13 @@ public class ServerTracker implements GameStateTracker {
             Message response = null;
             try {
                 response = connection.sendMessage(new GiveCardsRequest(cards));
-                if(response.isError())
+                if(response.isError()) {
+                    LOGGER.warning("Error giving cards: " + response.getErrorMessage());
                     return false;
+                }
 
-                GameStateResponse tmp = (GameStateResponse) response;
-                state = tmp.getState();
-                guiCallback.call();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warning("Exception giving cards: " + e.toString());
                 return false;
             }
             return true;

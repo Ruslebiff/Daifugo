@@ -118,6 +118,7 @@ public class Game {
         passCount = 0;
         roundNo = 1;
         playersInTradingPhase = 0;
+        receiveFromTrade = new HashMap<>();
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -141,6 +142,18 @@ public class Game {
         if (playersInTradingPhase == 0)
             throw new GameException();
         playersInTradingPhase--;
+
+        // making sure players receive the given cards
+        if (playersInTradingPhase == 0) {
+            SERVER_LOGGER.info("Trading phase is over");
+            for (UUID pID : receiveFromTrade.keySet()) {
+                List<CardData> hand = hands.get(pID);
+                hand.addAll(receiveFromTrade.get(pID));
+
+            }
+
+            findStartingPlayer(UUID.randomUUID()); // if three of diamonds is chosen, theres a bug
+        }
     }
 
     public void giveCards(UUID player, List<CardData> givenCards) throws GameException {
@@ -162,12 +175,26 @@ public class Game {
                 default -> throw new GameException("Invalid role");
             }
 
+            // removing cards from own hand
+            List<CardData> hand = hands.get(player);
+            for (CardData card : givenCards) {
+                for (CardData c : hand) {
+                    if (card.getSuit() == c.getSuit() && card.getNumber() == c.getNumber()) {
+                        hand.remove(c);
+                        break;
+                    }
+                }
+            }
+
+            // put given cards into receive map
             for (UUID pID : players.keySet()) {
                 if (players.get(pID).getGameData().getRole() == recipientRole) {
+                    SERVER_LOGGER.fine("Adding given cards to receive map");
                     receiveFromTrade.put(pID, givenCards);
                     break;
                 }
             }
+
 
             playerData.doneTrading();
             decrementTraders();
@@ -232,7 +259,7 @@ public class Game {
         synchronized (this) {
             tmp = _getTopCards();
         }
-        SERVER_LOGGER.info("Size of top cards: " + tmp.size());
+        SERVER_LOGGER.fine("Size of top cards: " + tmp.size());
         if (tmp.size() == 4)
             tmp.remove(0);
         return tmp;
@@ -469,7 +496,8 @@ public class Game {
             roundNo++;
 
             assignRoles();
-            findStartingPlayer(dealCards());
+            dealCards();
+            currentPlayer = -1;
             goneOut = 0;
             propagateChange();
         }
@@ -618,20 +646,14 @@ public class Game {
             if (player == turnSequence.size())
                 player = 0;
 
-            SERVER_LOGGER.info("Dealing card: " + card.getValue());
 
 
             tmp = turnSequence.get(player++);
 
-            SERVER_LOGGER.fine(
-                    "Data: - " + tmp +
-                            " - " + (player-1) + " - " + turnSequence.size()
-            );
             List<CardData> hand = hands.get(tmp);
             if (hand == null)
                 SERVER_LOGGER.warning("hand is null");
             hand.add(card);
-            SERVER_LOGGER.info("new hand size: " + hand.size());
 
             if (playerWithThreeOfDiamonds == null
                     && card.getNumber() == 3
@@ -654,7 +676,7 @@ public class Game {
         turnSequence = new ArrayList<>();
         turnSequence.addAll(players.keySet());
         Collections.shuffle(turnSequence);
-        SERVER_LOGGER.info("Shuffling player order, new sequence size: " + turnSequence.size());
+        SERVER_LOGGER.fine("Shuffling player order, new sequence size: " + turnSequence.size());
     }
 
     /**
