@@ -29,6 +29,7 @@ public class Player extends JPanel{
     private final int widthOfComponent;
     private int boundsX = 0;
     private int space = 24; // Space between cards when a player has maximum cards
+    private int maxSpace = 24;
     private final int maxCards = 18;
     private boolean giveCards = false; // Is set by server
     private boolean cardsClickable;
@@ -168,6 +169,7 @@ public class Player extends JPanel{
     }
 
     public void viewDealtHand() {
+        space = maxSpace;
         space = space + ((maxCards - hand.size()) / 2);
         boundsX = (widthOfComponent / 2) - (cardWidth / 2) + (((hand.size() - 1) / 2) * space);
         if(hand.size() == 18)

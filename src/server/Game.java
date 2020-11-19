@@ -707,7 +707,7 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-        //currentPlayer = 0; // to speed up testing TODO: remove later
+//        currentPlayer = 0; // to speed up testing TODO: remove later
 
         currentPlayer = -1;
         for (UUID id : turnSequence) {

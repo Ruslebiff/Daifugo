@@ -97,6 +97,10 @@ public class Table extends JPanel {
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
         switch(stateTracker.getCardsInTrick()) {
+            case 0 -> {
+                LOGGER.info("Last played card in play " + stateTracker.getCardsInPlay());
+                LOGGER.info("Cards on table size " + stateTracker.getCardsOnTable().size());
+            }
             case 1 -> inPlay = "SINGLES";
             case 2 -> inPlay = "DOUBLES";
             case 3 -> inPlay = "TRIPLES";

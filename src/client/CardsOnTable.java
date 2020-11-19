@@ -60,8 +60,8 @@ public class CardsOnTable extends JPanel{
         int noOfFaceDown = stateTracker.getNumberOfFaceDownCards();
         for (int i = 0; i < noOfFaceDown; i++) {
             int boundsX = 1 + i;
-            if(i > 5)
-                boundsX -= 5;
+            if(boundsX > 10)
+                boundsX = 0;
             FaceDownCard tmp = new FaceDownCard();
             faceDownCards.add(tmp);
             tmp.setBounds(boundsX, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
