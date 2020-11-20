@@ -103,6 +103,7 @@ public class PlayersInformation extends JPanel {
             }
 
             playerInfo[i].setText(playerInformationTxt);
+            playerInfo[i].setFont(gameLobby.normalFont.deriveFont(Font.BOLD, 14));
 
             playerInfo[i].setOpaque(true);
             if(i != 0) {
