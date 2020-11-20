@@ -37,4 +37,6 @@ public interface GameStateTracker {
     int getCardsInPlay();
     boolean isNewTrick();
     Trick getLastTrick();
+    //boolean haveGoneOut();
+    int getGoneOutNumber();
 }

@@ -400,6 +400,14 @@ public class ServerTracker implements GameStateTracker {
         }
     }
 
+
+    @Override
+    public int getGoneOutNumber() {
+        synchronized (this) {
+            return state.getOutCount();
+        }
+    }
+
     @Override
     public int getNumberOfFaceDownCards() {
         synchronized (this) {

@@ -1,7 +1,5 @@
 package client;
 
-import common.Role;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -38,10 +36,14 @@ public class Table extends JPanel {
     private final String presidentOneTrade = "Please choose any one card to give to the Bum.";
     private final String presidentTwoTrade = "Please choose any two cards to give to the Bum.";
     private final String neutralTrade = "Please be patient while the rich and poor trades cards.";
-
+    private final String waitingForPlayersString = "Waiting for more players...";
+    private final String waitingForGameStartString = "Waiting for game to start";
+    private boolean gotMessage = false;
 
 
     private Void updateGUI() {
+        LOGGER.info("updateGUI, goneoutno: " + stateTracker.getGoneOutNumber());
+        LOGGER.info("is trading phase: " + stateTracker.isTradingPhase());
 
         if (statusString != null)
             statusString.setVisible(false);
@@ -73,6 +75,16 @@ public class Table extends JPanel {
         }
 
         if (stateTracker.isTradingPhase()) {
+            if (!gotMessage && stateTracker.getGoneOutNumber() == stateTracker.getPlayerList().size()) {
+                gotMessage = true;
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "You're out of the round! Your new role will be: Bum",
+                        "You've gone out!",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
             if (stateTracker.iHaveToTrade()) {
                 switch (stateTracker.getRole()) {
                     case PRESIDENT -> statusString.setText(
@@ -84,9 +96,9 @@ public class Table extends JPanel {
                     case VICE_BUM -> statusString.setText(viceBumTrade);
                     case VICE_PRESIDENT -> statusString.setText(vicePresidentTrade);
                 }
-            }
-            if (stateTracker.getRole() == Role.NEUTRAL)
+            } else {
                 statusString.setText(neutralTrade);
+            }
             statusString.setVisible(true);
         }
 
@@ -114,9 +126,45 @@ public class Table extends JPanel {
         cardsInPlayCounter.setText(inPlay);
 
         // setting new round text according to state
-        newRoundString.setVisible(stateTracker.isTradingPhase());
+        if (newRoundString != null)
+            newRoundString.setVisible(stateTracker.isTradingPhase());
 
         if (player != null) {
+            if (!player.isGoneOut() && gotMessage)
+                gotMessage = false;
+
+            if (player.isGoneOut() && !gotMessage) {
+                player.setGoneOut(false);
+                gotMessage = true;
+                LOGGER.info("Player has gone out");
+
+                // calculate which role we will get
+                int goneOutNumber = stateTracker.getGoneOutNumber();
+                LOGGER.info("goneOutNo: " + goneOutNumber);
+                int playerNum = stateTracker.getPlayerList().size();
+                LOGGER.info("playerNum: " + playerNum);
+                String newRole;
+
+                if (goneOutNumber == 1)
+                    newRole = "President";
+                else if (goneOutNumber == 2 && playerNum > 3)
+                    newRole = "Vice-President";
+                else if (goneOutNumber == playerNum-1 && playerNum > 3) {
+                    newRole = "Vice-Bum";
+                }
+                else if (goneOutNumber == playerNum)
+                    newRole = "Bum";
+                else
+                    newRole = "Neutral";
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "You're out of the round! Your new role will be: " + newRole,
+                        "You've gone out!",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+
             if (wasTradePhase && !stateTracker.isTradingPhase()) {
                 wasTradePhase = false;
                 player.update(stateTracker.getHand());
@@ -130,12 +178,15 @@ public class Table extends JPanel {
                     statusString.setVisible(true);
                 }
             }
-            if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
-                player.update(stateTracker.getHand());
+
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
                 player.setVisible(false);
+
+                statusString.setVisible(false);
+                newRoundString.setVisible(false);
+                cardsInPlayCounter.setVisible(false);
                 startString.setVisible(true);
             }
 
@@ -159,7 +210,9 @@ public class Table extends JPanel {
         TABLE_WIDTH = f_width;
         TABLE_HEIGHT = f_height;
         try {
-            image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
+            image = ImageIO.read(
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg")    // Read the image
+            );
         } catch (IOException ex) {
             ex.printStackTrace();
         }

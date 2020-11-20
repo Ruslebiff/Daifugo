@@ -225,8 +225,8 @@ public class Server {
         }
 
         private void joinExistingGame(JoinGameRequest request) throws IOException, GameDisconnect {
-            Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
             try {
+                Game game = Game.getGameByID(UUID.fromString(request.getGameID()));
                 game.joinGame(currentSession, request.getPassword());
 
             } catch (GameException e) {

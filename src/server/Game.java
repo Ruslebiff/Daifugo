@@ -1,11 +1,9 @@
 package server;
 
-import client.Card;
 import common.*;
 import server.exceptions.*;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static server.Server.SERVER_LOGGER;
 
@@ -47,11 +45,12 @@ public class Game {
             return list;
         }
     }
+    
 
-    private final boolean TEST_MODE = true;
-
-    public static Game getGameByID(UUID id) {
+    public static Game getGameByID(UUID id) throws GameException {
         synchronized (Game.class) {
+            if (!games.containsKey(id))
+                throw new GameException("No such game exists");
             return games.get(id);
         }
     }
@@ -87,8 +86,12 @@ public class Game {
     private Map<UUID, List<CardData>> receiveFromTrade;
     private Trick trickTriggered;
 
+    //TODO: this todo is just a bookmark
+    private final boolean TEST_MODE = true;
+    private final int TEST_CARD_NUM = 3;
 
     /**
+     *
      * Public interface
      ***************************/
 
@@ -292,6 +295,9 @@ public class Game {
         if (players.containsKey(user.getID()))
             throw new PlayerAlreadyInGame();
 
+        if (players.size() == 8)
+            throw new GameException("Game is full");
+
         if (!Arrays.equals(password, this.password)) throw new WrongPassword();
 
         PlayerData data = new PlayerData(
@@ -462,6 +468,14 @@ public class Game {
                 PlayerData pd = players.get(player).getGameData();
                 pd.setNumberOfCards(hands.get(player).size());
 
+
+                // if hand is empty, go out of round
+                if (hands.get(player).isEmpty()) {
+                    goneOut++;
+                    SERVER_LOGGER.info("Set goneout to: " + goneOut);
+                    pd.setOutCount(goneOut);
+                }
+
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
 
@@ -476,17 +490,13 @@ public class Game {
                 ) {
                     // all 4 top cards the same, start new trick
                     newTrick(Trick.FOUR_SAME);
+                    if (hands.get(player).isEmpty())
+                        nextPlayer();   // player has gone out and should not get the next turn
                     return;
                 }
 
 
 
-                // if hand is empty, go out of round
-                if (hands.get(player).isEmpty()) {
-                    goneOut++;
-                    SERVER_LOGGER.info("Set goneout to: " + goneOut);
-                    pd.setOutCount(goneOut);
-                }
 
                 if (noOfCardsInTrick == 0)
                     noOfCardsInTrick = cards.size();
@@ -548,7 +558,7 @@ public class Game {
 
         int numCards = 15;
         if (TEST_MODE)
-            numCards = 6; // to speed up testing
+            numCards = TEST_CARD_NUM; // to speed up testing
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
