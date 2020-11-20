@@ -39,6 +39,8 @@ public class Table extends JPanel {
     private final String presidentTwoTrade = "Please choose any two cards to give to the Bum.";
     private final String neutralTrade = "Please be patient while the rich and poor trades cards.";
 
+    private final String waitingForPlayersString = "Waiting for more players...";
+    private final String waitingForGameStartString = "Waiting for game to start";
 
 
     private Void updateGUI() {
@@ -71,7 +73,7 @@ public class Table extends JPanel {
         }
 
 
-        if (stateTracker.isTradingPhase() && !wasTradePhase) {
+        if (stateTracker.isTradingPhase() && !wasTradePhase && player != null) {
             wasTradePhase = true;
             player.update(stateTracker.getHand());
         }
@@ -93,6 +95,30 @@ public class Table extends JPanel {
                 statusString.setText(neutralTrade);
             statusString.setVisible(true);
         }
+
+        int amountOfPlayers = stateTracker.getPlayerList().size();
+
+        if (startString != null) {
+            if (amountOfPlayers < 3)
+                startString.setText(waitingForPlayersString);
+            else
+                startString.setText(waitingForGameStartString);
+        }
+
+        if (startBtn != null) {
+            if (amountOfPlayers < 3) {
+                startBtn.setEnabled(false);
+            } else {
+                startBtn.setEnabled(true);
+            }
+
+            if (!stateTracker.isStarted()) {
+                startBtn.setText("Start");
+            } else {
+                startBtn.setText("Stop");
+            }
+        }
+
 
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
@@ -131,6 +157,8 @@ public class Table extends JPanel {
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
                 player.setVisible(false);
+                statusString.setVisible(false);
+                newRoundString.setVisible(false);
                 startString.setVisible(true);
             }
 
@@ -203,8 +231,8 @@ public class Table extends JPanel {
         add(exitButton);
         exitButton.addActionListener(e -> exitGame());
 
-        startString = new JLabel("Waiting for game to start");
-        startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
+        startString = new JLabel(waitingForPlayersString, SwingConstants.CENTER);
+        startString.setBounds((f_width/2) - 175, (f_height/2)-50, 350,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
         startString.setForeground(westernRed);
         add(startString);
