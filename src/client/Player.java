@@ -272,17 +272,22 @@ public class Player extends JPanel{
 
     public Boolean checkIfPlayable() {
         if(cardsToPlay.size() != 0) {   // If the player has selected cards
-            List<Card> allCardsOnTable = stateTracker.getCardsOnTable(); // Last played cards
-            List<Card> lastPlayed = new ArrayList<>();
+            List<Card> lastPlayed = stateTracker.getCardsOnTable();
 
-            int noOfCardsInLastTrick = stateTracker.getCardsInTrick();
-            int allCards = allCardsOnTable.size() - 1;
-            for (int i = allCards; i > allCards - noOfCardsInLastTrick; i--) {  // Get only the amount of cards from
-                lastPlayed.add(allCardsOnTable.get(i));                         // table equal to last trick
+            boolean c3 = false;
+
+            // check that all cards tried to be played are the same
+            if (cardsToPlay.size() > 1) {
+                for (Card c : cardsToPlay) {
+                    if (c.getValue() == 16)
+                        c3 = true;
+                    if (c.getValue() != cardsToPlay.get(0).getValue()) {
+                        return false;
+                    }
+                }
             }
 
-            if (lastPlayed.size() == 0)
-                return true;
+
 
             // Check that you don't end up with 3 of clubs
             if(
@@ -301,23 +306,19 @@ public class Player extends JPanel{
                 return false;
             }
 
-            if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
+
+            if (!lastPlayed.isEmpty() && cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
                 return true;
 
+            // if the table is empty, all cards are the same, and 3 of clubs isn't one of them
+            if (lastPlayed.isEmpty() && !c3)
+                return true;
 
             // Check that the amount of selected cards is the same as the last played cards
-            if (cardsToPlay.size() == lastPlayed.size()) {
-                boolean allSame = false;
-                for (Card card : cardsToPlay) {
-                    if (card.getValue() == cardsToPlay.get(0).getValue())    // Checks if all the cards to play are the same
-                        allSame = true;
-                    else {
-                        allSame = false;
-                        break;
-                    }
-                }
-                return cardsToPlay.get(0).getValue() >= lastPlayed.get(lastPlayed.size() - 1).getValue() && allSame;
+            if (cardsToPlay.size() == stateTracker.getCardsInTrick()) {
+                return cardsToPlay.get(0).getValue() >= lastPlayed.get(lastPlayed.size() - 1).getValue();
             }
+
         }
         return false;
     }

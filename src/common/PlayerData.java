@@ -36,7 +36,6 @@ public class PlayerData implements Serializable {
        outCount = 0;
        outOfRound = false;
        this.previousRoles = previousRoles;
-       LOGGER.info("PREVIOUS ROLE SIZE " + this.previousRoles.size());
 
        // negative latency value is lost connection
        connectionLost = latency < 0;

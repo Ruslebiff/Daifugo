@@ -71,7 +71,7 @@ public class ScoreBoard extends JPanel {
                     }
                 }
             } else
-                LOGGER.info("PREVIOUS ROLES ARE EMPTY");
+                LOGGER.info("ScoreBoard: PREVIOUS ROLES ARE EMPTY");
 
             String playerLabel = player.getNick() + ": " + score;
             playerScores[i].setText(playerLabel);

@@ -8,7 +8,7 @@ package protocol;
 public class Protocol {
 
     // Port number
-    public static final int PORT = 5555;
+    public static final int PORT = 43273;
 
     // Timeout in milliseconds
     public static final int SOCKET_TIMEOUT = 10*1000;
