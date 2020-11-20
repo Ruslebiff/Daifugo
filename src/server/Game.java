@@ -48,7 +48,7 @@ public class Game {
         }
     }
 
-    private final boolean TEST_MODE = false;
+    private final boolean TEST_MODE = true;
 
     public static Game getGameByID(UUID id) {
         synchronized (Game.class) {
@@ -299,7 +299,8 @@ public class Game {
                 0,
                 false,
                 Role.NEUTRAL,
-                0
+                0,
+                new ArrayList<>()
         );
 
         synchronized (this) {
@@ -698,6 +699,7 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
+
 
         currentPlayer = -1;
         for (UUID id : turnSequence) {

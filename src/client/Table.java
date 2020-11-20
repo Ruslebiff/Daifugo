@@ -39,8 +39,6 @@ public class Table extends JPanel {
     private final String presidentTwoTrade = "Please choose any two cards to give to the Bum.";
     private final String neutralTrade = "Please be patient while the rich and poor trades cards.";
 
-    private final String waitingForPlayersString = "Waiting for more players...";
-    private final String waitingForGameStartString = "Waiting for game to start";
 
 
     private Void updateGUI() {
@@ -49,10 +47,6 @@ public class Table extends JPanel {
             statusString.setVisible(false);
 
         List<Card> cards = stateTracker.getHand();
-        for (Card card : cards) {
-            LOGGER.info("Currently in hand: " + card.getNumber() + card.getSuit());
-        }
-
 
         if (stateTracker.isCancelled()) {
             LOGGER.info("Game is cancelled, exiting...");
@@ -73,7 +67,7 @@ public class Table extends JPanel {
         }
 
 
-        if (stateTracker.isTradingPhase() && !wasTradePhase && player != null) {
+        if (stateTracker.isTradingPhase() && !wasTradePhase) {
             wasTradePhase = true;
             player.update(stateTracker.getHand());
         }
@@ -95,30 +89,6 @@ public class Table extends JPanel {
                 statusString.setText(neutralTrade);
             statusString.setVisible(true);
         }
-
-        int amountOfPlayers = stateTracker.getPlayerList().size();
-
-        if (startString != null) {
-            if (amountOfPlayers < 3)
-                startString.setText(waitingForPlayersString);
-            else
-                startString.setText(waitingForGameStartString);
-        }
-
-        if (startBtn != null) {
-            if (amountOfPlayers < 3) {
-                startBtn.setEnabled(false);
-            } else {
-                startBtn.setEnabled(true);
-            }
-
-            if (!stateTracker.isStarted()) {
-                startBtn.setText("Start");
-            } else {
-                startBtn.setText("Stop");
-            }
-        }
-
 
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
@@ -160,15 +130,12 @@ public class Table extends JPanel {
                     statusString.setVisible(true);
                 }
             }
-            if ((stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase()))
+            if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
                 player.update(stateTracker.getHand());
-
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
                 player.setVisible(false);
-                statusString.setVisible(false);
-                newRoundString.setVisible(false);
                 startString.setVisible(true);
             }
 
@@ -184,7 +151,6 @@ public class Table extends JPanel {
     public Table(int f_width, int f_height, GameStateTracker sT, GameLobby gL) {
 
         gameLobby = gL;
-
         wasStopped = true;
         wasTradePhase = false;
 
@@ -199,7 +165,7 @@ public class Table extends JPanel {
         }
         setLayout(null);
 
-        playersInformation = new PlayersInformation(stateTracker);
+        playersInformation = new PlayersInformation(stateTracker, gameLobby);
         int pInfoWidth = 200;
         int pInfoHeight = 100;
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
@@ -214,8 +180,8 @@ public class Table extends JPanel {
         );
         add(cardsOnTable);
 
-        Color westernYellow = new Color(0xFFDFCE25, true);
-        Color daifugoBlue = new Color(0xFF4988FF, true);
+        Color westernYellow = new Color(0xbbaa00);
+        Color westernRed = new Color(0x652010);
 
         cardsInPlayCounter = new JTextArea();
         cardsInPlayCounter.setLineWrap(true);
@@ -247,17 +213,17 @@ public class Table extends JPanel {
         add(exitButton);
         exitButton.addActionListener(e -> exitGame());
 
-        startString = new JLabel(waitingForPlayersString, SwingConstants.CENTER);
-        startString.setBounds((f_width/2) - 175, (f_height/2)-50, 350,50);
+        startString = new JLabel("Waiting for game to start");
+        startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
-        startString.setForeground(daifugoBlue);
+        startString.setForeground(westernRed);
         add(startString);
 
 
         newRoundString = new JLabel("Trading phase", SwingConstants.CENTER);
         newRoundString.setBounds((f_width/2) - 200, (f_height/2)-80, 400,80);
         newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.PLAIN, 72));
-        newRoundString.setForeground(daifugoBlue);
+        newRoundString.setForeground(westernRed);
         newRoundString.setVisible(false);
         add(newRoundString);
 
@@ -312,6 +278,26 @@ public class Table extends JPanel {
             startBtn.setText("Start");
             stateTracker.stopGame();
         }
+    }
+
+    public void showScoreBoard() {
+        if(stateTracker.getPlayerList().size() >= 3) {
+            JFrame scoreFrame = new JFrame("Scoreboard");
+            int SCREEN_HEIGHT = (stateTracker.getPlayerList().size() * 50) + 100;
+            int SCREEN_WIDTH = 200;
+            ScoreBoard scoreBoard = new ScoreBoard(stateTracker, gameLobby);
+            scoreBoard.setBounds(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+            scoreFrame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            scoreFrame.add(scoreBoard);
+            scoreFrame.setLocationRelativeTo(null);          // Place in middle of screen
+            scoreFrame.setVisible(true);                     // Frame visible
+        } else
+            JOptionPane.showMessageDialog(
+                    this.getParent(),
+                    "Not enough players!",
+                    "ERROR",
+                    JOptionPane.WARNING_MESSAGE
+            );
     }
 
     @Override
