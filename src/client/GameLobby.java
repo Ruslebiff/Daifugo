@@ -96,7 +96,7 @@ public class GameLobby extends JFrame {
     private JFrame pwFrame = new JFrame("Join game");
     private String playerToken;
     private SettingsIO settingsIO = new SettingsIO();
-    private String defaultServer = "localhost"; // TODO: Change default server address
+    private String defaultServer = "play.daifugo.no";
     public Font westernFont;
     public Font normalFont;
 

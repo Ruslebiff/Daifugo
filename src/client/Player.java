@@ -213,10 +213,12 @@ public class Player extends JPanel{
     }
 
     public void cancel() {
-        hand.forEach(c -> {
-            c.setSelectedFalse();   // Deselects all the cards
-            c.repaint();
-        });
+        if (hand != null) {
+            hand.forEach(c -> {
+                c.setSelectedFalse();   // Deselects all the cards
+                c.repaint();
+            });
+        }
         cardsToPlay = new ArrayList<>();
         cancelBtn.setEnabled(false);
     }
