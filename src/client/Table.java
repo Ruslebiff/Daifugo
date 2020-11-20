@@ -188,9 +188,6 @@ public class Table extends JPanel {
                     statusString.setVisible(true);
                 }
             }
-            if ((stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase()))
-                player.update(stateTracker.getHand());
-
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
