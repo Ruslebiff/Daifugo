@@ -185,6 +185,14 @@ public class Table extends JPanel {
                 }
             }
 
+            if (startBtn != null) {
+                if (stateTracker.isStarted()) {
+                    startBtn.setText("Stop");
+                } else {
+                    startBtn.setText("Start");
+                }
+            }
+
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
@@ -194,6 +202,8 @@ public class Table extends JPanel {
                 newRoundString.setVisible(false);
                 cardsInPlayCounter.setVisible(false);
                 startString.setVisible(true);
+
+                cardsOnTable.updateCardsOnTable();
             }
 
         }
