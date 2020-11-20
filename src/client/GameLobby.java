@@ -288,7 +288,10 @@ public class GameLobby extends JFrame {
         });
 
         JLabel nickText = new JLabel();
-        nickText.setText(playerName);
+        nickText.setText("Name: " + playerName);
+
+        JLabel serverText = new JLabel();
+        serverText.setText("Server: " + serverAddress);
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
@@ -314,12 +317,19 @@ public class GameLobby extends JFrame {
         c.weightx = 0.1;
         c.gridx = 2;
         c.gridy = 0;
-        c.ipadx = 100;
+        c.ipadx = 0;
         controlPanel.add(nickText, c);
+
+        c.fill = GridBagConstraints.CENTER;
+        c.weightx = 0.1;
+        c.gridx = 3;
+        c.gridy = 0;
+        c.ipadx = 0;
+        controlPanel.add(serverText, c);
 
         c.fill = GridBagConstraints.LINE_END;
         c.weightx = 0.0;
-        c.gridx = 3;
+        c.gridx = 4;
         c.gridy = 0;
         c.ipadx = 0;
         controlPanel.add(settingsButton, c);
@@ -327,7 +337,7 @@ public class GameLobby extends JFrame {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 0.0;
         c.weighty = 0.1;
-        c.gridwidth = 3;
+        c.gridwidth = 4;
         c.gridx = 1;
         c.gridy = 1;
         controlPanel.add(searchField, c);
@@ -482,7 +492,7 @@ public class GameLobby extends JFrame {
                     }
                     IdentityResponse updatedNickResponse = (IdentityResponse) response;
                     playerName = updatedNickResponse.getNick();
-                    nickText.setText(playerName);
+                    nickText.setText("Name: " + playerName);
                 } catch (IOException | ClassNotFoundException ioException) {
                     ioException.printStackTrace();
                 }
