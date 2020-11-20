@@ -20,10 +20,12 @@ public class PlayersInformation extends JPanel {
     private final int WIDTH;
     private final int HEIGHT;
     private final JLabel infoString;
+    private GameLobby gameLobby;
 
-    public PlayersInformation(GameStateTracker stateTracker) {
+    public PlayersInformation(GameStateTracker stateTracker, GameLobby gl) {
         this.stateTracker = stateTracker;
         this.players = stateTracker.getPlayerList();
+        this.gameLobby = gl;
         WIDTH = 200;
         HEIGHT = 50;
         int PANEL_HEIGHT = (players.size()+1) * HEIGHT;
@@ -32,7 +34,7 @@ public class PlayersInformation extends JPanel {
         setSize(new Dimension(WIDTH, PANEL_HEIGHT));
 
         infoString = new JLabel("Players", SwingConstants.CENTER);
-        infoString.setFont(new Font("sans serif", Font.BOLD, 18));
+        infoString.setFont(gameLobby.normalFont.deriveFont(Font.BOLD, 18));
         infoString.setBounds(0, 0, WIDTH, HEIGHT);
         add(infoString);
     }

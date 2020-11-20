@@ -98,6 +98,8 @@ public class Info {
         f.setVisible(true);                     // Frame visible
     }
 
+
+
     public String getVersion() {
         return version;
     }

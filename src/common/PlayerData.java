@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static client.GameLobby.LOGGER;
+
 public class PlayerData implements Serializable {
     private String nick;
     private long latency;
@@ -21,7 +23,8 @@ public class PlayerData implements Serializable {
             int numberOfCards,
             boolean passed,
             Role role,
-            int latency
+            int latency,
+            List<Role> previousRoles
     ) {
        this.nick = nick;
        this.passed = passed;
@@ -32,7 +35,8 @@ public class PlayerData implements Serializable {
        mustTrade = false;
        outCount = 0;
        outOfRound = false;
-       previousRoles = new ArrayList<>();
+       this.previousRoles = previousRoles;
+       LOGGER.info("PREVIOUS ROLE SIZE " + this.previousRoles.size());
 
        // negative latency value is lost connection
        connectionLost = latency < 0;
@@ -118,6 +122,7 @@ public class PlayerData implements Serializable {
             mustTrade = false;
         }
         previousRoles.add(role);
+
         return mustTrade;
     }
 
@@ -146,5 +151,9 @@ public class PlayerData implements Serializable {
 
     public void doneTrading() {
         mustTrade = false;
+    }
+
+    public List<Role> getPreviousRoles(){
+        return new ArrayList<>(previousRoles);
     }
 }

@@ -35,6 +35,7 @@ public class GameLobby extends JFrame {
     private int maxNickNameLength = 16;
     private int maxGameNameLength = 16;
     private int maxServerAddressLength = 36;
+    private Table playTable = null;
 
     static {
         try {
@@ -187,13 +188,31 @@ public class GameLobby extends JFrame {
             }
         });
 
+        JMenu viewMenu = new JMenu("View");
+        JMenuItem menuItemView = new JMenuItem(new AbstractAction("View Scoreboard"){
+            public void actionPerformed(ActionEvent e) {
+                if(playTable != null)
+                    playTable.showScoreBoard();
+                else
+                    JOptionPane.showMessageDialog(
+                            getParent(),
+                            "Scoreboard not available.",
+                            "ERROR",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+            }
+        });
+
+
         fileMenu.add(menuItemExit);
         helpMenu.add(menuItemHowToPlay);
         aboutMenu.add(menuItemAbout);
+        viewMenu.add(menuItemView);
 
         topMenuBar.add(fileMenu);
         topMenuBar.add(helpMenu);
         topMenuBar.add(aboutMenu);
+        topMenuBar.add(viewMenu);
         topMenuBar.setMaximumSize(new Dimension(window_width, 50));
         add(topMenuBar);
 
@@ -685,7 +704,7 @@ public class GameLobby extends JFrame {
 
             showLobby(false);
 
-            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable = new Table(window_width, window_height, tracker, this);
             playTable.setBounds(0,0, getWidth(), getHeight());
             playTable.setVisible(true);
             playTable.setBounds(0,0,window_width,window_height);
@@ -869,7 +888,7 @@ public class GameLobby extends JFrame {
             showLobby(false);
             pwFrame.setVisible(false);
 
-            Table playTable = new Table(window_width, window_height, tracker, this);
+            playTable = new Table(window_width, window_height, tracker, this);
             playTable.setBounds(0,0, getWidth(), getHeight());
             playTable.setVisible(true);
             playTable.setBounds(0,0,window_width,window_height);

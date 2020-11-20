@@ -62,13 +62,15 @@ public class GameState implements Serializable {
         players = new ArrayList<>();
 
         for (UUID id : game.getTurnSequence()) {
+
             PlayerData tmp = playerMap.get(id).getGameData();
             players.add(new PlayerData(
                     tmp.getNick(),
                     tmp.getNumberOfCards(),
                     tmp.hasPassed(),
                     tmp.getRole(),
-                    (int) tmp.getLatency()
+                    (int) tmp.getLatency(),
+                    tmp.getPreviousRoles()
             ));
 
             if (id == session.getID())
