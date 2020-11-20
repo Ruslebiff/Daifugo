@@ -295,6 +295,9 @@ public class Game {
         if (players.containsKey(user.getID()))
             throw new PlayerAlreadyInGame();
 
+        if (players.size() == 8)
+            throw new GameException("Game is full");
+
         if (!Arrays.equals(password, this.password)) throw new WrongPassword();
 
         PlayerData data = new PlayerData(
