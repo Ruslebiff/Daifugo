@@ -7,7 +7,7 @@ public class SettingsIO {
     public Properties prop = new Properties();
 
     public void saveSettings(String serverAddress, String nickName){
-        try (OutputStream output = new FileOutputStream("/config.properties")) {
+        try (OutputStream output = new FileOutputStream("./config.properties")) {
 
             Properties prop = new Properties();
 
@@ -27,7 +27,7 @@ public class SettingsIO {
 
 
     public void readSettings(){
-        try (InputStream input = new FileInputStream("/config.properties")) {
+        try (InputStream input = new FileInputStream("./config.properties")) {
 
             // load a properties file
             prop.load(input);
