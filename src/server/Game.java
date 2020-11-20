@@ -87,8 +87,8 @@ public class Game {
     private Trick trickTriggered;
 
     //TODO: this todo is just a bookmark
-    private final boolean TEST_MODE = false;
-    private final int TEST_CARD_NUM = 6;
+    private final boolean TEST_MODE = true;
+    private final int TEST_CARD_NUM = 3;
 
     /**
      * Public interface

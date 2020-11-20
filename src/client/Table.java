@@ -153,17 +153,20 @@ public class Table extends JPanel {
                 LOGGER.info("Player has gone out");
 
                 // calculate which role we will get
-                int roleNum = stateTracker.getGoneOutNumber();
+                int goneOutNumber = stateTracker.getGoneOutNumber();
+                LOGGER.info("goneOutNo: " + goneOutNumber);
                 int playerNum = stateTracker.getPlayerList().size();
+                LOGGER.info("playerNum: " + playerNum);
                 String newRole;
 
-                if (roleNum == 1)
+                if (goneOutNumber == 1)
                     newRole = "President";
-                else if (roleNum == 2 && playerNum > 3)
+                else if (goneOutNumber == 2 && playerNum > 3)
                     newRole = "Vice-President";
-                else if (roleNum == playerNum-2 && playerNum >3)
+                else if (goneOutNumber == playerNum-1 && playerNum > 3) {
                     newRole = "Vice-Bum";
-                else if (roleNum == playerNum)
+                }
+                else if (goneOutNumber == playerNum)
                     newRole = "Bum";
                 else
                     newRole = "Neutral";
