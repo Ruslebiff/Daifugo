@@ -146,7 +146,7 @@ public class GameLobby extends JFrame {
                                 new UpdateNickMessage(playerToken, playerName)
                         );
                         if (r.isError()){
-                            JOptionPane.showMessageDialog(this, "Nick already in use, getting a default nick");
+                            JOptionPane.showMessageDialog(this, r.getErrorMessage()+"!\nSetting a default nick");
                             playerName = tmp.getNick(); // set default nick from server
                         } else {
                             System.out.println("updated nick to" + playerName);
