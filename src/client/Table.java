@@ -28,7 +28,7 @@ public class Table extends JPanel {
     private Player player;
     private boolean wasStopped;
     private boolean wasTradePhase;
-    private final JLabel cardsInPlayCounter;
+    private final JTextArea cardsInPlayCounter;
 
     private final String yourTurn = "It's your turn to play cards. Select cards to play.";
     private final String bumTwoTrade = "You must give your 2 best cards to the President.";
@@ -39,6 +39,8 @@ public class Table extends JPanel {
     private final String presidentTwoTrade = "Please choose any two cards to give to the Bum.";
     private final String neutralTrade = "Please be patient while the rich and poor trades cards.";
 
+    private final String waitingForPlayersString = "Waiting for more players...";
+    private final String waitingForGameStartString = "Waiting for game to start";
 
 
     private Void updateGUI() {
@@ -71,7 +73,7 @@ public class Table extends JPanel {
         }
 
 
-        if (stateTracker.isTradingPhase() && !wasTradePhase) {
+        if (stateTracker.isTradingPhase() && !wasTradePhase && player != null) {
             wasTradePhase = true;
             player.update(stateTracker.getHand());
         }
@@ -94,17 +96,50 @@ public class Table extends JPanel {
             statusString.setVisible(true);
         }
 
+        int amountOfPlayers = stateTracker.getPlayerList().size();
+
+        if (startString != null) {
+            if (amountOfPlayers < 3)
+                startString.setText(waitingForPlayersString);
+            else
+                startString.setText(waitingForGameStartString);
+        }
+
+        if (startBtn != null) {
+            if (amountOfPlayers < 3) {
+                startBtn.setEnabled(false);
+            } else {
+                startBtn.setEnabled(true);
+            }
+
+            if (!stateTracker.isStarted()) {
+                startBtn.setText("Start");
+            } else {
+                startBtn.setText("Stop");
+            }
+        }
+
+
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
         switch(stateTracker.getCardsInTrick()) {
-            case 0 -> {
-                LOGGER.info("Last played card in play " + stateTracker.getCardsInPlay());
-                LOGGER.info("Cards on table size " + stateTracker.getCardsOnTable().size());
-            }
-            case 1 -> inPlay = "SINGLES...";
+            case 1 -> inPlay = "SINGLES!";
             case 2 -> inPlay = "DOUBLES!";
             case 3 -> inPlay = "TRIPLES!";
             default -> inPlay = "";
+        }
+
+        if(stateTracker.isNewTrick()){
+            LOGGER.info("Inside new trick " + stateTracker.getLastTrick());
+            switch(stateTracker.getLastTrick()) {
+
+                case FOUR_SAME -> inPlay = "FOUR OF A KIND!";
+                case THREE_CLUBS -> inPlay = "THREE OF CLUBS!";
+                case ALL_PASS -> inPlay = "EVERYBODY PASSED!";
+                default -> inPlay = "";
+            }
+            cardsInPlayCounter.setVisible(true);
+
         }
         cardsInPlayCounter.setText(inPlay);
 
@@ -125,12 +160,12 @@ public class Table extends JPanel {
                     statusString.setVisible(true);
                 }
             }
-            if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
-                player.update(stateTracker.getHand());
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
                 player.setVisible(false);
+                statusString.setVisible(false);
+                newRoundString.setVisible(false);
                 startString.setVisible(true);
             }
 
@@ -179,11 +214,17 @@ public class Table extends JPanel {
         Color westernYellow = new Color(0xFFDFCE25, true);
         Color daifugoBlue = new Color(0xFF4988FF, true);
 
-        cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds((f_width/2) + (f_width/4), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,100);
+        cardsInPlayCounter = new JTextArea();
+        cardsInPlayCounter.setLineWrap(true);
+        cardsInPlayCounter.setWrapStyleWord(true);
+        cardsInPlayCounter.setEditable(false);
+        cardsInPlayCounter.setOpaque(false);
+        cardsInPlayCounter.setBounds((f_width/2) + (f_width/5), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,200);
         cardsInPlayCounter.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
         cardsInPlayCounter.setForeground(westernYellow);
         add(cardsInPlayCounter);
+
+
 
         stateTracker.registerConnectionLostCallback(() -> {
             gameLobby.quitClient();
@@ -203,8 +244,8 @@ public class Table extends JPanel {
         add(exitButton);
         exitButton.addActionListener(e -> exitGame());
 
-        startString = new JLabel("Waiting for game to start");
-        startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
+        startString = new JLabel(waitingForPlayersString, SwingConstants.CENTER);
+        startString.setBounds((f_width/2) - 175, (f_height/2)-50, 350,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
         startString.setForeground(daifugoBlue);
         add(startString);

@@ -1,6 +1,5 @@
 package common;
 
-import client.Player;
 import server.*;
 import server.exceptions.*;
 
@@ -28,6 +27,7 @@ public class GameState implements Serializable {
     private int roundNo;
     private boolean mustTrade;
     private Role role;
+    private Trick lastTrick;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -39,11 +39,13 @@ public class GameState implements Serializable {
         this.cardsOnTable = game.getCardsOnTable().size();
         this.topCards = game.getTopCards();
 
+
         roundNo = game.getRoundNo();
         tradingPhase = game.isTradingPhase();
         gameID = game.getID();
         faceDownCards = game.getNoOfCardsFaceDown();
         currentPlayer = game.getCurrentPlayer();
+        this.lastTrick = game.getLastTrickTriggered();
 
         try {
             hand = new ArrayList<>(game.getPlayerHand(session.getID()));
@@ -55,7 +57,7 @@ public class GameState implements Serializable {
                 SERVER_LOGGER.fine("added to " + playerNick + "'s hand for sending: " + c.getNumber()+c.getSuit());
             }
 
-        Map<UUID, PlayerObject> playerMap = game.getPlayers();
+        Map<UUID, PlayerObject> playerMap = new HashMap<>(game.getPlayers());
         players = new ArrayList<>();
 
         for (UUID id : game.getTurnSequence()) {
@@ -132,6 +134,10 @@ public class GameState implements Serializable {
 
     public int getCardsOnTable() {
         return this.cardsOnTable;
+    }
+
+    public Trick getLastTrick() {
+        return lastTrick;
     }
 
 }

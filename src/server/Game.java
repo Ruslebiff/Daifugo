@@ -48,6 +48,8 @@ public class Game {
         }
     }
 
+    private final boolean TEST_MODE = false;
+
     public static Game getGameByID(UUID id) {
         synchronized (Game.class) {
             return games.get(id);
@@ -83,6 +85,7 @@ public class Game {
     private int roundNo;
     private int playersInTradingPhase;
     private Map<UUID, List<CardData>> receiveFromTrade;
+    private Trick trickTriggered;
 
 
     /**
@@ -120,6 +123,7 @@ public class Game {
         roundNo = 1;
         playersInTradingPhase = 0;
         receiveFromTrade = new HashMap<>();
+        trickTriggered = Trick.NONE;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -349,28 +353,27 @@ public class Game {
     }
 
     public void leaveGame(UUID player) {
+        boolean shouldStop = false;
         synchronized (this) {
             players.remove(player);
             turnSequence.remove(player);
             if (players.size() == 0) {
                removeFromList();
             }
-            propagateChange();
+            if (started)
+                shouldStop = true;
+
+            if (!shouldStop)
+                propagateChange();
         }
 
-        if (started) {
-            resetRound();
-        }
+        if (shouldStop)
+            stop();
+
     }
 
     public void start() throws GameException {
         synchronized (this) {
-            if (players.size() > 2) {
-                started = true;
-                shufflePlayerOrder();
-                findStartingPlayer(dealCards());
-                propagateChange();
-            }
             if (players.size() < 3)
                 throw new GameException("Not enough players");
 
@@ -392,6 +395,9 @@ public class Game {
             currentPlayer = -1;
             passCount = 0;
             goneOut = 0;
+            cardsOnTable = new ArrayList<>();
+            noOfCardsFaceDown = 0;
+            playersInTradingPhase = 0;
             propagateChange();
         }
     }
@@ -458,8 +464,9 @@ public class Game {
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
 
+                trickTriggered = Trick.NONE;
                 if (cards.get(0).getValue() == 16) {
-                    newTrick();
+                    newTrick(Trick.THREE_CLUBS);     // 3 of clubs
                     return;
                 } else if (topCards.size() == 4
                         && topCards.get(1).getValue() == topCards.get(0).getValue()
@@ -467,7 +474,7 @@ public class Game {
                         && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
-                    newTrick();
+                    newTrick(Trick.FOUR_SAME);
                     return;
                 }
 
@@ -502,7 +509,7 @@ public class Game {
 
     public void newRound() {
         synchronized (this) {
-            newTrick();
+            newTrick(Trick.NONE);     // Start of game
             noOfCardsFaceDown = 0;
             roundNo++;
 
@@ -539,8 +546,8 @@ public class Game {
         List<CardData> deck = new ArrayList<>();
 
         int numCards = 15;
-        //int numCards = 3; // to speed up testing TODO: remove later
-
+        if (TEST_MODE)
+            numCards = 6; // to speed up testing
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
@@ -592,11 +599,12 @@ public class Game {
         } while (pd.hasPassed() || pd.isOutOfRound());
 
         if (passCount + goneOut == players.size()-1)
-            newTrick();
+            newTrick(Trick.ALL_PASS); // Everybody says pass
 
     }
 
-    private void newTrick() {
+    // 0 indicates everybody said pass, or if it's a new round, 1 is 3 of clubs, 4 is 4 of the same card
+    private void newTrick(Trick trickType) {
         for (PlayerObject po : players.values()) {
             po.getGameData().setPassed(false);
         }
@@ -604,31 +612,14 @@ public class Game {
         cardsOnTable = new ArrayList<>();
         noOfCardsInTrick = 0;
         passCount = 0;
+        trickTriggered = trickType;
         propagateChange();
     }
 
-    /**
-     * Resets round if enough players remain, if not, stops the game and
-     * reopens for joining players.
-     */
-    private void resetRound() {
-
-        if (players.size() >= 3) {
-            synchronized (this) {
-                for (PlayerObject po : players.values()) {
-                    PlayerData pd = po.getGameData();
-
-                    pd.setOutCount(0);
-                    pd.setRole(Role.NEUTRAL);
-                }
-            }
-
-            newRound();
-        } else {
-            stop();
-        }
-
+    public Trick getLastTrickTriggered(){
+        return trickTriggered;
     }
+
 
 
 
@@ -707,7 +698,6 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-//        currentPlayer = 0; // to speed up testing TODO: remove later
 
         currentPlayer = -1;
         for (UUID id : turnSequence) {
@@ -719,6 +709,9 @@ public class Game {
 
         if (currentPlayer < 0)
             currentPlayer = turnSequence.indexOf(threeOfDiamonds);
+
+        if(TEST_MODE)
+            currentPlayer = 0; // to speed up testing
 
         SERVER_LOGGER.info("Set starting player to: " + currentPlayer);
     }

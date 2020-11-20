@@ -21,7 +21,6 @@ public class CardsOnTable extends JPanel{
     public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
         setLayout(null);
         stateTracker = sT;
-        //setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
         try {
             image = ImageIO.read(  // Renders the green felt

@@ -1,7 +1,5 @@
 package client;
 
-import client.networking.ClientConnection;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -88,7 +86,7 @@ public class Player extends JPanel{
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
-        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn() && !stateTracker.getCardsOnTable().isEmpty());
     }
 
     public void setTradingPhase(boolean phase) {
@@ -98,8 +96,8 @@ public class Player extends JPanel{
     }
 
     public void updateButtonState() {
-        if (!stateTracker.isTradingPhase()) {
-            passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        if (!stateTracker.isTradingPhase()) {       // If it is my turn and there are cards on table, enable button
+            passTurnBtn.setEnabled(stateTracker.isMyTurn() && !stateTracker.getCardsOnTable().isEmpty());
             cardsClickable = stateTracker.isMyTurn();
             tradeMode(false);
         } else {
@@ -229,6 +227,7 @@ public class Player extends JPanel{
                 return;
             }
 
+
             ok = stateTracker.playCards(cardsToPlay);
             if (!ok) {
                 LOGGER.warning("Unable to play the selected cards.");
@@ -280,8 +279,26 @@ public class Player extends JPanel{
             if (lastPlayed.size() == 0)
                 return true;
 
+            // Check that you don't end up with 3 of clubs
+            if(
+                    hand.size() == 2 &&     // If you have two cards left
+                    cardsToPlay.get(0).getValue() != 16 && // and you want to play a card that is not 3 of clubs
+                    (hand.get(0).getValue() == 16 || hand.get(1).getValue() == 16) // The remaining card is 3 of clubs
+            ){
+                LOGGER.warning("Can't have three of clubs as last card");
+                JOptionPane.showMessageDialog(
+                        this.getParent(),
+                        "Can't have three of clubs as last card!",
+                        "Illegal Play",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                cancel();
+                return false;
+            }
+
             if (cardsToPlay.size() == 1 && cardsToPlay.get(0).getValue() == 16) // If player selected 3 of clubs
                 return true;
+
 
             // Check that the amount of selected cards is the same as the last played cards
             if (cardsToPlay.size() == lastPlayed.size()) {

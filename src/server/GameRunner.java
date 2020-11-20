@@ -140,8 +140,16 @@ public class GameRunner {
     }
 
 
-    private void playerDisconnect() throws GameDisconnect {
-        userSession.leaveCurrentGame();
+    private void playerDisconnect() throws GameDisconnect{
+        try {
+            if (game.getOwnerNick() == userSession.getNick())
+                game.cancelGame();
+            else
+                userSession.leaveCurrentGame();
+        } catch (UserSessionError userSessionError) {
+            LOGGER.warning("Encountered exception during player disconnect:");
+            userSessionError.printStackTrace();
+        }
         throw new GameDisconnect();
     }
 

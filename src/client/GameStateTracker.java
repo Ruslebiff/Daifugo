@@ -3,6 +3,7 @@ package client;
 
 import common.PlayerData;
 import common.Role;
+import common.Trick;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -34,4 +35,6 @@ public interface GameStateTracker {
     void registerConnectionLostCallback(Callable<Void> func);
     Role getRole();
     int getCardsInPlay();
+    boolean isNewTrick();
+    Trick getLastTrick();
 }

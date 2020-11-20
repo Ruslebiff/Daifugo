@@ -4,7 +4,7 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import common.Role;
-import jdk.jshell.spi.ExecutionControl;
+import common.Trick;
 import protocol.*;
 
 import java.io.IOException;
@@ -305,14 +305,10 @@ public class ServerTracker implements GameStateTracker {
         synchronized (this) {
             Message response = null;
             try {
-                response = connection.sendMessage(MessageType.CANCEL_GAME);
+                response = connection.sendMessage(MessageType.STOP_GAME);
                 if(response.isError())
                     return false;
 
-                // TODO: gamerunner isn't sending state back
-                GameStateResponse tmp = (GameStateResponse) response;
-                state = tmp.getState();
-                guiCallback.call();
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
@@ -387,6 +383,20 @@ public class ServerTracker implements GameStateTracker {
     public int getCardsInPlay() {
         synchronized (this) {
             return state.getCardsOnTable();
+        }
+    }
+
+    @Override
+    public boolean isNewTrick() {
+        synchronized (this) {
+            return state.getLastTrick() != Trick.NONE;
+        }
+    }
+
+    @Override
+    public Trick getLastTrick() {
+        synchronized (this) {
+            return state.getLastTrick();
         }
     }
 
