@@ -284,7 +284,7 @@ public class Table extends JPanel {
         newRoundString = new JLabel("Trading phase", SwingConstants.CENTER);
         newRoundString.setBounds((f_width/2) - 200, (f_height/2)-80, 400,80);
         newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.PLAIN, 72));
-        newRoundString.setForeground(westernRed);
+        newRoundString.setForeground(daifugoBlue);
         newRoundString.setVisible(false);
         add(newRoundString, 0);
 
