@@ -86,7 +86,7 @@ public class Player extends JPanel{
         sortHand(); // Sorts the players hand with respect to the card values
         hand.forEach(this::addListener);    // Adds a mouseListener for each card
         viewDealtHand();
-        passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        passTurnBtn.setEnabled(stateTracker.isMyTurn() && !stateTracker.getCardsOnTable().isEmpty());
     }
 
     public void setTradingPhase(boolean phase) {
@@ -96,8 +96,8 @@ public class Player extends JPanel{
     }
 
     public void updateButtonState() {
-        if (!stateTracker.isTradingPhase()) {
-            passTurnBtn.setEnabled(stateTracker.isMyTurn());
+        if (!stateTracker.isTradingPhase()) {       // If it is my turn and there are cards on table, enable button
+            passTurnBtn.setEnabled(stateTracker.isMyTurn() && !stateTracker.getCardsOnTable().isEmpty());
             cardsClickable = stateTracker.isMyTurn();
             tradeMode(false);
         } else {
