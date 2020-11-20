@@ -49,8 +49,10 @@ public class Game {
     }
 
 
-    public static Game getGameByID(UUID id) {
+    public static Game getGameByID(UUID id) throws GameException {
         synchronized (Game.class) {
+            if (!games.containsKey(id))
+                throw new GameException("No such game exists");
             return games.get(id);
         }
     }
@@ -91,6 +93,7 @@ public class Game {
     private final int TEST_CARD_NUM = 3;
 
     /**
+     *
      * Public interface
      ***************************/
 

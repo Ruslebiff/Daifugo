@@ -44,6 +44,8 @@ public class Table extends JPanel {
 
 
     private Void updateGUI() {
+        LOGGER.info("updateGUI, goneoutno: " + stateTracker.getGoneOutNumber());
+        LOGGER.info("is trading phase: " + stateTracker.isTradingPhase());
 
         if (statusString != null)
             statusString.setVisible(false);
