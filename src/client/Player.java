@@ -340,8 +340,22 @@ public class Player extends JPanel{
 
             if (mustChooseHighest) {
                 for (Card handCard : hand) {
-                    if (handCard.getValue() > card.getValue() && handCard.getValue() != 16 )
-                        return false;
+                    if (noOfCardsToGive == 1){  // must only give one card
+                        if (handCard.getValue() > card.getValue() && handCard.getValue() != 16 )
+                            return false;
+                    } else if (noOfCardsToGive == 2){
+                        boolean handCardNotAmongSelected = true;
+
+                        for (Card c : cardsToPlay) {
+                            if (c.getNumber() == handCard.getNumber() && c.getSuit() == handCard.getSuit()){
+                                handCardNotAmongSelected = false;
+                            }
+                        }
+
+                        if (handCard.getValue() > card.getValue() && handCard.getValue() != 16 && handCardNotAmongSelected)
+                            return false;
+                    }
+
                 }
             }
         }

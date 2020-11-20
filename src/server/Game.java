@@ -1,11 +1,9 @@
 package server;
 
-import client.Card;
 import common.*;
 import server.exceptions.*;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static server.Server.SERVER_LOGGER;
 
