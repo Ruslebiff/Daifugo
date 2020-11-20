@@ -85,7 +85,7 @@ public class Game {
     private int roundNo;
     private int playersInTradingPhase;
     private Map<UUID, List<CardData>> receiveFromTrade;
-    private boolean roundReset;
+    private Trick trickTriggered;
 
 
     /**
@@ -123,7 +123,7 @@ public class Game {
         roundNo = 1;
         playersInTradingPhase = 0;
         receiveFromTrade = new HashMap<>();
-        roundReset = false;
+        trickTriggered = Trick.NONE;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -461,14 +461,12 @@ public class Game {
                 PlayerData pd = players.get(player).getGameData();
                 pd.setNumberOfCards(hands.get(player).size());
 
-                // if the round was a reset, flip this
-                roundReset = false;
-
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
 
+                trickTriggered = Trick.NONE;
                 if (cards.get(0).getValue() == 16) {
-                    newTrick();
+                    newTrick(Trick.THREE_CLUBS);     // 3 of clubs
                     return;
                 } else if (topCards.size() == 4
                         && topCards.get(1).getValue() == topCards.get(0).getValue()
@@ -476,7 +474,7 @@ public class Game {
                         && topCards.get(3).getValue() == topCards.get(0).getValue()
                 ) {
                     // all 4 top cards the same, start new trick
-                    newTrick();
+                    newTrick(Trick.FOUR_SAME);
                     return;
                 }
 
@@ -511,7 +509,7 @@ public class Game {
 
     public void newRound() {
         synchronized (this) {
-            newTrick();
+            newTrick(Trick.NONE);     // Start of game
             noOfCardsFaceDown = 0;
             roundNo++;
 
@@ -550,7 +548,6 @@ public class Game {
         int numCards = 15;
         if (TEST_MODE)
             numCards = 6; // to speed up testing
-
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards
@@ -602,11 +599,12 @@ public class Game {
         } while (pd.hasPassed() || pd.isOutOfRound());
 
         if (passCount + goneOut == players.size()-1)
-            newTrick();
+            newTrick(Trick.ALL_PASS); // Everybody says pass
 
     }
 
-    private void newTrick() {
+    // 0 indicates everybody said pass, or if it's a new round, 1 is 3 of clubs, 4 is 4 of the same card
+    private void newTrick(Trick trickType) {
         for (PlayerObject po : players.values()) {
             po.getGameData().setPassed(false);
         }
@@ -614,13 +612,12 @@ public class Game {
         cardsOnTable = new ArrayList<>();
         noOfCardsInTrick = 0;
         passCount = 0;
+        trickTriggered = trickType;
         propagateChange();
     }
 
-    public boolean isRoundReset() {
-        synchronized (this) {
-            return roundReset;
-        }
+    public Trick getLastTrickTriggered(){
+        return trickTriggered;
     }
 
 

@@ -93,7 +93,6 @@ public class GameLobby extends JFrame {
     private JButton joinGameButton = new JButton();
     private JFrame pwFrame = new JFrame("Join game");
     private String playerToken;
-
     public Font westernFont;
     public Font normalFont;
 

@@ -28,7 +28,7 @@ public class Table extends JPanel {
     private Player player;
     private boolean wasStopped;
     private boolean wasTradePhase;
-    private final JLabel cardsInPlayCounter;
+    private final JTextArea cardsInPlayCounter;
 
     private final String yourTurn = "It's your turn to play cards. Select cards to play.";
     private final String bumTwoTrade = "You must give your 2 best cards to the President.";
@@ -123,14 +123,23 @@ public class Table extends JPanel {
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
         switch(stateTracker.getCardsInTrick()) {
-            case 0 -> {
-                LOGGER.info("Last played card in play " + stateTracker.getCardsInPlay());
-                LOGGER.info("Cards on table size " + stateTracker.getCardsOnTable().size());
-            }
-            case 1 -> inPlay = "SINGLES...";
+            case 1 -> inPlay = "SINGLES!";
             case 2 -> inPlay = "DOUBLES!";
             case 3 -> inPlay = "TRIPLES!";
             default -> inPlay = "";
+        }
+
+        if(stateTracker.isNewTrick()){
+            LOGGER.info("Inside new trick " + stateTracker.getLastTrick());
+            switch(stateTracker.getLastTrick()) {
+
+                case FOUR_SAME -> inPlay = "FOUR OF A KIND!";
+                case THREE_CLUBS -> inPlay = "THREE OF CLUBS!";
+                case ALL_PASS -> inPlay = "EVERYBODY PASSED!";
+                default -> inPlay = "";
+            }
+            cardsInPlayCounter.setVisible(true);
+
         }
         cardsInPlayCounter.setText(inPlay);
 
@@ -213,11 +222,17 @@ public class Table extends JPanel {
         Color westernYellow = new Color(0xbbaa00);
         Color westernRed = new Color(0x652010);
 
-        cardsInPlayCounter = new JLabel();
-        cardsInPlayCounter.setBounds((f_width/2) + (f_width/4), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,100);
+        cardsInPlayCounter = new JTextArea();
+        cardsInPlayCounter.setLineWrap(true);
+        cardsInPlayCounter.setWrapStyleWord(true);
+        cardsInPlayCounter.setEditable(false);
+        cardsInPlayCounter.setOpaque(false);
+        cardsInPlayCounter.setBounds((f_width/2) + (f_width/5), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,200);
         cardsInPlayCounter.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
         cardsInPlayCounter.setForeground(westernYellow);
         add(cardsInPlayCounter);
+
+
 
         stateTracker.registerConnectionLostCallback(() -> {
             gameLobby.quitClient();

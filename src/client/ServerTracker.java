@@ -4,6 +4,7 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import common.Role;
+import common.Trick;
 import protocol.*;
 
 import java.io.IOException;
@@ -386,9 +387,16 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
-    public boolean isRoundReset() {
+    public boolean isNewTrick() {
         synchronized (this) {
-            return false;
+            return state.getLastTrick() != Trick.NONE;
+        }
+    }
+
+    @Override
+    public Trick getLastTrick() {
+        synchronized (this) {
+            return state.getLastTrick();
         }
     }
 

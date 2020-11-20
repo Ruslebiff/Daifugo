@@ -14,14 +14,13 @@ import static client.GameLobby.LOGGER;
 public class CardsOnTable extends JPanel{
     private BufferedImage image;    // Image of green felt
     private List<Card> lastCardsOnTable = new ArrayList<>();   // The last three cards played
-    private List<FaceDownCard> faceDownCards = new ArrayList<>();   // The last three cards played
+    private List<FaceDownCard> faceDownCards = new ArrayList<>();   // stack of cards facing down
     private final GameStateTracker stateTracker;
 
 
     public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
         setLayout(null);
         stateTracker = sT;
-        //setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
         try {
             image = ImageIO.read(  // Renders the green felt
@@ -38,8 +37,13 @@ public class CardsOnTable extends JPanel{
         for (Card card : lastCardsOnTable) {
             this.remove(card);
         }
-        for(FaceDownCard fc : faceDownCards) {
-            this.remove(fc);
+
+        // clear board at new round
+        if (stateTracker.getNumberOfFaceDownCards() == 0) {
+            for(FaceDownCard fc : faceDownCards) {
+                this.remove(fc);
+            }
+            faceDownCards = new ArrayList<>(); // reset
         }
 
         int cardWidth = 80, cardHeight = 120;
@@ -58,15 +62,21 @@ public class CardsOnTable extends JPanel{
         }
 
         int noOfFaceDown = stateTracker.getNumberOfFaceDownCards();
-        for (int i = 0; i < noOfFaceDown; i++) {
-            int boundsX = 1 + i;
-            if(boundsX > 10)
-                boundsX = 0;
-            FaceDownCard tmp = new FaceDownCard();
-            faceDownCards.add(tmp);
-            tmp.setBounds(boundsX, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
-            add(tmp);
+        if (noOfFaceDown > 10){ // Set max face down cards
+            noOfFaceDown = 10;
         }
+        if (noOfFaceDown > faceDownCards.size()){
+            for (int i = 0; i < noOfFaceDown; i++) {
+                int boundsX = 1 + i;
+                if(boundsX > 10)
+                    boundsX = 0;
+                FaceDownCard tmp = new FaceDownCard();
+                faceDownCards.add(tmp);
+                tmp.setBounds(boundsX, (this.getHeight()/2) - (cardHeight/2), cardWidth, cardHeight);
+                add(tmp);
+            }
+        }
+
         repaint();
     }
 
