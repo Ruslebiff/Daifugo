@@ -48,6 +48,8 @@ public class Game {
         }
     }
 
+    private final boolean TEST_MODE = false;
+
     public static Game getGameByID(UUID id) {
         synchronized (Game.class) {
             return games.get(id);
@@ -83,6 +85,7 @@ public class Game {
     private int roundNo;
     private int playersInTradingPhase;
     private Map<UUID, List<CardData>> receiveFromTrade;
+    private boolean roundReset;
 
 
     /**
@@ -120,6 +123,7 @@ public class Game {
         roundNo = 1;
         playersInTradingPhase = 0;
         receiveFromTrade = new HashMap<>();
+        roundReset = false;
 
         synchronized (Game.class) {
             games.put(ID, this);
@@ -349,28 +353,27 @@ public class Game {
     }
 
     public void leaveGame(UUID player) {
+        boolean shouldStop = false;
         synchronized (this) {
             players.remove(player);
             turnSequence.remove(player);
             if (players.size() == 0) {
                removeFromList();
             }
-            propagateChange();
+            if (started)
+                shouldStop = true;
+
+            if (!shouldStop)
+                propagateChange();
         }
 
-        if (started) {
-            resetRound();
-        }
+        if (shouldStop)
+            stop();
+
     }
 
     public void start() throws GameException {
         synchronized (this) {
-            if (players.size() > 2) {
-                started = true;
-                shufflePlayerOrder();
-                findStartingPlayer(dealCards());
-                propagateChange();
-            }
             if (players.size() < 3)
                 throw new GameException("Not enough players");
 
@@ -458,6 +461,9 @@ public class Game {
                 PlayerData pd = players.get(player).getGameData();
                 pd.setNumberOfCards(hands.get(player).size());
 
+                // if the round was a reset, flip this
+                roundReset = false;
+
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
 
@@ -541,8 +547,9 @@ public class Game {
     private List<CardData> prepareDeck() {
         List<CardData> deck = new ArrayList<>();
 
-        //int numCards = 15;
-        int numCards = 3; // to speed up testing TODO: remove later
+        int numCards = 15;
+        if (TEST_MODE)
+            numCards = 6; // to speed up testing
 
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
@@ -610,28 +617,12 @@ public class Game {
         propagateChange();
     }
 
-    /**
-     * Resets round if enough players remain, if not, stops the game and
-     * reopens for joining players.
-     */
-    private void resetRound() {
-
-        if (players.size() >= 3) {
-            synchronized (this) {
-                for (PlayerObject po : players.values()) {
-                    PlayerData pd = po.getGameData();
-
-                    pd.setOutCount(0);
-                    pd.setRole(Role.NEUTRAL);
-                }
-            }
-
-            newRound();
-        } else {
-            stop();
+    public boolean isRoundReset() {
+        synchronized (this) {
+            return roundReset;
         }
-
     }
+
 
 
 
@@ -710,9 +701,7 @@ public class Game {
      * @param threeOfDiamonds UUID ID of player having the three of diamonds
      */
     private void findStartingPlayer(UUID threeOfDiamonds) {
-        currentPlayer = 0; // to speed up testing TODO: remove later
 
-/*
         currentPlayer = -1;
         for (UUID id : turnSequence) {
             if (players.get(id).getGameData().getRole() == Role.BUM) {
@@ -723,7 +712,9 @@ public class Game {
 
         if (currentPlayer < 0)
             currentPlayer = turnSequence.indexOf(threeOfDiamonds);
-*/
+
+        if(TEST_MODE)
+            currentPlayer = 0; // to speed up testing
 
         SERVER_LOGGER.info("Set starting player to: " + currentPlayer);
     }

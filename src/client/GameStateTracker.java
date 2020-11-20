@@ -34,4 +34,5 @@ public interface GameStateTracker {
     void registerConnectionLostCallback(Callable<Void> func);
     Role getRole();
     int getCardsInPlay();
+    boolean isRoundReset();
 }

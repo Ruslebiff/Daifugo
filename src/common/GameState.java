@@ -28,6 +28,7 @@ public class GameState implements Serializable {
     private int roundNo;
     private boolean mustTrade;
     private Role role;
+    private boolean roundReset;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -44,6 +45,7 @@ public class GameState implements Serializable {
         gameID = game.getID();
         faceDownCards = game.getNoOfCardsFaceDown();
         currentPlayer = game.getCurrentPlayer();
+        roundReset = game.isRoundReset();
 
         try {
             hand = new ArrayList<>(game.getPlayerHand(session.getID()));
@@ -55,7 +57,7 @@ public class GameState implements Serializable {
                 SERVER_LOGGER.fine("added to " + playerNick + "'s hand for sending: " + c.getNumber()+c.getSuit());
             }
 
-        Map<UUID, PlayerObject> playerMap = game.getPlayers();
+        Map<UUID, PlayerObject> playerMap = new HashMap<>(game.getPlayers());
         players = new ArrayList<>();
 
         for (UUID id : game.getTurnSequence()) {
@@ -73,6 +75,10 @@ public class GameState implements Serializable {
 
         mustTrade = playerMap.get(session.getID()).getGameData().hasToTrade();
         role = playerMap.get(session.getID()).getGameData().getRole();
+    }
+
+    public boolean isRoundReset() {
+        return roundReset;
     }
 
     public Role getRole() {

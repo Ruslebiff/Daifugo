@@ -4,7 +4,6 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import common.Role;
-import jdk.jshell.spi.ExecutionControl;
 import protocol.*;
 
 import java.io.IOException;
@@ -383,6 +382,13 @@ public class ServerTracker implements GameStateTracker {
     public int getCardsInPlay() {
         synchronized (this) {
             return state.getCardsOnTable();
+        }
+    }
+
+    @Override
+    public boolean isRoundReset() {
+        synchronized (this) {
+            return false;
         }
     }
 

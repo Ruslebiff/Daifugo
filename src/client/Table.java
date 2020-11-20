@@ -151,8 +151,14 @@ public class Table extends JPanel {
                     statusString.setVisible(true);
                 }
             }
-            if (stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase())
+            if ((stateTracker.getRoundNo() > 1 && !stateTracker.isTradingPhase()))
                 player.update(stateTracker.getHand());
+
+            if (stateTracker.isRoundReset()) {
+                LOGGER.info("Detected round reset.");
+                player.update(stateTracker.getHand());
+                player.updateButtonState();
+            }
 
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
