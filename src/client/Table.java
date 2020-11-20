@@ -1,7 +1,5 @@
 package client;
 
-import common.Role;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -41,6 +39,7 @@ public class Table extends JPanel {
 
     private final String waitingForPlayersString = "Waiting for more players...";
     private final String waitingForGameStartString = "Waiting for game to start";
+    private boolean gotMessage = false;
 
 
     private Void updateGUI() {
@@ -81,6 +80,16 @@ public class Table extends JPanel {
         }
 
         if (stateTracker.isTradingPhase()) {
+            if (!gotMessage && stateTracker.getGoneOutNumber() == stateTracker.getPlayerList().size()) {
+                gotMessage = true;
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "You're out of the round! Your new role will be: Bum",
+                        "You've gone out!",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
             if (stateTracker.iHaveToTrade()) {
                 switch (stateTracker.getRole()) {
                     case PRESIDENT -> statusString.setText(
@@ -150,8 +159,12 @@ public class Table extends JPanel {
             newRoundString.setVisible(stateTracker.isTradingPhase());
 
         if (player != null) {
-            if (player.isGoneOut()) {
+            if (!player.isGoneOut() && gotMessage)
+                gotMessage = false;
+
+            if (player.isGoneOut() && !gotMessage) {
                 player.setGoneOut(false);
+                gotMessage = true;
                 LOGGER.info("Player has gone out");
 
                 // calculate which role we will get
