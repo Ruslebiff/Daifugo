@@ -117,6 +117,13 @@ public class GameLobby extends JFrame {
         }
         newServerAddressTextField.setText(serverAddress);
 
+        if (playerName.length() > maxNickNameLength){
+            playerName = null;
+            JOptionPane.showMessageDialog(this, "Nick name too long!\nSetting a default nick");
+        }
+
+        
+
         InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
         try {
             westernFont = Font.createFont(Font.TRUETYPE_FONT, is);
