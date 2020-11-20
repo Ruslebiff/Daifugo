@@ -200,6 +200,7 @@ public class Table extends JPanel {
             if (!stateTracker.isStarted()) {
                 wasStopped = true;
                 player.setVisible(false);
+                player.cancel();
 
                 statusString.setVisible(false);
                 newRoundString.setVisible(false);
