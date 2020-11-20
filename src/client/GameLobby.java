@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -90,6 +91,7 @@ public class GameLobby extends JFrame {
     private JLimitedTextField newServerAddressTextField = new JLimitedTextField(serverAddress, maxServerAddressLength);
     private ScheduledExecutorService heartbeatExecutor;
     private JLabel latencyLabel = new JLabel();
+    JLabel nickText = new JLabel();
     private JButton joinGameButton = new JButton();
     private JFrame pwFrame = new JFrame("Join game");
     private String playerToken;
@@ -105,6 +107,13 @@ public class GameLobby extends JFrame {
     JScrollPane sp = new JScrollPane(gamesTable);
 
     public GameLobby() {
+        SettingsIO settingsIO = new SettingsIO();
+        settingsIO.readSettings();
+
+        playerName = settingsIO.prop.getProperty("nickName", null);
+        serverAddress = settingsIO.prop.getProperty("serverAddress", "localhost"); // TODO: Change default server address
+
+
 
         InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
         try {
@@ -125,6 +134,28 @@ public class GameLobby extends JFrame {
             Message response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()) {
                 LOGGER.warning("Failed to connect with session: " + response.getErrorMessage());
+            } else if (playerName != null){
+                try {
+                    IdentityResponse tmp = (IdentityResponse) response;
+                    playerToken = tmp.getToken();
+                    Message r;
+                    synchronized (this) {
+                        r = conn.sendMessage(
+                                new UpdateNickMessage(playerToken, playerName)
+                        );
+                        System.out.println("updated nick to" + playerName);
+                        IdentityResponse updatedNickResponse = (IdentityResponse) r;
+                        playerName = updatedNickResponse.getNick();
+                        nickText.setText(playerName);
+                    }
+                    if (response.isError()){
+                        JOptionPane.showMessageDialog(this, r.getErrorMessage());
+                        return;
+                    }
+                } catch (IOException | ClassNotFoundException ioException) {
+                    ioException.printStackTrace();
+                }
+                connectionOK = true;
             } else {
                 IdentityResponse tmp = (IdentityResponse) response;
                 playerToken = tmp.getToken();
@@ -287,7 +318,7 @@ public class GameLobby extends JFrame {
             refreshGamesList();
         });
 
-        JLabel nickText = new JLabel();
+
         nickText.setText(playerName);
 
         JButton settingsButton = new JButton();
@@ -495,7 +526,8 @@ public class GameLobby extends JFrame {
                 }
             }
 
-            if (allSettingsOK){ // settings ok, exit settings view
+            if (allSettingsOK){ // settings ok, save and exit settings view
+                settingsIO.saveSettings(serverAddress, playerName);
                 showLobby(true);
             }
 
