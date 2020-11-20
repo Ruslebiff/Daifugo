@@ -1,7 +1,5 @@
 package client;
 
-import client.networking.ClientConnection;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;

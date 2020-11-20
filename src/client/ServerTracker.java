@@ -4,7 +4,7 @@ import client.networking.ClientConnection;
 import common.GameState;
 import common.PlayerData;
 import common.Role;
-import jdk.jshell.spi.ExecutionControl;
+import common.Trick;
 import protocol.*;
 
 import java.io.IOException;
@@ -387,6 +387,20 @@ public class ServerTracker implements GameStateTracker {
     public int getCardsInPlay() {
         synchronized (this) {
             return state.getCardsOnTable();
+        }
+    }
+
+    @Override
+    public boolean isNewTrick() {
+        synchronized (this) {
+            return state.getLastTrick() != Trick.NONE;
+        }
+    }
+
+    @Override
+    public Trick getLastTrick() {
+        synchronized (this) {
+            return state.getLastTrick();
         }
     }
 
