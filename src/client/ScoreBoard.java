@@ -17,13 +17,15 @@ public class ScoreBoard extends JPanel {
     private List<PlayerData> players;     // Array of the players in the game
     private JLabel[] playerScores;        // Array of the labels representing the players
     private final JLabel scoreLabel;        // Array of the labels representing the players
-    private final int labelWidth = 100;
-    private final int labelHeight = 50;
+    private int labelWidth;
+    private final int labelHeight = 20;
 
-    public ScoreBoard(GameStateTracker sT, GameLobby gl) {
+    public ScoreBoard(GameStateTracker sT, GameLobby gl, int width) {
 
         stateTracker = sT;
         gameLobby = gl;
+        this.labelWidth = width;
+
 
         this.players = stateTracker.getPlayerList();
         setLayout(null);
@@ -43,9 +45,19 @@ public class ScoreBoard extends JPanel {
             PlayerData player = this.players.get(i);
             int score = 0;
 
-            playerScores[i] = new JLabel("", SwingConstants.CENTER);
+            playerScores[i] = new JLabel("");
             playerScores[i].setBounds(0, labelHeight+(labelHeight*i), labelWidth, labelHeight);
-            playerScores[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));  // Create border
+            playerScores[i].setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));  // Create border
+
+            if (i%2 == 1){
+                playerScores[i].setBackground(Color.lightGray);
+                playerScores[i].setOpaque(true);
+
+            } else {
+                playerScores[i].setBackground(Color.gray);
+                playerScores[i].setOpaque(true);
+            }
+
 
 
             if(!player.getPreviousRoles().isEmpty()) {
