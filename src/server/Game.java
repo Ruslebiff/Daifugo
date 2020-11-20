@@ -87,7 +87,7 @@ public class Game {
     private Trick trickTriggered;
 
     //TODO: this todo is just a bookmark
-    private final boolean TEST_MODE = true;
+    private final boolean TEST_MODE = false;
     private final int TEST_CARD_NUM = 6;
 
     /**
@@ -463,6 +463,14 @@ public class Game {
                 PlayerData pd = players.get(player).getGameData();
                 pd.setNumberOfCards(hands.get(player).size());
 
+
+                // if hand is empty, go out of round
+                if (hands.get(player).isEmpty()) {
+                    goneOut++;
+                    SERVER_LOGGER.info("Set goneout to: " + goneOut);
+                    pd.setOutCount(goneOut);
+                }
+
                 // check if there is a new trick from playing
                 List<CardData> topCards = _getTopCards();
 
@@ -477,17 +485,13 @@ public class Game {
                 ) {
                     // all 4 top cards the same, start new trick
                     newTrick(Trick.FOUR_SAME);
+                    if (hands.get(player).isEmpty())
+                        nextPlayer();   // player has gone out and should not get the next turn
                     return;
                 }
 
 
 
-                // if hand is empty, go out of round
-                if (hands.get(player).isEmpty()) {
-                    goneOut++;
-                    SERVER_LOGGER.info("Set goneout to: " + goneOut);
-                    pd.setOutCount(goneOut);
-                }
 
                 if (noOfCardsInTrick == 0)
                     noOfCardsInTrick = cards.size();
