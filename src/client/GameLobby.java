@@ -117,12 +117,6 @@ public class GameLobby extends JFrame {
         }
         newServerAddressTextField.setText(serverAddress);
 
-        if (playerName.length() > maxNickNameLength){
-            playerName = null;
-            JOptionPane.showMessageDialog(this, "Nick name too long!\nSetting a default nick");
-        }
-
-        
 
         InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
         try {
@@ -137,6 +131,12 @@ public class GameLobby extends JFrame {
         UIManager.put("LimitedTextField.font", normalFont.deriveFont(Font.BOLD, 14));
         UIManager.put("ScrollPane.font", normalFont.deriveFont(Font.BOLD, 16));
         UIManager.put("Button.font", normalFont.deriveFont(Font.BOLD, 18));
+
+
+        if (playerName.length() > maxNickNameLength){
+            playerName = null;
+            JOptionPane.showMessageDialog(this, "Nick name too long!\nSetting a default nick");
+        }
 
         try {
             conn = new ClientConnection(serverAddress);
