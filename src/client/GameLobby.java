@@ -462,16 +462,9 @@ public class GameLobby extends JFrame {
             boolean allSettingsOK;
             if (!newServerAddressTextField.getText().equals(serverAddress)) {
                 serverAddress = newServerAddressTextField.getText();
-                connectionOK = false;
-                try {
-                    conn = new ClientConnection(serverAddress);
-                    connectionOK = true;
-                } catch (IOException a) {
-                    LOGGER.warning("ERROR: Failed to connect!");
-                    connectToServerFrame();
-                }
+                JOptionPane.showMessageDialog(settingsConfirmButton, "NB! You must restart the game to apply the new server address");
             }
-            allSettingsOK = connectionOK;
+            allSettingsOK = true;
 
             if (!newNickNameTextField.getText().equals(playerName)){
                 try {
