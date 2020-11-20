@@ -134,7 +134,7 @@ public class GameLobby extends JFrame {
         UIManager.put("Button.font", normalFont.deriveFont(Font.BOLD, 18));
 
 
-        if (playerName.length() > maxNickNameLength){
+        if (playerName != null && playerName.length() > maxNickNameLength){
             playerName = null;
             JOptionPane.showMessageDialog(this, "Nick name too long!\nSetting a default nick");
         }

@@ -36,8 +36,7 @@ public class SettingsIO {
             System.out.println("Loaded settings:");
             prop.forEach((key, value) -> System.out.println("Key : " + key + ", Value : " + value));
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException ignored) {
             System.out.println("Could not load config file. Default settings will be used.");
         }
     }
