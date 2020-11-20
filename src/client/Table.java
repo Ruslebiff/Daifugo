@@ -69,8 +69,10 @@ public class Table extends JPanel {
 
         if (stateTracker.isStarted() && wasStopped) {
             wasStopped = false;
-            player.update(stateTracker.getHand());
-            player.setVisible(true);
+            if (player != null) {
+                player.update(stateTracker.getHand());
+                player.setVisible(true);
+            }
             startString.setVisible(false);
         }
 
