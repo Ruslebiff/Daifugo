@@ -343,12 +343,12 @@ public class Table extends JPanel {
 
     public void showScoreBoard() {
         if(stateTracker.getPlayerList().size() >= 3) {
+            int scoreBoardHeight = (stateTracker.getPlayerList().size() * 20 + 60);
+            int scoreBoardWidth = 400;
             JFrame scoreFrame = new JFrame("Scoreboard");
-            int SCREEN_HEIGHT = (stateTracker.getPlayerList().size() * 50) + 100;
-            int SCREEN_WIDTH = 200;
-            ScoreBoard scoreBoard = new ScoreBoard(stateTracker, gameLobby);
-            scoreBoard.setBounds(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-            scoreFrame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            ScoreBoard scoreBoard = new ScoreBoard(stateTracker, gameLobby, scoreBoardWidth);
+            scoreBoard.setBounds(0,0,scoreBoardWidth,scoreBoardHeight);
+            scoreFrame.setSize(scoreBoard.getWidth(), scoreBoard.getHeight());
             scoreFrame.add(scoreBoard);
             scoreFrame.setLocationRelativeTo(null);          // Place in middle of screen
             scoreFrame.setVisible(true);                     // Frame visible
