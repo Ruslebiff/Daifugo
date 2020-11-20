@@ -90,9 +90,9 @@ public class Table extends JPanel {
                     case VICE_BUM -> statusString.setText(viceBumTrade);
                     case VICE_PRESIDENT -> statusString.setText(vicePresidentTrade);
                 }
-            }
-            if (stateTracker.getRole() == Role.NEUTRAL)
+            } else {
                 statusString.setText(neutralTrade);
+            }
             statusString.setVisible(true);
         }
 
@@ -147,6 +147,34 @@ public class Table extends JPanel {
         newRoundString.setVisible(stateTracker.isTradingPhase());
 
         if (player != null) {
+            if (player.isGoneOut()) {
+                player.setGoneOut(false);
+                LOGGER.info("Player has gone out");
+
+                // calculate which role we will get
+                int roleNum = stateTracker.getGoneOutNumber();
+                int playerNum = stateTracker.getPlayerList().size();
+                String newRole;
+
+                if (roleNum == 1)
+                    newRole = "President";
+                else if (roleNum == 2 && playerNum > 3)
+                    newRole = "Vice-President";
+                else if (roleNum == playerNum-2 && playerNum >3)
+                    newRole = "Vice-Bum";
+                else if (roleNum == playerNum)
+                    newRole = "Bum";
+                else
+                    newRole = "Neutral";
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "You're out of the round! Your new role will be: " + newRole,
+                        "You've gone out!",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+
             if (wasTradePhase && !stateTracker.isTradingPhase()) {
                 wasTradePhase = false;
                 player.update(stateTracker.getHand());
@@ -169,6 +197,7 @@ public class Table extends JPanel {
                 player.setVisible(false);
                 statusString.setVisible(false);
                 newRoundString.setVisible(false);
+                cardsInPlayCounter.setVisible(false);
                 startString.setVisible(true);
             }
 
@@ -193,7 +222,9 @@ public class Table extends JPanel {
         TABLE_WIDTH = f_width;
         TABLE_HEIGHT = f_height;
         try {
-            image = ImageIO.read(ClientMain.class.getResourceAsStream("/green_fabric.jpg"));       // Read the image
+            image = ImageIO.read(
+                    ClientMain.class.getResourceAsStream("/green_fabric.jpg")    // Read the image
+            );
         } catch (IOException ex) {
             ex.printStackTrace();
         }

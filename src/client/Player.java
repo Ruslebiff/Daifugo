@@ -29,9 +29,16 @@ public class Player extends JPanel{
     private int space = 24; // Space between cards when a player has maximum cards
     private int maxSpace = 24;
     private final int maxCards = 18;
-    private boolean giveCards = false; // Is set by server
     private boolean cardsClickable;
+    private boolean goneOut = false;
 
+    public void setGoneOut(boolean goneOut) {
+        this.goneOut = goneOut;
+    }
+
+    public boolean isGoneOut() {
+        return goneOut;
+    }
 
     public Player(int width, GameStateTracker sT) {
         this.stateTracker = sT;
@@ -90,7 +97,6 @@ public class Player extends JPanel{
     }
 
     public void setTradingPhase(boolean phase) {
-        this.giveCards = phase;
         if (phase)
             cardsClickable = true;
     }
@@ -255,13 +261,14 @@ public class Player extends JPanel{
         if (hand.size() != 0) {   // If player has more cards left
             sortHand();             // Sort hand accordingly
             rearrangeCardsOnDisplay(); // Display properly
+        } else {
+            goneOut = true;
         }
 
         cardsToPlay = new ArrayList<>(); // Remove all cards to play from cards to play
         playCardsBtn.setEnabled(false);
         cancelBtn.setEnabled(false);
         cardsClickable = false;
-        giveCards = false;
         repaint();
     }
 

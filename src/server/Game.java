@@ -48,7 +48,6 @@ public class Game {
         }
     }
 
-    private final boolean TEST_MODE = false;
 
     public static Game getGameByID(UUID id) {
         synchronized (Game.class) {
@@ -87,6 +86,9 @@ public class Game {
     private Map<UUID, List<CardData>> receiveFromTrade;
     private Trick trickTriggered;
 
+    //TODO: this todo is just a bookmark
+    private final boolean TEST_MODE = true;
+    private final int TEST_CARD_NUM = 6;
 
     /**
      * Public interface
@@ -547,7 +549,7 @@ public class Game {
 
         int numCards = 15;
         if (TEST_MODE)
-            numCards = 6; // to speed up testing
+            numCards = TEST_CARD_NUM; // to speed up testing
 
         char[] suits = {'H', 'S', 'C', 'D'}; // H(earts), S(pades), C(lubs), D(iamond)
         for (int suit = 0; suit < 4; suit++)        // For each suit, create 13 cards

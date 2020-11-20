@@ -28,6 +28,7 @@ public class GameState implements Serializable {
     private boolean mustTrade;
     private Role role;
     private Trick lastTrick;
+    private int outCount;
 
 
     public GameState(Game game, UserSession session) throws UserSessionError {
@@ -69,12 +70,19 @@ public class GameState implements Serializable {
                     tmp.getRole(),
                     (int) tmp.getLatency()
             ));
+
+            if (id == session.getID())
+                outCount = tmp.getOutCount();
         }
 
         started = game.hasStarted();
 
         mustTrade = playerMap.get(session.getID()).getGameData().hasToTrade();
         role = playerMap.get(session.getID()).getGameData().getRole();
+    }
+
+    public int getOutCount() {
+        return outCount;
     }
 
     public Role getRole() {

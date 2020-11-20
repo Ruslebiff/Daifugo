@@ -42,6 +42,10 @@ public class PlayerData implements Serializable {
         this.outOfRound = outOfRound;
     }
 
+    public int getOutCount() {
+        return outCount;
+    }
+
     public void reset() {
         role = Role.NEUTRAL;
         previousRoles = new ArrayList<>();
