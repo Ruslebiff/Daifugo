@@ -42,8 +42,14 @@ public class Table extends JPanel {
 
 
     private Void updateGUI() {
-        LOGGER.info("updateGUI, goneoutno: " + stateTracker.getGoneOutNumber());
-        LOGGER.info("is trading phase: " + stateTracker.isTradingPhase());
+
+        if (startBtn != null) {
+            if (!stateTracker.isStarted() && stateTracker.getPlayerList().size() < 3) {
+                startBtn.setEnabled(false);
+            }
+            else
+                startBtn.setEnabled(true);
+        }
 
         if (statusString != null)
             statusString.setVisible(false);
@@ -140,9 +146,7 @@ public class Table extends JPanel {
 
                 // calculate which role we will get
                 int goneOutNumber = stateTracker.getGoneOutNumber();
-                LOGGER.info("goneOutNo: " + goneOutNumber);
                 int playerNum = stateTracker.getPlayerList().size();
-                LOGGER.info("playerNum: " + playerNum);
                 String newRole;
 
                 if (goneOutNumber == 1)
@@ -261,17 +265,19 @@ public class Table extends JPanel {
         });
         stateTracker.registerCallback(this::updateGUI);
 
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.setBounds(f_width-150, 50, 100, 50);
+        add(exitButton);
+        exitButton.addActionListener(e -> exitGame());
+
         if(stateTracker.isOwner()) {
             startBtn = new JButton("Start");
-            startBtn.setBounds(f_width-150,50, 100,50);
+            startBtn.setBounds(f_width-150,100, 100,50);
+            startBtn.setEnabled(false);
             add(startBtn);
             startBtn.addActionListener(e -> startGame());
         }
-
-        JButton exitButton = new JButton("Exit");
-        exitButton.setBounds(f_width-150, 100, 100, 50);
-        add(exitButton);
-        exitButton.addActionListener(e -> exitGame());
 
         startString = new JLabel("Waiting for game to start");
         startString.setBounds((f_width/2) - 150, (f_height/2)-50, 300,50);
