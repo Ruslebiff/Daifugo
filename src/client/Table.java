@@ -27,6 +27,7 @@ public class Table extends JPanel {
     private boolean wasStopped;
     private boolean wasTradePhase;
     private final JTextArea cardsInPlayCounter;
+    private JLabel playingAsLabel;
 
     private final String yourTurn = "It's your turn to play cards. Select cards to play.";
     private final String bumTwoTrade = "You must give your 2 best cards to the President.";
@@ -41,7 +42,9 @@ public class Table extends JPanel {
     private boolean gotMessage = false;
 
 
+
     private Void updateGUI() {
+
 
         if (startBtn != null) {
             if (!stateTracker.isStarted() && stateTracker.getPlayerList().size() < 3) {
@@ -309,6 +312,16 @@ public class Table extends JPanel {
                 (TABLE_HEIGHT/8) + 100);
         add(player);
         player.setVisible(false);
+
+        playingAsLabel = new JLabel(
+                "Playing as " +
+                gameLobby.getPlayerName() + " in " +
+                stateTracker.getGameTitle(),
+                SwingConstants.CENTER);
+        playingAsLabel.setBounds(5, (f_height) - 100, 200,50);
+        playingAsLabel.setFont(gameLobby.normalFont.deriveFont(Font.BOLD, 10));
+        playingAsLabel.setForeground(Color.WHITE);
+        add(playingAsLabel);
 
         gL.setWaitingCursor(false);
     }

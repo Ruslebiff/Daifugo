@@ -625,6 +625,12 @@ public class GameLobby extends JFrame {
         getGamesList();
     }
 
+    public String getPlayerName() {
+        if(!playerName.isBlank())
+            return playerName;
+        else return "";
+    }
+
     /**
      * Fills the gamesList with the games from the server, adds them to the gamesTable
      */

@@ -16,7 +16,6 @@ import static java.lang.Math.round;
 public class Player extends JPanel{
     private final GameStateTracker stateTracker;
     private BufferedImage image;    // Image of green felt
-    private int role;      // Role, -2 = Bum, -1 = ViceBum, 0 = Neutral, 1 = VP, 2 = President
     private List<Card> hand ; // The cards dealt to the player
     private List<Card> cardsToPlay = new ArrayList<>();
     private final PlayerButton playCardsBtn;   // Button plays the selected cards
@@ -42,7 +41,6 @@ public class Player extends JPanel{
 
     public Player(int width, GameStateTracker sT) {
         this.stateTracker = sT;
-        this.role = 0; // Upon creation of a player, the player will be set to neutral, as the game has just begun
         widthOfComponent = width;
         setLayout(null);
         setOpaque(true);

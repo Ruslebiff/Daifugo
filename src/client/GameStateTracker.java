@@ -39,4 +39,5 @@ public interface GameStateTracker {
     Trick getLastTrick();
     //boolean haveGoneOut();
     int getGoneOutNumber();
+    String getGameTitle();
 }

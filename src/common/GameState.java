@@ -39,7 +39,7 @@ public class GameState implements Serializable {
         this.cardsInTrick = game.getNoOfCardsInTrick();
         this.cardsOnTable = game.getCardsOnTable().size();
         this.topCards = game.getTopCards();
-
+        this.gameTitle = game.getTitle();
 
         roundNo = game.getRoundNo();
         tradingPhase = game.isTradingPhase();
@@ -148,6 +148,10 @@ public class GameState implements Serializable {
 
     public Trick getLastTrick() {
         return lastTrick;
+    }
+
+    public String getGameTitle() {
+        return this.gameTitle;
     }
 
 }

@@ -409,6 +409,13 @@ public class ServerTracker implements GameStateTracker {
     }
 
     @Override
+    public String getGameTitle() {
+        synchronized (this) {
+            return state.getGameTitle();
+        }
+    }
+
+    @Override
     public int getNumberOfFaceDownCards() {
         synchronized (this) {
             return state.getFaceDownCards();
