@@ -87,8 +87,8 @@ public class Game {
     private Trick trickTriggered;
 
     //TODO: this todo is just a bookmark
-    private final boolean TEST_MODE = true;
-    private final int TEST_CARD_NUM = 3;
+    private final boolean TEST_MODE = false;
+    private final int TEST_CARD_NUM = 4;
 
     /**
      *
@@ -481,6 +481,8 @@ public class Game {
                 trickTriggered = Trick.NONE;
                 if (cards.get(0).getValue() == 16) {
                     newTrick(Trick.THREE_CLUBS);     // 3 of clubs
+                    if (hands.get(player).isEmpty())
+                        nextPlayer();   // player has gone out and should not get the next turn
                     return;
                 } else if (topCards.size() == 4
                         && topCards.get(1).getValue() == topCards.get(0).getValue()

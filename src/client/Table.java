@@ -252,12 +252,17 @@ public class Table extends JPanel {
         playersInformation.setBounds(50,50, pInfoWidth, pInfoHeight);
         add(playersInformation);
 
-        int cardsOnTableWidth = 300, cardsOnTableHeight = 200;
+        int cardsOnTableWidth = 230, cardsOnTableHeight = 120;
+        int cardsOnTableX = (f_width /2) - (cardsOnTableWidth/2);
+        int cardsOnTableY = (f_height /2) - (cardsOnTableHeight/2) - 60;
+
         cardsOnTable = new CardsOnTable(stateTracker, cardsOnTableWidth, cardsOnTableHeight);
+//        cardsOnTable.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
         cardsOnTable.setBounds(
-                (f_width /2) - (cardsOnTableWidth/2) - 25,
-                (f_height /3) - (cardsOnTableHeight/2),
-                   cardsOnTableWidth, cardsOnTableHeight
+                cardsOnTableX,
+                cardsOnTableY,
+                cardsOnTableWidth,
+                cardsOnTableHeight
         );
         add(cardsOnTable);
 
@@ -269,9 +274,10 @@ public class Table extends JPanel {
         cardsInPlayCounter.setWrapStyleWord(true);
         cardsInPlayCounter.setEditable(false);
         cardsInPlayCounter.setOpaque(false);
-        cardsInPlayCounter.setBounds((f_width/2) + (f_width/5), (cardsOnTableHeight) + (cardsOnTableHeight/2) - 25,200,200);
+        cardsInPlayCounter.setBounds((f_width/2) + (f_width/5), cardsOnTableY,200,200);
         cardsInPlayCounter.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 50));
         cardsInPlayCounter.setForeground(westernYellow);
+//        cardsInPlayCounter.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 2));
         add(cardsInPlayCounter);
 
 
@@ -297,8 +303,9 @@ public class Table extends JPanel {
         startString = new JLabel(waitingForPlayersString, SwingConstants.CENTER);
         startString.setBounds((f_width/2) - 175, (f_height/2)-50, 350,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
+//        startString.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
         startString.setForeground(daifugoBlue);
-        add(startString);
+        add(startString, 0);
 
 
         newRoundString = new JLabel("Trading phase", SwingConstants.CENTER);
@@ -306,14 +313,14 @@ public class Table extends JPanel {
         newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.PLAIN, 72));
         newRoundString.setForeground(daifugoBlue);
         newRoundString.setVisible(false);
-        add(newRoundString);
+        add(newRoundString, 0);
 
         statusString = new JLabel("Some testing text that doesn't matter", SwingConstants.CENTER);
         statusString.setBounds((f_width/2) - 250, (f_height/2)+50, 500,50);
         statusString.setFont(gameLobby.normalFont.deriveFont(Font.BOLD, 18));
         statusString.setForeground(westernYellow);
         statusString.setVisible(false);
-        add(statusString);
+        add(statusString,0);
 
 
         player = new Player(TABLE_WIDTH/2, stateTracker);

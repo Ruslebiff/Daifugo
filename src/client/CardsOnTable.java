@@ -20,6 +20,7 @@ public class CardsOnTable extends JPanel{
 
     public CardsOnTable(GameStateTracker sT, int panelWidth, int panelHeight) {
         setLayout(null);
+        setOpaque(false);
         stateTracker = sT;
 
         try {
@@ -53,7 +54,7 @@ public class CardsOnTable extends JPanel{
         for (int i = lastCardsOnTable.size() - 1; i >= 0 ; i--) {
             Card c = lastCardsOnTable.get(i);
             c.setBounds(
-                    (this.getWidth()/2) - (cardWidth/2) + (i*10),
+                    (this.getWidth()/2) + (i*10),
                     (this.getHeight()/2) - (cardHeight/2),
                     cardWidth,
                     cardHeight
@@ -83,6 +84,6 @@ public class CardsOnTable extends JPanel{
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(image, 0, 0, this); // Draws the image of onto the JPanel
+        //g.drawImage(image, 0, 0, this); // Draws the image of onto the JPanel
     }
 }
