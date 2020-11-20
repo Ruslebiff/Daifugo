@@ -97,7 +97,7 @@ public class Table extends JPanel {
         cardsInPlayCounter.setVisible(stateTracker.getCardsInPlay() != 0);
         String inPlay = "";
         switch(stateTracker.getCardsInTrick()) {
-            case 1 -> inPlay = "SINGLES...";
+            case 1 -> inPlay = "SINGLES!";
             case 2 -> inPlay = "DOUBLES!";
             case 3 -> inPlay = "TRIPLES!";
             default -> inPlay = "";
