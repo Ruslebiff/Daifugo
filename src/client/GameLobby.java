@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -86,9 +85,9 @@ public class GameLobby extends JFrame {
     private final List<GameListing> gameList = new ArrayList<>();
     private ClientConnection conn = null;
     private int latency = 0;
-    private String serverAddress = "localhost"; // Default server address, will be changed through settings etc
+    private String serverAddress;
     private volatile boolean connectionOK = false;
-    private JLimitedTextField newServerAddressTextField = new JLimitedTextField(serverAddress, maxServerAddressLength);
+    private JLimitedTextField newServerAddressTextField = new JLimitedTextField("", maxServerAddressLength);
     private ScheduledExecutorService heartbeatExecutor;
     private JLabel latencyLabel = new JLabel();
     JLabel nickText = new JLabel();
@@ -112,8 +111,7 @@ public class GameLobby extends JFrame {
 
         playerName = settingsIO.prop.getProperty("nickName", null);
         serverAddress = settingsIO.prop.getProperty("serverAddress", "localhost"); // TODO: Change default server address
-
-
+        newServerAddressTextField.setText(serverAddress);
 
         InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
         try {
@@ -134,7 +132,7 @@ public class GameLobby extends JFrame {
             Message response = conn.sendMessage(new Message(MessageType.CONNECT));
             if (response.isError()) {
                 LOGGER.warning("Failed to connect with session: " + response.getErrorMessage());
-            } else if (playerName != null){
+            } else if (playerName != null) { // connected successfully, nick loaded from settings
                 try {
                     IdentityResponse tmp = (IdentityResponse) response;
                     playerToken = tmp.getToken();
@@ -143,29 +141,31 @@ public class GameLobby extends JFrame {
                         r = conn.sendMessage(
                                 new UpdateNickMessage(playerToken, playerName)
                         );
-                        System.out.println("updated nick to" + playerName);
-                        IdentityResponse updatedNickResponse = (IdentityResponse) r;
-                        playerName = updatedNickResponse.getNick();
-                        nickText.setText(playerName);
-                    }
-                    if (response.isError()){
-                        JOptionPane.showMessageDialog(this, r.getErrorMessage());
-                        return;
+                        if (r.isError()){
+                            JOptionPane.showMessageDialog(this, "Nick already in use, getting a default nick");
+                            playerName = tmp.getNick(); // set default nick from server
+                        } else {
+                            System.out.println("updated nick to" + playerName);
+                            IdentityResponse updatedNickResponse = (IdentityResponse) r;
+                            playerName = updatedNickResponse.getNick();
+                        }
                     }
                 } catch (IOException | ClassNotFoundException ioException) {
                     ioException.printStackTrace();
                 }
                 connectionOK = true;
-            } else {
+            } else {                    // connected successfully, no nick loaded from settings
                 IdentityResponse tmp = (IdentityResponse) response;
                 playerToken = tmp.getToken();
                 playerName = tmp.getNick();
+                nickText.setText(playerName);
                 connectionOK = true;
             }
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warning("ERROR: Failed to connect!");
             connectToServerFrame();
         }
+
 
         while(!connectionOK){
             try {
@@ -176,6 +176,7 @@ public class GameLobby extends JFrame {
         }
 
         LOGGER.info("Connected to server " + serverAddress);
+        nickText.setText(playerName);
 
 
 
@@ -318,8 +319,6 @@ public class GameLobby extends JFrame {
             refreshGamesList();
         });
 
-
-        nickText.setText(playerName);
 
         JButton settingsButton = new JButton();
         settingsButton.setText("Settings");
