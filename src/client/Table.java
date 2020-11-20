@@ -219,8 +219,8 @@ public class Table extends JPanel {
         );
         add(cardsOnTable);
 
-        Color westernYellow = new Color(0xbbaa00);
-        Color westernRed = new Color(0x652010);
+        Color westernYellow = new Color(0xFFDFCE25, true);
+        Color daifugoBlue = new Color(0xFF4988FF, true);
 
         cardsInPlayCounter = new JTextArea();
         cardsInPlayCounter.setLineWrap(true);
@@ -255,14 +255,14 @@ public class Table extends JPanel {
         startString = new JLabel(waitingForPlayersString, SwingConstants.CENTER);
         startString.setBounds((f_width/2) - 175, (f_height/2)-50, 350,50);
         startString.setFont(gameLobby.westernFont.deriveFont(Font.BOLD, 40));
-        startString.setForeground(westernRed);
+        startString.setForeground(daifugoBlue);
         add(startString);
 
 
         newRoundString = new JLabel("Trading phase", SwingConstants.CENTER);
         newRoundString.setBounds((f_width/2) - 200, (f_height/2)-80, 400,80);
         newRoundString.setFont(gameLobby.westernFont.deriveFont(Font.PLAIN, 72));
-        newRoundString.setForeground(westernRed);
+        newRoundString.setForeground(daifugoBlue);
         newRoundString.setVisible(false);
         add(newRoundString);
 
