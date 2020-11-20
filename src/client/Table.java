@@ -144,7 +144,8 @@ public class Table extends JPanel {
         cardsInPlayCounter.setText(inPlay);
 
         // setting new round text according to state
-        newRoundString.setVisible(stateTracker.isTradingPhase());
+        if (newRoundString != null)
+            newRoundString.setVisible(stateTracker.isTradingPhase());
 
         if (player != null) {
             if (player.isGoneOut()) {
