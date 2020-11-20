@@ -88,7 +88,7 @@ public class Game {
 
     //TODO: this todo is just a bookmark
     private final boolean TEST_MODE = false;
-    private final int TEST_CARD_NUM = 4;
+    private final int TEST_CARD_NUM = 3;
 
     /**
      *

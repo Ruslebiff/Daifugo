@@ -130,7 +130,7 @@ public class Table extends JPanel {
             newRoundString.setVisible(stateTracker.isTradingPhase());
 
         if (player != null) {
-            if (!player.isGoneOut() && gotMessage)
+            if (!player.isGoneOut() && gotMessage && !stateTracker.isTradingPhase())
                 gotMessage = false;
 
             if (player.isGoneOut() && !gotMessage) {
