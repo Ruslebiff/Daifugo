@@ -94,6 +94,8 @@ public class GameLobby extends JFrame {
     private JButton joinGameButton = new JButton();
     private JFrame pwFrame = new JFrame("Join game");
     private String playerToken;
+    private SettingsIO settingsIO = new SettingsIO();
+    private String defaultServer = "localhost"; // TODO: Change default server address
     public Font westernFont;
     public Font normalFont;
 
@@ -106,11 +108,13 @@ public class GameLobby extends JFrame {
     JScrollPane sp = new JScrollPane(gamesTable);
 
     public GameLobby() {
-        SettingsIO settingsIO = new SettingsIO();
         settingsIO.readSettings();
 
         playerName = settingsIO.prop.getProperty("nickName", null);
-        serverAddress = settingsIO.prop.getProperty("serverAddress", "localhost"); // TODO: Change default server address
+        serverAddress = settingsIO.prop.getProperty("serverAddress", defaultServer);
+        if (serverAddress.length() < 1){ // use default server if settings has an empty value for server address
+            serverAddress = defaultServer;
+        }
         newServerAddressTextField.setText(serverAddress);
 
         InputStream is = ClientMain.class.getResourceAsStream("/fonts/OldTownRegular.ttf");
@@ -501,12 +505,10 @@ public class GameLobby extends JFrame {
         });
 
         settingsConfirmButton.addActionListener(e -> {
-            boolean allSettingsOK;
             if (!newServerAddressTextField.getText().equals(serverAddress)) {
                 serverAddress = newServerAddressTextField.getText();
                 JOptionPane.showMessageDialog(settingsConfirmButton, "NB! You must restart the game to apply the new server address");
             }
-            allSettingsOK = true;
 
             if (!newNickNameTextField.getText().equals(playerName)){
                 try {
@@ -519,7 +521,6 @@ public class GameLobby extends JFrame {
                     }
                     if (response.isError()){
                         JOptionPane.showMessageDialog(settingsConfirmButton, response.getErrorMessage());
-                        allSettingsOK = false;
                         return;
                     }
                     IdentityResponse updatedNickResponse = (IdentityResponse) response;
@@ -530,10 +531,9 @@ public class GameLobby extends JFrame {
                 }
             }
 
-            if (allSettingsOK){ // settings ok, save and exit settings view
-                settingsIO.saveSettings(serverAddress, playerName);
-                showLobby(true);
-            }
+            // Save and quit settings
+            settingsIO.saveSettings(serverAddress, playerName);
+            showLobby(true);
 
         });
 
@@ -784,6 +784,9 @@ public class GameLobby extends JFrame {
         confirmButton.setBounds(connectionFrame.getWidth()/2 - 50, connectionFrame.getHeight()/2, 100, 40);
         confirmButton.addActionListener(a -> {
             serverAddress = addressTextArea.getText();
+            if (serverAddress.length() == 0) {
+                serverAddress = defaultServer;
+            }
             try {
                 conn = new ClientConnection(serverAddress);
                 Message response;
@@ -796,6 +799,7 @@ public class GameLobby extends JFrame {
                     playerName = tmp.getNick();
                     connectionOK = true;
                     newServerAddressTextField.setText(serverAddress);
+                    settingsIO.saveSettings(serverAddress, playerName);
                     connectionFrame.dispose(); // destroy frame
                 }
             } catch (IOException | ClassNotFoundException e) {
