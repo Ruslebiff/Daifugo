@@ -11,4 +11,4 @@ The application and server is both written in Java, and even has support for pro
 
 ## Running the game
 
-You'll need Java version 15 or later installed, and then you'll simply have to run the `Daifugo.jar` file found under releases a default server is online and able to serve your games, but If you want to host your own server you can also download the server executable `Daifugo-server.jar` also found under releases. Not however that a game needs at least three participants to be able to start it and begin playing.
+You'll need Java version 15 or later installed, and then you'll simply have to run the `Daifugo.jar` file found under releases. A default server is online and should be able to serve your games, but If you want to host your own server you can also download the server executable `Daifugo-server.jar` also found under releases. However this is a game that needs at least three participants to be able to start it and begin playing.
